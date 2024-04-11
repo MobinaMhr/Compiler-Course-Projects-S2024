@@ -1,0 +1,30 @@
+def compare(a, b)
+    return a + b;
+end
+
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib (n-1) + fib (n-2)
+;
+
+def doFunc(arg1, fptr)
+    return fptr(arg1);
+end
+
+def main()
+    compare_ptr = method(:compare);
+    puts(compare_ptr(2, 3));
+
+    loop do
+        puts("start");
+        break if (a);
+        next if (b);
+        puts("end");
+    end
+
+    fib_5 = fib.match(5);
+
+    doFunc("Taraneh",
+           -> (name) {return "Hi I'm " << name << ".";});
+end

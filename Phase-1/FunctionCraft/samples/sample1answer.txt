@@ -1,0 +1,30 @@
+FuncDec: list_printer
+FuncDec: printList
+Built-In: PUTS
+Built-In: PUTS
+FunctionCall
+Operator: -
+FuncDec: f2
+RETURN
+Operator: +
+Operator: +
+FuncDec: create2dList
+Decision: IF
+Operator: is not
+FunctionCall
+Operator: <<
+Operator: <<
+Operator: *
+Operator: +
+Operator: +
+Decision: ELSE
+FunctionCall
+MAIN
+Operator: <<
+Built-In: PUTS
+FunctionCall
+FunctionCall
+Built-In: PUTS
+Built-In: CHOP
+Built-In: CHOP
+Built-In: CHOP
