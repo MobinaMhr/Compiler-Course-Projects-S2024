@@ -36,9 +36,7 @@ DIV:   '/';
 DECREMENT:   '--';
 INCREMENT:   '++';
 
-// Bitwise Shift
-RSH:        '>>';
-LSH:        '<<';
+CONCAT: '<<';
 
 // 7-2)
 // Relational Operators
@@ -73,12 +71,12 @@ ELSEIF: 'elseif';
 
 // 10)
 // Built in Functions
-PUTS: 'puts';
-PUSH: 'push';
-LEN: 'Len';
+PUTS: 'puts'; // ISNOT USED
+PUSH: 'push'; // ISNOT USED
+LEN: 'Len'; // ISNOT USED
 MAIN: 'main';
-CHOP: 'chop';
-CHOMP: 'chomp';
+CHOP: 'chop'; // ISNOT USED
+CHOMP: 'chomp'; // ISNOT USED
 
 // 11)
 // Loops
@@ -109,11 +107,10 @@ COLON:     ':';
 SEMICOLON: ';';
 
 ARROW: '->';
-STAR: '*';
 ID: [a-zA-Z][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
-WS:         [ \t\r\n]+ -> skip;
+WS:         [ \t\r\n]+ -> skip; // ISNOT USED
 
 INT_VAL:     [1-9]+;
 STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
@@ -173,19 +170,16 @@ main:
     END
     ;
 
-//return_value:
-//    expression
-//    ;
-
 function_body:
     (statement | comment)*
-//    (RETURN (return_value SEMICOLON)?)?
     (RETURN (expression SEMICOLON)?)?
     ;
 
 statement:
     function_call SEMICOLON
-    | expression SEMICOLON
+    // The problem is where ID = lambda_function!
+    | expression SEMICOLON // handles fib5 = fib.match(5);
+    | assignment SEMICOLON
     | loop_do
     | for_in
     | conditional_expression
@@ -197,24 +191,33 @@ comment:
     | MULTI_LINE_COMMENT
     ;
 
-list:
+add_to_list:
+    ID CONCAT expression (CONCAT expression)* // list_temp << 2 << 3
+    ;
+
+list_literal:
     LBRACKET
     (literal (COMMA literal)*)?
-    RBRACKET
+    RBRACKET // [1, 2, 3]
     | ID
     (
         LBRACKET
         (ID | INT_VAL)
         RBRACKET
-    )*
+    )* // list_temp[0][1]
+    ;
+
+string_literal: /// I'm not happy with the idea of addig ID in string_literal:(
+    (STR_VAL | ID)
+    (CONCAT string_literal)*
     ;
 
 literal:
     INT_VAL
-    | STR_VAL
+    | string_literal
     | FLOAT_VAL
     | BOOLEAN_VAL
-    | list
+    | list_literal
     | function_ptr
     ;
 
@@ -228,9 +231,13 @@ relational_operator:
     | IS_NOT
     ;
 
-bitwise_shift_operator:
-    RSH
-    | LSH
+assignment_operator:
+    ASSIGN
+    | PLUS_ASSIGN
+    | MINUS_ASSIGN
+    | MULT_ASSIGN
+    | DIV_ASSIGN
+    | MOD_ASSIGN
     ;
 
 arithmetic_operator:
@@ -267,23 +274,30 @@ function_argument:
 
 function_call:
     ID LPAR function_argument? RPAR
-    | LPAR STAR ID RPAR LPAR function_argument RPAR
     | lambda_function LPAR function_argument? RPAR
+    | ID DOT function_call
     ;
 
 arithmetic_expression:
     expression
-    (
-        arithmetic_operator
-        | bitwise_shift_operator
-    )
+    arithmetic_operator
     expression
     (
-        (arithmetic_operator | bitwise_shift_operator)
+        arithmetic_operator
         expression
     )*
     | (DECREMENT | INCREMENT | MINUS) expression
     | expression (DECREMENT | INCREMENT)
+    ;
+
+assignment_expression:
+    expression
+    assignment_operator
+    expression
+    (
+        assignment_operator
+        expression
+    )*
     ;
 
 relational_expression:
@@ -304,6 +318,7 @@ logical_expression:
         logical_operator
         expression
     )*
+    | NOT expression
     ;
 
 conditional_expression:
@@ -321,8 +336,10 @@ expression:
     | literal
     | function_call
     | arithmetic_expression
+    | assignment_expression
     | relational_expression
     | logical_expression
+    | add_to_list // I'm not happy with naming and placement of rule!
     ;
 
 pattern_clause:
@@ -333,7 +350,6 @@ pattern_clause:
     RPAR
     ASSIGN
     expression
-//    return_value
     ;
 
 pattern_matching:
