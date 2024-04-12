@@ -33,16 +33,22 @@ PLUS:  '+';
 MINUS: '-';
 MULT:  '*';
 DIV:   '/';
-NEGATE: '-';
 DECREMENT:   '--';
 INCREMENT:   '++';
 
+// Bitwise Shift
+RSH:        '>>';
+LSH:        '<<';
+
 // 7-2)
 // Relational Operators
-LESS_THAN_OR_EQUAL: '<=';
-LESS_THAN: '<';
-GREATER_THAN_OR_EQUAL: '>=';
-GREATER_THAN: '>';
+GEQ: '>=';
+LEQ: '<=';
+GTR: '>';
+LES: '<';
+EQL: '==';
+NEQ: '!=';
+IS_NOT: 'is not';
 
 // 7-3)
 // Logical Operators
@@ -87,7 +93,7 @@ NEXT_IF: 'next if';
 // 12)
 // Pattern Matching Structure
 PATTERN: 'pattern';
-TAB: '  ';//tab!
+TAB: [\t];//tab!
 VERTICAL_BAR: '|';
 
 // Symbols
@@ -103,13 +109,16 @@ COLON:     ':';
 SEMICOLON: ';';
 
 ARROW: '->';
-ID: [a-z][z-zA-Z0-9_]*;
-COMMENT:    '#' ~[\r\n]* -> skip;
+STAR: '*';
+ID: [a-zA-Z][a-zA-Z0-9_]*;
+SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
+MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 WS:         [ \t\r\n]+ -> skip;
 
-INT_VAL:     [1-9][0-9]*;
+INT_VAL:     [1-9]+;
+STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
 FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
-BOOLEAN_VAL: 'true' | 'false';
+BOOLEAN_VAL: TRUE | FALSE;
 
 
 
@@ -120,3 +129,263 @@ BOOLEAN_VAL: 'true' | 'false';
 // The parser rules collectively define the syntax of the language.
 
 // TODO
+
+functionCraft:
+    (function | comment)*
+    main
+    comment*
+    ;
+
+function:
+    DEF
+    name = ID
+    LPAR
+    function_parameter
+    RPAR
+    function_body
+    END
+    ;
+
+function_ptr:
+    METHOD
+    LPAR
+    COLON
+    name = ID
+    RPAR
+    ;
+
+lambda_function:
+    ARROW
+    LPAR
+    function_parameter
+    RPAR
+    LBRACE
+    function_body
+    RBRACE
+    ;
+
+main:
+    DEF
+    MAIN { System.out.println("MainBody"); }
+    LPAR
+    RPAR
+    function_body
+    END
+    ;
+
+//return_value:
+//    expression
+//    ;
+
+function_body:
+    (statement | comment)*
+//    (RETURN (return_value SEMICOLON)?)?
+    (RETURN (expression SEMICOLON)?)?
+    ;
+
+statement:
+    function_call SEMICOLON
+    | expression SEMICOLON
+    | loop_do
+    | for_in
+    | conditional_expression
+    | pattern_matching
+    ;
+
+comment:
+    SINGLE_LINE_COMMENT
+    | MULTI_LINE_COMMENT
+    ;
+
+list:
+    LBRACKET
+    (literal (COMMA literal)*)?
+    RBRACKET
+    | ID
+    (
+        LBRACKET
+        (ID | INT_VAL)
+        RBRACKET
+    )*
+    ;
+
+literal:
+    INT_VAL
+    | STR_VAL
+    | FLOAT_VAL
+    | BOOLEAN_VAL
+    | list
+    | function_ptr
+    ;
+
+relational_operator:
+    GEQ
+    | LEQ
+    | GTR
+    | LES
+    | EQL
+    | NEQ
+    | IS_NOT
+    ;
+
+bitwise_shift_operator:
+    RSH
+    | LSH
+    ;
+
+arithmetic_operator:
+    PLUS
+    | MINUS
+    | MULT
+    | DIV
+    ;
+
+logical_operator:
+    AND
+    | OR
+    ;
+
+assignment:
+    ID ASSIGN expression
+;
+
+function_parameter:
+    (ID (COMMA ID)*)?
+    (
+        (ID COMMA)?
+        LBRACKET
+        assignment
+        (COMMA assignment)*
+        RBRACKET
+    )?
+    ;
+
+function_argument:
+    expression
+    (COMMA expression)*
+    ;
+
+function_call:
+    ID LPAR function_argument? RPAR
+    | LPAR STAR ID RPAR LPAR function_argument RPAR
+    | lambda_function LPAR function_argument? RPAR
+    ;
+
+arithmetic_expression:
+    expression
+    (
+        arithmetic_operator
+        | bitwise_shift_operator
+    )
+    expression
+    (
+        (arithmetic_operator | bitwise_shift_operator)
+        expression
+    )*
+    | (DECREMENT | INCREMENT | MINUS) expression
+    | expression (DECREMENT | INCREMENT)
+    ;
+
+relational_expression:
+    expression
+    relational_operator
+    expression
+    (
+        relational_operator
+        expression
+    )*
+    ;
+
+logical_expression:
+    expression
+    logical_operator
+    expression
+    (
+        logical_operator
+        expression
+    )*
+    ;
+
+conditional_expression:
+    IF LPAR condition RPAR statement
+    (
+        (ELSEIF LPAR condition RPAR statement)*
+        ELSE statement
+    )?
+    END
+    ;
+
+expression:
+    LPAR expression RPAR // I added this to make sure expression works with paranteces
+    | ID
+    | literal
+    | function_call
+    | arithmetic_expression
+    | relational_expression
+    | logical_expression
+    ;
+
+pattern_clause:
+    TAB
+    VERTICAL_BAR
+    LPAR
+    condition
+    RPAR
+    ASSIGN
+    expression
+//    return_value
+    ;
+
+pattern_matching:
+    PATTERN
+    name = ID
+    LPAR
+    ID
+    RPAR
+    pattern_clause+
+    SEMICOLON
+    ;
+
+loop_do:
+    LOOP_DO
+    (
+        statement
+        | comment
+        | BREAK
+        | BREAK_IF LPAR condition RPAR
+        | NEXT
+        | NEXT_IF LPAR condition RPAR
+    )*
+    END
+    ;
+
+for_in:
+    FOR
+    ID
+    IN
+    range
+    (
+        statement
+        | comment
+        | BREAK
+        | BREAK_IF LPAR condition RPAR
+        | NEXT
+        | NEXT_IF LPAR condition RPAR
+    )*
+    END
+    ;
+
+// condition is called with format: LPAR condition RPAR everywhere
+condition:
+    expression // Should it support only boolean values? (ID)
+    | LPAR condition RPAR (logical_operator LPAR condition RPAR)*
+    ;
+
+range:
+    LPAR
+    ID
+    '..'
+    ID
+    RPAR
+    ;
+
