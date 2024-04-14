@@ -171,12 +171,6 @@ comment
     | MULTI_LINE_COMMENT
     ;
 
-assignment:
-    name = ID { System.out.println("Assignment: " + $name.text); }
-    ASSIGN
-    expression
-;
-
 required_parameter
     : ID COMMA required_parameter
     | ID
@@ -193,16 +187,11 @@ function_parameter
     | LBRACKET optional_parameter RBRACKET
     ;
 
-function_argument
-    : expression COMMA function_argument
-    | expression
-    ;
-
 pattern_clause
     :
     TAB
     VERTICAL_BAR
-    LPAR condition RPAR
+    condition_clause
     ASSIGN expression
     ;
 
@@ -216,12 +205,12 @@ pattern_matching:
 
 break_statement
     : BREAK
-    | BREAK_IF LPAR condition RPAR
+    | BREAK_IF condition_clause
     ;
 
 next_statement
     : NEXT
-    | NEXT_IF LPAR condition RPAR
+    | NEXT_IF condition_clause
     ;
 
 loop_body
@@ -250,7 +239,7 @@ for_in
 if_statement
     :
     IF
-    LPAR condition RPAR
+    condition_clause
     statement { System.out.println("Decision: IF"); }
     ;
 
@@ -258,7 +247,7 @@ if_statement
 else_if_statement
     :
     ELSEIF
-    LPAR condition RPAR
+    condition_clause
     statement { System.out.println("Decision: ELSE IF"); }
     ;
 
@@ -306,14 +295,14 @@ match
     :
     MATCH { System.out.println("Built-In: MATCH"); }
     LPAR
-    function_argument
+    arg
     RPAR
     ;
 
 chop
     :
     CHOP { System.out.println("Built-In: CHOP"); }
-    LPAR (STR_VAL | ID) RPAR // Use function_argument, so you can use the return value:>
+    LPAR expression RPAR
     ;
 
 chomp
@@ -361,7 +350,7 @@ bool_literal
 list_literal
     :
     LBRACKET
-    function_argument?
+    arg?
     RBRACKET
     ;
 
@@ -392,23 +381,6 @@ literal
     | function_call // foo(5)
     ;
 
-element
-    : expression COMMA element
-    | expression
-    ;
-
-list_initialization
-    :
-    LBRACKET
-    element?
-    RBRACKET
-    ;
-
-var_initialization
-    :
-    element
-    ;
-
 lambda_function:
     ARROW
     LPAR function_parameter RPAR
@@ -419,20 +391,25 @@ lambda_function:
     { System.out.println("Structure: LAMBDA"); }
     ;
 
-
-///////////////////////////////////////////////////////////////////
-
-explicit_initialization
+condition_clause
     :
-    ID
-    ASSIGN
-    (list_initialization | var_initialization)
+    LPAR
+    expression
+    RPAR
     ;
 
-expression:
-    LPAR expression RPAR // I added this to make sure expression works with paranteces
-    | other_expression
+arg
+    : expression COMMA arg
+    | expression
     ;
+
+assignment:
+    name = ID { System.out.println("Assignment: " + $name.text); }
+    ASSIGN
+    expression
+;
+
+/////////////////////////////////////////////////////////////////////////////////
 
 other_expression
     : LPAR expression RPAR
@@ -440,6 +417,11 @@ other_expression
     | ID
     | literal
     | lambda_function // to return.
+    ;
+
+expression:
+    LPAR expression RPAR // I added this to make sure expression works with paranteces
+    | other_expression
     ;
 
 statement
@@ -451,8 +433,6 @@ statement
     | conditional_expression
     | pattern_matching
     ;
-
-///////////
 
 relational_operator
     : GEQ
@@ -487,15 +467,8 @@ logical_operator
 
 // { System.out.println("Function Call"); }
 function_call // Write rule better.
-    : ID LPAR function_argument? RPAR
-    | lambda_function (LPAR function_argument? RPAR)? // lambda function call
+    : ID LPAR arg? RPAR
+    | lambda_function (LPAR arg? RPAR)? // lambda function call
     | ID DOT function_call // pattern_call
-    | function_call LPAR function_argument? RPAR
+    | function_call LPAR arg? RPAR
     ;
-
-// condition is called with format: LPAR condition RPAR everywhere
-condition:
-    expression // Should it support only boolean values? (ID)
-    | LPAR condition RPAR (logical_operator LPAR condition RPAR)*
-    ;
-
