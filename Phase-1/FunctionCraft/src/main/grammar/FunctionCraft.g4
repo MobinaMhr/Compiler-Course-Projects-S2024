@@ -118,7 +118,6 @@ STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
 CHAR_VAL:   '\'' [a-zA-z0-9_] '\''; //'a' '0'
 // null value?
 FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
-BOOLEAN_VAL: TRUE | FALSE;
 
 
 
@@ -137,12 +136,6 @@ program
     comment*
     ;
 
-return_statement
-    :
-    RETURN { System.out.println("RETURN"); }
-    (expression SEMICOLON)?
-    ;
-
 function_body
     :
     (statement | comment)*
@@ -156,6 +149,12 @@ function
     function_body
     return_statement?
     END
+    ;
+
+return_statement
+    :
+    RETURN { System.out.println("RETURN"); }
+    (expression SEMICOLON)?
     ;
 
 main // Main doen't contain return statement.
@@ -350,6 +349,49 @@ numeric_literal
     | (MINUS | PLUS)? FLOAT_VAL
     ;
 
+string_literal
+    : STR_VAL
+    ;
+
+bool_literal
+    : TRUE
+    | FALSE
+    ;
+
+list_literal
+    :
+    LBRACKET
+    function_argument?
+    RBRACKET
+    ;
+
+index
+    :
+    LBRACKET
+    (ID | INT_VAL)
+    RBRACKET
+    ;
+
+get_list_element
+    :
+    ID
+    index+
+    ;
+
+literal
+    // ATOMIC VALUES
+    : numeric_literal // int float
+    | string_literal // "hi there"
+    | bool_literal // True False
+    // CHAR_LITERAL
+
+    // COMPOUND VALUES
+    | list_literal // [1, 3, 5]
+    | function_ptr // method(:fooFunction)
+    | get_list_element // arr[0]
+    | function_call // foo(5)
+    ;
+
 element
     : expression COMMA element
     | expression
@@ -367,6 +409,17 @@ var_initialization
     element
     ;
 
+lambda_function:
+    ARROW
+    LPAR function_parameter RPAR
+    LBRACE
+    function_body
+    return_statement?
+    RBRACE
+    { System.out.println("Structure: LAMBDA"); }
+    ;
+
+
 ///////////////////////////////////////////////////////////////////
 
 explicit_initialization
@@ -376,76 +429,30 @@ explicit_initialization
     (list_initialization | var_initialization)
     ;
 
-primitive_data_type
-    : numeric_literal
-    | STR_VAL
-    | BOOLEAN_VAL
-//    | list
-//    | function_pointer
-    ;
-
 expression:
     LPAR expression RPAR // I added this to make sure expression works with paranteces
-    | ID
-    | literal
-    | function_call
-    | add_to_list // I'm not happy with naming and placement of rule!
-    | ID
-    | STR_VAL
-    | numeric_literal
-//    | may be function_call
-//    | list write for it
+    | other_expression
     ;
 
 other_expression
     : LPAR expression RPAR
-    | list
-//    |
+    | list_literal
     | ID
-    | function_call
     | literal
+    | lambda_function // to return.
     ;
 
 statement
-//    function_call SEMICOLON // This one is already in expression SEMICOLON!
-    // The problem is where ID = lambda_function!
-    : expression SEMICOLON // handles fib5 = fib.match(5);
-    | assignment SEMICOLON
+    // ID = lambda_function! TYPE CHECKING!
+    : expression SEMICOLON // handles foo(5);
+    | assignment SEMICOLON // handles fib5 = fib.match(5);
     | loop_do
     | for_in
     | conditional_expression
     | pattern_matching
     ;
 
-add_to_list:
-    ID CONCAT expression (CONCAT expression)* // list_temp << 2 << 3
-    ;
-
-list_literal:
-    LBRACKET
-    (literal (COMMA literal)*)?
-    RBRACKET // [1, 2, 3]
-    | ID
-    (
-        LBRACKET
-        (ID | INT_VAL)
-        RBRACKET
-    )* // list_temp[0][1]
-    ;
-
-string_literal: /// I'm not happy with the idea of addig ID in string_literal:(
-    (STR_VAL | ID)
-    (CONCAT string_literal)*
-    ;
-
-literal
-    : INT_VAL
-    | string_literal
-    | FLOAT_VAL
-    | BOOLEAN_VAL
-    | list_literal
-    | function_ptr
-    ;
+///////////
 
 relational_operator
     : GEQ
@@ -458,8 +465,8 @@ relational_operator
     ;
 
 assignment_operator
-    : ASSIGN
-    | PLUS_ASSIGN
+//    : ASSIGN // Don't add this to the rule, it is related to (assignment SEMICOLON) rule of statement.
+    : PLUS_ASSIGN
     | MINUS_ASSIGN
     | MULT_ASSIGN
     | DIV_ASSIGN
@@ -478,35 +485,12 @@ logical_operator
     | OR
     ;
 
-lambda_function_call
-    :
-    lambda_function
-    LPAR function_argument? RPAR
-    ;
-
-// Can it be called anywhere it could????? CHECK.
-lambda_function:
-    ARROW
-    LPAR function_parameter RPAR
-    LBRACE
-    function_body
-    return_statement?
-    RBRACE
-    { System.out.println("Structure: LAMBDA"); }
-    ;
-
-pattern_call
-    :
-    ID
-    DOT
-    function_call
-    ;
-
 // { System.out.println("Function Call"); }
 function_call // Write rule better.
     : ID LPAR function_argument? RPAR
-    | lambda_function_call
-    | pattern_call
+    | lambda_function (LPAR function_argument? RPAR)? // lambda function call
+    | ID DOT function_call // pattern_call
+    | function_call LPAR function_argument? RPAR
     ;
 
 // condition is called with format: LPAR condition RPAR everywhere
