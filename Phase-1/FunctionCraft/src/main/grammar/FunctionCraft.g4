@@ -136,9 +136,10 @@ program
     comment*
     ;
 
-function_body
+body
     :
     (statement | comment)*
+    return_statement?
     ;
 
 function
@@ -146,8 +147,7 @@ function
     DEF
     name = ID { System.out.println("FuncDec: " + $name.text); }
     LPAR function_parameter RPAR
-    function_body
-    return_statement?
+    body
     END
     ;
 
@@ -162,7 +162,7 @@ main
     DEF
     MAIN { System.out.println("MAIN"); }
     LPAR RPAR
-    function_body
+    body
     END
     ;
 
@@ -241,23 +241,20 @@ if_statement
     :
     IF
     condition_clause
-    function_body { System.out.println("Decision: IF"); }
-    return_statement?
+    body { System.out.println("Decision: IF"); }
     ;
 
 else_if_statement
     :
     ELSEIF
     condition_clause
-    function_body { System.out.println("Decision: ELSE IF"); }
-    return_statement?
+    body { System.out.println("Decision: ELSE IF"); }
     ;
 
 else_statement
     :
     ELSE
-    function_body { System.out.println("Decision: ELSE"); }
-    return_statement?
+    body { System.out.println("Decision: ELSE"); }
     ;
 
 conditional_expression
@@ -362,8 +359,7 @@ lambda_function:
     ARROW
     LPAR function_parameter RPAR
     LBRACE
-    function_body
-    return_statement?
+    body
     RBRACE
     { System.out.println("Structure: LAMBDA"); }
     ;
