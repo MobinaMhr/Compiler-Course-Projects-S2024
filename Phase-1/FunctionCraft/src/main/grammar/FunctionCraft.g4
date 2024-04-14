@@ -157,7 +157,7 @@ return_statement
     (expression SEMICOLON)?
     ;
 
-main // Main doen't contain return statement.
+main
     :
     DEF
     MAIN { System.out.println("MAIN"); }
@@ -224,6 +224,7 @@ loop_do
     :
     LOOP_DO { System.out.println("Loop: DO"); }
     loop_body*
+    return_statement?
     END
     ;
 
@@ -232,30 +233,31 @@ for_in
     FOR { System.out.println("Loop: FOR"); }
     ID IN range
     loop_body*
+    return_statement?
     END
     ;
 
- // Can have return value
 if_statement
     :
     IF
     condition_clause
-    statement { System.out.println("Decision: IF"); }
+    function_body { System.out.println("Decision: IF"); }
+    return_statement?
     ;
 
- // Can have return value
 else_if_statement
     :
     ELSEIF
     condition_clause
-    statement { System.out.println("Decision: ELSE IF"); }
+    function_body { System.out.println("Decision: ELSE IF"); }
+    return_statement?
     ;
 
- // Can have return value
 else_statement
     :
     ELSE
-    statement { System.out.println("Decision: ELSE"); }
+    function_body { System.out.println("Decision: ELSE"); }
+    return_statement?
     ;
 
 conditional_expression
@@ -266,49 +268,38 @@ conditional_expression
     END
     ;
 
-//    (function_call | ID | STR_VAL | list) //|l[i][0]
 puts
     :
     PUTS { System.out.println("Built-In: PUTS"); }
-    LPAR expression RPAR // Should it be function_argument?
+    LPAR expression RPAR
     ;
 
 len
     :
     LEN { System.out.println("Built-In: LEN"); }
-    LPAR (list | STR_VAL | ID) RPAR // Use function_argument, so you can use the return value:>
+    LPAR literal RPAR // literal
     ;
 
-// can i use COMMA expression, so in type checking it checks other conditions
-// element to list | character to string
 push
     :
     PUSH { System.out.println("Built-In: PUSH"); }
     LPAR
-    (list | ID | STR_VAL) COMMA expression // in type checking it checks other
-//    (list COMMA expression) // Use function_argument, so you can use the return value:>
-//    | (STR_VAL | ID ) COMMA (CHAR_VAL | ID)
+    (list_literal | ID | STR_VAL) COMMA expression
     RPAR
     ;
 
-match
-    :
-    MATCH { System.out.println("Built-In: MATCH"); }
-    LPAR
-    arg
-    RPAR
-    ;
+//{ System.out.println("Built-In: MATCH"); }
 
 chop
     :
     CHOP { System.out.println("Built-In: CHOP"); }
-    LPAR expression RPAR
+    LPAR literal RPAR
     ;
 
 chomp
     :
     CHOMP { System.out.println("Built-In: CHOMP"); }
-    LPAR (STR_VAL | ID) RPAR
+    LPAR literal RPAR
     ;
 
 function_ptr:
@@ -350,21 +341,8 @@ bool_literal
 list_literal
     :
     LBRACKET
-    arg?
+    args?
     RBRACKET
-    ;
-
-index
-    :
-    LBRACKET
-    (ID | INT_VAL)
-    RBRACKET
-    ;
-
-get_list_element
-    :
-    ID
-    index+
     ;
 
 literal
@@ -377,7 +355,6 @@ literal
     // COMPOUND VALUES
     | list_literal // [1, 3, 5]
     | function_ptr // method(:fooFunction)
-    | get_list_element // arr[0]
     | function_call // foo(5)
     ;
 
@@ -398,8 +375,8 @@ condition_clause
     RPAR
     ;
 
-arg
-    : expression COMMA arg
+args
+    : expression COMMA args
     | expression
     ;
 
@@ -413,15 +390,14 @@ assignment:
 
 other_expression
     : LPAR expression RPAR
-    | list_literal
     | ID
     | literal
     | lambda_function // to return.
     ;
 
-expression:
-    LPAR expression RPAR // I added this to make sure expression works with paranteces
-    | other_expression
+expression
+    :
+    other_expression
     ;
 
 statement
@@ -467,8 +443,8 @@ logical_operator
 
 // { System.out.println("Function Call"); }
 function_call // Write rule better.
-    : ID LPAR arg? RPAR
-    | lambda_function (LPAR arg? RPAR)? // lambda function call
+    : ID LPAR args? RPAR
+    | lambda_function (LPAR args? RPAR)? // lambda function call
     | ID DOT function_call // pattern_call
-    | function_call LPAR arg? RPAR
+    | function_call LPAR args? RPAR
     ;
