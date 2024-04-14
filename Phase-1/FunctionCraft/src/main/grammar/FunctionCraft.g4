@@ -111,9 +111,12 @@ ID: [a-zA-Z][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 WS:         [ \t\r\n]+ -> skip; // ISNOT USED
+NEW_LINE: '\n';
 
 INT_VAL:     [1-9][0-9]*;
 STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
+CHAR_VAL:   '\'' [a-zA-z0-9_] '\''; //'a' '0'
+// null value?
 FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
 BOOLEAN_VAL: TRUE | FALSE;
 
@@ -143,7 +146,6 @@ return_statement
 function_body
     :
     (statement | comment)*
-    return_statement?
     ;
 
 function
@@ -152,20 +154,11 @@ function
     name = ID { System.out.println("FuncDec: " + $name.text); }
     LPAR function_parameter RPAR
     function_body
+    return_statement?
     END
     ;
 
-// Can it be called anywhere it could????? CHECK.
-lambda_function:
-    ARROW
-    LPAR function_parameter RPAR
-    LBRACE
-    function_body
-    RBRACE
-    { System.out.println("Structure: LAMBDA"); }
-    ;
-
-main
+main // Main doen't contain return statement.
     :
     DEF
     MAIN { System.out.println("MAIN"); }
@@ -254,6 +247,7 @@ for_in
     END
     ;
 
+ // Can have return value
 if_statement
     :
     IF
@@ -261,6 +255,7 @@ if_statement
     statement { System.out.println("Decision: IF"); }
     ;
 
+ // Can have return value
 else_if_statement
     :
     ELSEIF
@@ -268,6 +263,7 @@ else_if_statement
     statement { System.out.println("Decision: ELSE IF"); }
     ;
 
+ // Can have return value
 else_statement
     :
     ELSE
@@ -282,37 +278,28 @@ conditional_expression
     END
     ;
 
-//////////////////////////////////////////////////////
-
-expression:
-    LPAR expression RPAR // I added this to make sure expression works with paranteces
-    | ID
-    | literal
-    | function_call
-    | add_to_list // I'm not happy with naming and placement of rule!
-    ;
-
+//    (function_call | ID | STR_VAL | list) //|l[i][0]
 puts
     :
     PUTS { System.out.println("Built-In: PUTS"); }
-    LPAR
-    ///////////////////////////////
-    RPAR
+    LPAR expression RPAR // Should it be function_argument?
     ;
 
 len
     :
     LEN { System.out.println("Built-In: LEN"); }
-    LPAR
-    ///////////////////////////////
-    RPAR
+    LPAR (list | STR_VAL | ID) RPAR // Use function_argument, so you can use the return value:>
     ;
 
+// can i use COMMA expression, so in type checking it checks other conditions
+// element to list | character to string
 push
     :
     PUSH { System.out.println("Built-In: PUSH"); }
     LPAR
-    ///////////////////////////////
+    (list | ID | STR_VAL) COMMA expression // in type checking it checks other
+//    (list COMMA expression) // Use function_argument, so you can use the return value:>
+//    | (STR_VAL | ID ) COMMA (CHAR_VAL | ID)
     RPAR
     ;
 
@@ -320,38 +307,109 @@ match
     :
     MATCH { System.out.println("Built-In: MATCH"); }
     LPAR
-    ///////////////////////////////
+    function_argument
     RPAR
     ;
 
 chop
     :
     CHOP { System.out.println("Built-In: CHOP"); }
-    LPAR
-    ///////////////////////////////
-    RPAR
+    LPAR (STR_VAL | ID) RPAR // Use function_argument, so you can use the return value:>
     ;
 
 chomp
     :
     CHOMP { System.out.println("Built-In: CHOMP"); }
-    LPAR
-    ///////////////////////////////
-    RPAR
+    LPAR (STR_VAL | ID) RPAR
     ;
 
 function_ptr:
     METHOD
     LPAR
     COLON
-    name = ID
+    name = ID // Should we log sth in function_ptr???
     RPAR
     ;
 
-statement:
-    function_call SEMICOLON
+range_operator
+    :
+    DOT
+    DOT
+    ;
+
+range:
+    LPAR
+    (ID | INT_VAL)
+    range_operator
+    (ID | INT_VAL)
+    RPAR
+    ;
+
+numeric_literal
+    : (MINUS | PLUS)? INT_VAL
+    | (MINUS | PLUS)? FLOAT_VAL
+    ;
+
+element
+    : expression COMMA element
+    | expression
+    ;
+
+list_initialization
+    :
+    LBRACKET
+    element?
+    RBRACKET
+    ;
+
+var_initialization
+    :
+    element
+    ;
+
+///////////////////////////////////////////////////////////////////
+
+explicit_initialization
+    :
+    ID
+    ASSIGN
+    (list_initialization | var_initialization)
+    ;
+
+primitive_data_type
+    : numeric_literal
+    | STR_VAL
+    | BOOLEAN_VAL
+//    | list
+//    | function_pointer
+    ;
+
+expression:
+    LPAR expression RPAR // I added this to make sure expression works with paranteces
+    | ID
+    | literal
+    | function_call
+    | add_to_list // I'm not happy with naming and placement of rule!
+    | ID
+    | STR_VAL
+    | numeric_literal
+//    | may be function_call
+//    | list write for it
+    ;
+
+other_expression
+    : LPAR expression RPAR
+    | list
+//    |
+    | ID
+    | function_call
+    | literal
+    ;
+
+statement
+//    function_call SEMICOLON // This one is already in expression SEMICOLON!
     // The problem is where ID = lambda_function!
-    | expression SEMICOLON // handles fib5 = fib.match(5);
+    : expression SEMICOLON // handles fib5 = fib.match(5);
     | assignment SEMICOLON
     | loop_do
     | for_in
@@ -420,10 +478,35 @@ logical_operator
     | OR
     ;
 
+lambda_function_call
+    :
+    lambda_function
+    LPAR function_argument? RPAR
+    ;
+
+// Can it be called anywhere it could????? CHECK.
+lambda_function:
+    ARROW
+    LPAR function_parameter RPAR
+    LBRACE
+    function_body
+    return_statement?
+    RBRACE
+    { System.out.println("Structure: LAMBDA"); }
+    ;
+
+pattern_call
+    :
+    ID
+    DOT
+    function_call
+    ;
+
+// { System.out.println("Function Call"); }
 function_call // Write rule better.
-    : ID LPAR function_argument? RPAR { System.out.println("Function Call"); }
-    | lambda_function LPAR function_argument? RPAR { System.out.println("Function Call"); }
-    | ID DOT function_call { System.out.println("Function Call"); }
+    : ID LPAR function_argument? RPAR
+    | lambda_function_call
+    | pattern_call
     ;
 
 // condition is called with format: LPAR condition RPAR everywhere
@@ -432,10 +515,3 @@ condition:
     | LPAR condition RPAR (logical_operator LPAR condition RPAR)*
     ;
 
-range:
-    LPAR
-    ID
-    '..'
-    ID
-    RPAR
-    ;
