@@ -87,8 +87,8 @@ next_statement
 loop_body
     : statement
     | comment
-    | break_statement { System.out.println("Control: BREAK"); }
-    | next_statement { System.out.println("Control: NEXT"); }
+    | break_statement SEMICOLON { System.out.println("Control: BREAK"); }
+    | next_statement SEMICOLON{ System.out.println("Control: NEXT"); }
     ;
 
 loop_do
@@ -263,8 +263,6 @@ assignment
     expression { System.out.println("Assignment: " + $name.text); }
     ;
 
-//////////////////////////////////////////////////////////////////////
-
 factor
     : LPAR expression RPAR
     | factor LBRACKET expression RBRACKET
@@ -318,16 +316,10 @@ append_expr
     | logical_expr
     ;
 
-other_expression
-    : LPAR expression RPAR
-    | ID
-    | literal
-    | lambda_function // to return.
-    ;
-
 expression
     :
-    other_expression
+    append_expr
+//    factor
     ;
 
 statement
@@ -342,7 +334,8 @@ statement
 
 // { System.out.println("Function Call"); }
 function_call // Write rule better.
-    : ID LPAR args? RPAR
+    : puts | len | push | chop | chomp
+    | ID LPAR args? RPAR
     | lambda_function (LPAR args? RPAR)? // lambda function call
     | ID DOT function_call // pattern_call
     | function_call LPAR args? RPAR
@@ -455,9 +448,9 @@ MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 WS:         [ \t\r\n]+ -> skip; // ISNOT USED
 NEW_LINE: '\n';
 
-INT_VAL:     [1-9][0-9]*;
+INT_VAL:     [0-9]*;
 STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
-CHAR_VAL:   '\'' [a-zA-z0-9_] '\''; //'a' '0'
+CHAR_VAL:   '\'' [a-zA-Z0-9_] '\''; //'a' '0'
 // null value?
 FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
 
