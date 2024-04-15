@@ -2,7 +2,7 @@ grammar FunctionCraft;
 
 program
     :
-    (function | comment)*
+    (function | comment | pattern_matching)*
     main
     comment*
     ;
@@ -47,9 +47,11 @@ required_parameter
     | ID
     ;
 
+
+
 optional_parameter
-    : assignment
-    | assignment COMMA optional_parameter
+    : ID assignment_op expression
+    | ID assignment_op expression COMMA optional_parameter
     ;
 
 function_parameter
@@ -60,8 +62,10 @@ function_parameter
 
 pattern_clause
     :
-    TAB
-    VERTICAL_BAR
+    { System.out.println("HERE in pattern clause"); }
+//    {}
+    NEWLINE { System.out.println("new line is called"); }
+    PATTERN_INDENT { System.out.println("pattern indent is called"); }
     condition_clause
     ASSIGN expression
     ;
@@ -69,8 +73,10 @@ pattern_clause
 pattern_matching:
     PATTERN
     name = ID { System.out.println("PatternDec: " + $name.text); }
-    LPAR ID RPAR
+    LPAR args RPAR
+     { System.out.println("Before pattern_clause"); }
     pattern_clause+
+     { System.out.println("After pattern_clause"); }
     SEMICOLON
     ;
 
@@ -111,21 +117,24 @@ for_in
 if_statement
     :
     IF
+    { System.out.println("Decision: IF"); }
     condition_clause
-    body { System.out.println("Decision: IF"); }
+    body
     ;
 
 else_if_statement
     :
     ELSEIF
+    { System.out.println("Decision: ELSE IF"); }
     condition_clause
-    body { System.out.println("Decision: ELSE IF"); }
+    body
     ;
 
 else_statement
     :
     ELSE
-    body { System.out.println("Decision: ELSE"); }
+    { System.out.println("Decision: ELSE"); }
+    body
     ;
 
 conditional_expression
@@ -193,8 +202,7 @@ range:
     ;
 
 numeric_literal
-    : (MINUS | PLUS)? INT_VAL
-    | (MINUS | PLUS)? FLOAT_VAL
+    : num = (MINUS | PLUS)? (INT_VAL | FLOAT_VAL)
     ;
 
 string_literal
@@ -214,16 +222,17 @@ list_literal
     ;
 
 literal
-    // ATOMIC VALUES
-    : numeric_literal // int float
-    | string_literal // "hi there"
-    | bool_literal // True False
-    // CHAR_LITERAL
-
     // COMPOUND VALUES
-    | list_literal // [1, 3, 5]
-    | function_ptr // method(:fooFunction)
-    | function_call // foo(5)
+    : list_literal //{ System.out.println("list_literal"); } // [1, 3, 5]
+    | function_ptr //{ System.out.println("function_ptr"); } // method(:fooFunction)
+    | function_call  // foo(5)
+
+
+    // ATOMIC VALUES
+    | numeric_literal  // int float
+    | string_literal//  { System.out.println("string_literal"); } // "hi there"
+    | bool_literal //{ System.out.println("bool_literal"); } // True False
+    // CHAR_LITERAL
     ;
 
 lambda_function:
@@ -275,51 +284,53 @@ factor
     ;
 
 arithmetic_term
-    : factor (MULT | DIV | MOD) arithmetic_term
+    : factor MULT arithmetic_term { System.out.println("Operator: *"); }
+    | factor DIV arithmetic_term { System.out.println("Operator: /"); }
+    | factor MOD arithmetic_term { System.out.println("Operator: %"); }
     | factor
     ;
 
 arithmetic_expr
-    : arithmetic_term (PLUS | MINUS) arithmetic_expr
+    : arithmetic_term PLUS arithmetic_expr { System.out.println("Operator: +"); }
+    | arithmetic_term MINUS arithmetic_expr { System.out.println("Operator: -"); }
     | arithmetic_term
     ;
 
 relational_op
-    : GEQ
-    | LEQ
-    | GTR
-    | LES
+    : GEQ { System.out.println("Operator: >="); }
+    | LEQ { System.out.println("Operator: <="); }
+    | GTR { System.out.println("Operator: >"); }
+    | LES { System.out.println("Operator: <"); }
     ;
 
 compare_expr
-    : arithmetic_expr (relational_op) compare_expr
+    : arithmetic_expr relational_op compare_expr
     | arithmetic_expr
     ;
 
 equality_expr
-    : compare_expr (EQL | NEQ) equality_expr
+    : compare_expr EQL equality_expr { System.out.println("Operator: =="); }
+    | compare_expr NEQ equality_expr { System.out.println("Operator: !="); }
     | compare_expr
     ;
 
 logical_product_expr
-    : equality_expr (AND) logical_product_expr
+    : equality_expr AND logical_product_expr { System.out.println("Operator: &&"); }
     | equality_expr
     ;
 
 logical_expr
-    : equality_expr (OR) logical_product_expr
+    : equality_expr OR logical_product_expr { System.out.println("Operator: ||"); }
     | logical_product_expr
     ;
 
 append_expr
-    : logical_expr (CONCAT) append_expr
+    : logical_expr CONCAT append_expr { System.out.println("Operator: <<"); }
     | logical_expr
     ;
 
 expression
-    :
-    append_expr
-//    factor
+    : append_expr
     ;
 
 statement
@@ -329,16 +340,16 @@ statement
     | loop_do
     | for_in
     | conditional_expression
-    | pattern_matching
+//    | pattern_matching
     ;
 
 // { System.out.println("Function Call"); }
 function_call // Write rule better.
     : puts | len | push | chop | chomp
-    | ID LPAR args? RPAR
+    | { System.out.println("function_call"); } ID LPAR args? RPAR
     | lambda_function (LPAR args? RPAR)? // lambda function call
     | ID DOT function_call // pattern_call
-    | function_call LPAR args? RPAR
+    | { System.out.println("function_call"); } RPAR function_call LPAR args? RPAR
     ;
 
 
@@ -362,7 +373,6 @@ BOOLEAN:        'bool';
 LIST:           'list';
 FUNCTION_PTR:   'fptr';
 
-// 7-1)
 // Arithmetic Operators
 PLUS:  '+';
 MINUS: '-';
@@ -374,7 +384,6 @@ INCREMENT:   '++';
 
 CONCAT: '<<';
 
-// 7-2)
 // Relational Operators
 GEQ: '>=';
 LEQ: '<=';
@@ -383,13 +392,11 @@ LES: '<';
 EQL: '==';
 NEQ: '!=';
 
-// 7-3)
 // Logical Operators
 AND: '&&';
 OR:  '||';
 NOT: '!';
 
-// 7-5)
 // Assignment Operators
 ASSIGN: '=';
 PLUS_ASSIGN: '+=';
@@ -398,13 +405,11 @@ MULT_ASSIGN: '*=';
 DIV_ASSIGN: '/=';
 MOD_ASSIGN: '%=';
 
-// 8)
 // Conditional Statements
 IF: 'if';
 ELSE: 'else';
 ELSEIF: 'elseif';
 
-// 10)
 // Built in Functions
 PUTS: 'puts'; // ISNOT USED
 PUSH: 'push'; // ISNOT USED
@@ -413,7 +418,6 @@ MAIN: 'main';
 CHOP: 'chop'; // ISNOT USED
 CHOMP: 'chomp'; // ISNOT USED
 
-// 11)
 // Loops
 LOOP_DO: 'loop do';
 FOR: 'for';
@@ -426,8 +430,9 @@ NEXT_IF: 'next if';
 // 12)
 // Pattern Matching Structure
 PATTERN: 'pattern';
-TAB: [\t];//tab!
-VERTICAL_BAR: '|';
+//TAB: [\t] -> more, type(HIDDEN);
+//NEWLINE: '\n' | '\r';
+PATTERN_INDENT: ('\n'|'\r')(('\t|') | ('    |'));
 
 // Symbols
 LBRACE:    '{';
@@ -441,17 +446,16 @@ COMMA:     ',';
 COLON:     ':';
 SEMICOLON: ';';
 
+INT_VAL:     ([0] | [1-9][0-9]*);
+STR_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"';
+CHAR_VAL:   '\'' ('\\' ["\\] | ~["\\\r\n]) '\''; //'a' '0'
+// null value?
+FLOAT_VAL:   INT_VAL '.' [0-9]+;
+
+
 ARROW: '->';
 ID: [a-zA-Z][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
-WS:         [ \t\r\n]+ -> skip; // ISNOT USED
-NEW_LINE: '\n';
-
-ZERO: '0';
-INT_VAL:     ZERO | [1-9][0-9]*;
-STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
-CHAR_VAL:   '\'' [a-zA-Z0-9_] '\''; //'a' '0'
-// null value?
-FLOAT_VAL:   INT_VAL '.' [0-9]+ | '0.' [0-9]*;
-
+//WS:         [ \t\r\n]+ -> skip;
+WS:         [ \r\n]+ -> skip;
