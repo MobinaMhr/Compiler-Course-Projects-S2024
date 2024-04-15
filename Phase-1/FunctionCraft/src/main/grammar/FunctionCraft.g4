@@ -64,7 +64,7 @@ pattern_clause
     :
     { System.out.println("HERE in pattern clause"); }
 //    {}
-    NEWLINE { System.out.println("new line is called"); }
+//    NEWLINE { System.out.println("new line is called"); }
     PATTERN_INDENT { System.out.println("pattern indent is called"); }
     condition_clause
     ASSIGN expression
@@ -371,7 +371,7 @@ FLOAT:          'float';
 STR:            'string';
 BOOLEAN:        'bool';
 LIST:           'list';
-FUNCTION_PTR:   'fptr';
+//FUNCTION_PTR:   'fptr';
 
 // Arithmetic Operators
 PLUS:  '+';
@@ -432,7 +432,7 @@ NEXT_IF: 'next if';
 PATTERN: 'pattern';
 //TAB: [\t] -> more, type(HIDDEN);
 //NEWLINE: '\n' | '\r';
-PATTERN_INDENT: ('\n'|'\r')(('\t|') | ('    |'));
+PATTERN_INDENT: ('\r'?'\n')('\t|' | '    |');
 
 // Symbols
 LBRACE:    '{';
