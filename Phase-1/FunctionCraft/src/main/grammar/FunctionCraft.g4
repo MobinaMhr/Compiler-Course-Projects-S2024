@@ -1,6 +1,6 @@
 grammar FunctionCraft;
 
-functionCraft
+program
     :
     (function | comment)*
     main
@@ -448,7 +448,8 @@ MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 WS:         [ \t\r\n]+ -> skip; // ISNOT USED
 NEW_LINE: '\n';
 
-INT_VAL:     [0-9]*;
+ZERO: '0';
+INT_VAL:     ZERO | [1-9][0-9]*;
 STR_VAL:    '"' [a-zA-Z0-9_]+ '"';// "_abc" is supported what about "%abc"
 CHAR_VAL:   '\'' [a-zA-Z0-9_] '\''; //'a' '0'
 // null value?
