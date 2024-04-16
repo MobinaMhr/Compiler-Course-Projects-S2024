@@ -299,21 +299,20 @@ assignment
     ;
 
 function_call
-    : built_in_function { System.out.println("FunctionCall"); } function_call_suffix
-    | built_in_function
-    | { System.out.println("FunctionCall"); } ID LPAR args? RPAR { System.out.println("FunctionCall"); } function_call_suffix
+    : built_in_function
+    | { System.out.println("FunctionCall"); } ID LPAR args? RPAR function_call_suffix
     | { System.out.println("FunctionCall"); } ID LPAR args? RPAR
-    | lambda_function (LPAR args? RPAR) function_call_suffix // lambda function call
-    | lambda_function (LPAR args? RPAR)                      // lambda function call
-    | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR { System.out.println("FunctionCall"); } function_call_suffix
+    | { System.out.println("FunctionCall"); } lambda_function (LPAR args? RPAR) function_call_suffix
+    | { System.out.println("FunctionCall"); } lambda_function (LPAR args? RPAR)
+    | { System.out.println("FunctionCall"); } function_ptr (LPAR args? RPAR) function_call_suffix
+    | { System.out.println("FunctionCall"); } function_ptr (LPAR args? RPAR)
+    | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR function_call_suffix
     | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR
-//    | factor args? function_call_suffix
-//    | factor args?
     ;
 
 function_call_suffix
-    : LPAR args? RPAR function_call_suffix
-    | LPAR args? RPAR
+    : { System.out.println("FunctionCall"); } LPAR args? RPAR function_call_suffix
+    | { System.out.println("FunctionCall"); } LPAR args? RPAR
     ;
 
 factor
@@ -323,6 +322,7 @@ factor
     | NOT LPAR factor RPAR
     | MINUS factor factor_suffix
     | MINUS factor
+    | function_call factor_suffix
     | function_call
     | ID factor_suffix
     | ID
@@ -333,19 +333,21 @@ factor
 factor_suffix
     : LBRACKET expression RBRACKET factor_suffix
     | LBRACKET expression RBRACKET
-    | (INCREMENT | DECREMENT) factor_suffix
-    | (INCREMENT | DECREMENT)
+    | INCREMENT { System.out.println("Operator: ++"); } factor_suffix
+    | INCREMENT { System.out.println("Operator: ++"); }
+    | DECREMENT { System.out.println("Operator: --"); } factor_suffix
+    | DECREMENT { System.out.println("Operator: --"); }
     ;
 
 arithmetic_op_priority1
-    : MULT arithmetic_term{ System.out.println("Operator: *"); }
-    | DIV arithmetic_term{ System.out.println("Operator: /"); }
-    | MOD arithmetic_term{ System.out.println("Operator: %"); }
+    : MULT { System.out.println("Operator: *"); } arithmetic_term
+    | DIV { System.out.println("Operator: /"); } arithmetic_term
+    | MOD { System.out.println("Operator: %"); } arithmetic_term
     ;
 
 arithmetic_op_priority2
-    : PLUS arithmetic_expr { System.out.println("Operator: +"); }
-    | MINUS arithmetic_expr { System.out.println("Operator: -"); }
+    : PLUS { System.out.println("Operator: +"); } arithmetic_expr
+    | MINUS { System.out.println("Operator: -"); } arithmetic_expr
     ;
 
 arithmetic_term
@@ -376,31 +378,29 @@ equality_expr
     | compare_expr
     ;
 
-logical_product_expr
-    : (LPAR logical_product_expr RPAR) AND (LPAR logical_product_expr RPAR) { System.out.println("Operator: &&"); }
-    | equality_expr
-    ;
+//logical_product_expr
+//    : (LPAR expression RPAR) AND (LPAR logical_product_expr RPAR) { System.out.println("Operator: &&"); }
+//    | equality_expr
+//    ;
 
 logical_expr
-    : (LPAR logical_product_expr RPAR) OR (LPAR logical_product_expr RPAR) { System.out.println("Operator: ||"); }
-    | logical_product_expr
-    ;
-
-logical_expr_mobina
-    : (LPAR logical_expr_mobina RPAR) AND (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: &&"); }
-    | (LPAR logical_expr_mobina RPAR) OR (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: ||"); }
+    : (LPAR expression RPAR) AND (LPAR expression RPAR) { System.out.println("Operator: &&"); }
+    | (LPAR expression RPAR) OR (LPAR expression RPAR) { System.out.println("Operator: ||"); }
     | equality_expr
     ;
 
-append_expr
-    : logical_expr CONCAT append_expr { System.out.println("Operator: <<"); }
-//    | logical_expr
-    | logical_expr_mobina
-    ;
+//logical_expr_mobina
+//    : (LPAR logical_expr_mobina RPAR) AND (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: &&"); }
+//    | (LPAR logical_expr_mobina RPAR) OR (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: ||"); }
+//    | equality_expr
+//    ;
 
 expression
-    : append_expr
+    : logical_expr CONCAT expression { System.out.println("Operator: <<"); }
+    | logical_expr
+//    | logical_expr_mobina
     ;
+
 
 statement
     // ID = lambda_function! TYPE CHECKING!
@@ -430,6 +430,11 @@ built_in_function
 
 
 
+ARROW: '->';
+DECREMENT:   '--';
+INCREMENT:   '++';
+
+CONCAT: '<<';
 
 // Keywords: Control Structures
 DEF: 'def';
@@ -449,10 +454,6 @@ MINUS: '-';
 MULT:  '*';
 DIV:   '/';
 MOD:    '%';
-DECREMENT:   '--';
-INCREMENT:   '++';
-
-CONCAT: '<<';
 
 // Relational Operators
 GEQ: '>=';
@@ -523,8 +524,6 @@ CHAR_VAL:   '\'' ('\\' ["\\] | ~["\\\r\n]) '\''; //'a' '0'
 // null value?
 FLOAT_VAL:   INT_VAL '.' [0-9]+;
 
-
-ARROW: '->';
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
