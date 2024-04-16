@@ -17,7 +17,7 @@ function
     :
     DEF
     name = ID { System.out.println("FuncDec: " + $name.text); }
-    LPAR function_parameter RPAR
+    LPAR function_parameter? RPAR
     body
     END
     ;
@@ -47,8 +47,6 @@ required_parameter
     | ID
     ;
 
-
-
 optional_parameter
     : ID assignment_op expression
     | ID assignment_op expression COMMA optional_parameter
@@ -62,10 +60,7 @@ function_parameter
 
 pattern_clause
     :
-    { System.out.println("HERE in pattern clause"); }
-//    {}
-//    NEWLINE { System.out.println("new line is called"); }
-    PATTERN_INDENT { System.out.println("pattern indent is called"); }
+    PATTERN_INDENT
     condition_clause
     ASSIGN expression
     ;
@@ -74,9 +69,7 @@ pattern_matching:
     PATTERN
     name = ID { System.out.println("PatternDec: " + $name.text); }
     LPAR args RPAR
-     { System.out.println("Before pattern_clause"); }
     pattern_clause+
-     { System.out.println("After pattern_clause"); }
     SEMICOLON
     ;
 
@@ -91,16 +84,21 @@ next_statement
     ;
 
 loop_body
-    : statement
-    | comment
-    | break_statement SEMICOLON { System.out.println("Control: BREAK"); }
-    | next_statement SEMICOLON{ System.out.println("Control: NEXT"); }
+    :
+    (
+        statement_in_loop
+        | comment
+        | break_statement SEMICOLON
+        { System.out.println("Control: BREAK"); }
+        | next_statement SEMICOLON
+        { System.out.println("Control: NEXT"); }
+    )*
     ;
 
 loop_do
     :
     LOOP_DO { System.out.println("Loop: DO"); }
-    loop_body*
+    loop_body
     return_statement?
     END
     ;
@@ -109,7 +107,7 @@ for_in
     :
     FOR { System.out.println("Loop: FOR"); }
     ID IN range
-    loop_body*
+    loop_body
     return_statement?
     END
     ;
@@ -142,6 +140,37 @@ conditional_expression
     if_statement
     else_if_statement*
     else_statement?
+    END
+    ;
+
+if_statement_in_loop
+    :
+    IF
+    { System.out.println("Decision: IF"); }
+    condition_clause
+    loop_body
+    ;
+
+else_if_statement_in_loop
+    :
+    ELSEIF
+    { System.out.println("Decision: ELSE IF"); }
+    condition_clause
+    loop_body
+    ;
+
+else_statement_in_loop
+    :
+    ELSE
+    { System.out.println("Decision: ELSE"); }
+    loop_body
+    ;
+
+conditional_expression_in_loop
+    :
+    if_statement_in_loop
+    else_if_statement_in_loop*
+    else_statement_in_loop?
     END
     ;
 
@@ -241,7 +270,6 @@ lambda_function:
     LBRACE
     body
     RBRACE
-    { System.out.println("Structure: LAMBDA"); }
     ;
 
 condition_clause
@@ -269,19 +297,33 @@ assignment
     :
     name = ID
     assignment_op
-    expression { System.out.println("Assignment: " + $name.text); }
+    expression
+    { System.out.println("Assignment: " + $name.text); }
     ;
 
 factor
-    : LPAR expression RPAR
-    | factor LBRACKET expression RBRACKET
-    | factor (INCREMENT | DECREMENT)
+    : LPAR expression RPAR factor_suffix
+    | LPAR expression RPAR
+    | NOT factor factor_suffix
     | NOT factor
+    | MINUS factor factor_suffix
     | MINUS factor
+    | ID factor_suffix
     | ID
+    | literal factor_suffix
     | literal
-    | lambda_function // to return.
+    | { System.out.println("Structure: LAMBDA"); } lambda_function factor_suffix // to return.
+    | { System.out.println("Structure: LAMBDA"); } lambda_function // to return.
     ;
+
+factor_suffix
+    : LBRACKET expression RBRACKET factor_suffix
+    | LBRACKET expression RBRACKET
+    | (INCREMENT | DECREMENT) factor_suffix
+    |  (INCREMENT | DECREMENT)
+    ;
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 arithmetic_term
     : factor MULT arithmetic_term { System.out.println("Operator: *"); }
@@ -340,18 +382,38 @@ statement
     | loop_do
     | for_in
     | conditional_expression
-//    | pattern_matching
     ;
 
-// { System.out.println("Function Call"); }
-function_call // Write rule better.
+statement_in_loop
+    // ID = lambda_function! TYPE CHECKING!
+    : expression SEMICOLON // handles foo(5);
+    | assignment SEMICOLON // handles fib5 = fib.match(5);
+    | loop_do
+    | for_in
+    | conditional_expression_in_loop
+    ;
+
+function_call
     : puts | len | push | chop | chomp
-    | { System.out.println("function_call"); } ID LPAR args? RPAR
-    | lambda_function (LPAR args? RPAR)? // lambda function call
-    | ID DOT function_call // pattern_call
-    | { System.out.println("function_call"); } RPAR function_call LPAR args? RPAR
+    | puts | len | push | chop | chomp
+    | { System.out.println("FunctionCall"); } ID LPAR args? RPAR
+    | lambda_function (LPAR args? RPAR) // lambda function call
+    | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR
+//    | factor
+//    | { System.out.println("FunctionCall"); } function_call LPAR args? RPAR
     ;
 
+    ///////////////////////////////////////////////////////////////////////////////////////
+
+//function_call
+//    : puts | len | push | chop | chomp
+//    | { System.out.println("FunctionCall"); } ID LPAR args? RPAR
+//    | lambda_function (LPAR args? RPAR) // lambda function call
+//    | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR
+////    | factor
+////    | { System.out.println("FunctionCall"); } function_call LPAR args? RPAR
+//    ;
+//
 
 // Keywords: Control Structures
 DEF: 'def';
@@ -417,6 +479,7 @@ LEN: 'Len'; // ISNOT USED
 MAIN: 'main';
 CHOP: 'chop'; // ISNOT USED
 CHOMP: 'chomp'; // ISNOT USED
+MATCH: 'match';
 
 // Loops
 LOOP_DO: 'loop do';
