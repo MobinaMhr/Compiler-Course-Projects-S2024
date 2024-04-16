@@ -295,8 +295,8 @@ assignment
     :
     name = ID
     assignment_op
-    { System.out.println("Assignment: " + $name.text); }
     expression
+    { System.out.println("Assignment: " + $name.text); }
     ;
 
 function_call
