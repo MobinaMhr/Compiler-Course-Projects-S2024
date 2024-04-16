@@ -295,8 +295,8 @@ assignment
     :
     name = ID
     assignment_op
-    expression
     { System.out.println("Assignment: " + $name.text); }
+    expression
     ;
 
 function_call
@@ -341,17 +341,15 @@ factor_suffix
     ;
 
 arithmetic_term
-    : factor MULT factor { System.out.println("Operator: *"); }
-    | factor DIV factor { System.out.println("Operator: /"); }
-    | factor MOD factor { System.out.println("Operator: %"); }
+    : factor MULT { System.out.println("Operator: *"); } arithmetic_term
+    | factor DIV  { System.out.println("Operator: /"); } arithmetic_term
+    | factor MOD  { System.out.println("Operator: %"); } arithmetic_term
     | factor
     ;
 
 arithmetic_sum
-    : arithmetic_term PLUS { System.out.println("Operator: +"); } arithmetic_sum
-    | arithmetic_term MINUS { System.out.println("Operator: -"); } arithmetic_sum
-    | arithmetic_term PLUS arithmetic_term { System.out.println("Operator: +"); }
-    | arithmetic_term MINUS arithmetic_term { System.out.println("Operator: -"); }
+    : arithmetic_term
+    ((PLUS arithmetic_term { System.out.println("Operator: +"); }) | (MINUS arithmetic_term { System.out.println("Operator: -"); }))*
     ;
 
 
@@ -361,21 +359,21 @@ arithmetic_expr
     ;
 
 relational_op
-    : GEQ { System.out.println("Operator: >="); }
-    | LEQ { System.out.println("Operator: <="); }
-    | GTR { System.out.println("Operator: >"); }
-    | LES { System.out.println("Operator: <"); }
+    : GEQ
+    | LEQ
+    | GTR
+    | LES
     ;
 
 compare_expr
-    : arithmetic_expr relational_op compare_expr
-    | arithmetic_expr
+    : arithmetic_expr
+    (op = relational_op
+    arithmetic_expr
+    { System.out.println("FuncDec: " + $op.text); })*
     ;
 
 equality_expr
-    : compare_expr EQL equality_expr { System.out.println("Operator: =="); }
-    | compare_expr NEQ equality_expr { System.out.println("Operator: !="); }
-    | compare_expr
+    : compare_expr ((EQL compare_expr { System.out.println("Operator: =="); }) | (NEQ compare_expr { System.out.println("Operator: !="); }))*
     ;
 
 //logical_product_expr
@@ -396,9 +394,7 @@ logical_expr
 //    ;
 
 append_expr
-    : logical_expr CONCAT { System.out.println("Operator: <<"); } append_expr
-    | logical_expr CONCAT logical_expr { System.out.println("Operator: <<"); }
-//    | logical_expr_mobina
+    : logical_expr ( CONCAT logical_expr { System.out.println("Operator: <<"); } )*
     ;
 
 expression
