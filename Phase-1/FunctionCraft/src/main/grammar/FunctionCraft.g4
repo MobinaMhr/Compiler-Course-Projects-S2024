@@ -92,13 +92,14 @@ loop_body
         | next_statement SEMICOLON
 
     )*
+    return_statement?
     ;
 
 loop_do
     :
     LOOP_DO { System.out.println("Loop: DO"); }
     loop_body
-    return_statement?
+//    return_statement?
     END
     ;
 
@@ -107,7 +108,7 @@ for_in
     FOR { System.out.println("Loop: FOR"); }
     ID IN range
     loop_body
-    return_statement?
+//    return_statement?
     END
     ;
 
@@ -442,13 +443,6 @@ FALSE: 'false';
 // Keywords: Method Definition
 METHOD: 'method';
 
-// Primitive Data Types
-INT:            'int';
-FLOAT:          'float';
-STR:            'string';
-BOOLEAN:        'bool';
-//FUNCTION_PTR:   'fptr';
-
 // Arithmetic Operators
 PLUS:  '+';
 MINUS: '-';
@@ -531,7 +525,7 @@ FLOAT_VAL:   INT_VAL '.' [0-9]+;
 
 
 ARROW: '->';
-ID: [a-zA-Z][a-zA-Z0-9_]*;
+ID: [a-zA-Z_][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 //WS:         [ \t\r\n]+ -> skip;
