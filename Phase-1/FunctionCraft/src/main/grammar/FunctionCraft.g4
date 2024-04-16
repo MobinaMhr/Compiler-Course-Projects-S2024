@@ -355,7 +355,6 @@ arithmetic_sum
 
 arithmetic_expr
     : arithmetic_sum
-    | arithmetic_term
     ;
 
 relational_op
