@@ -25,7 +25,8 @@ function
 return_statement
     :
     RETURN { System.out.println("RETURN"); }
-    (expression SEMICOLON)?
+    expression?
+    SEMICOLON
     ;
 
 main
@@ -339,24 +340,23 @@ factor_suffix
     | DECREMENT { System.out.println("Operator: --"); }
     ;
 
-arithmetic_op_priority1
-    : MULT { System.out.println("Operator: *"); } arithmetic_term
-    | DIV { System.out.println("Operator: /"); } arithmetic_term
-    | MOD { System.out.println("Operator: %"); } arithmetic_term
-    ;
-
-arithmetic_op_priority2
-    : PLUS { System.out.println("Operator: +"); } arithmetic_expr
-    | MINUS { System.out.println("Operator: -"); } arithmetic_expr
-    ;
-
 arithmetic_term
-    : factor arithmetic_op_priority1
+    : factor MULT factor { System.out.println("Operator: *"); }
+    | factor DIV factor { System.out.println("Operator: /"); }
+    | factor MOD factor { System.out.println("Operator: %"); }
     | factor
     ;
 
+arithmetic_sum
+    : arithmetic_term PLUS { System.out.println("Operator: +"); } arithmetic_sum
+    | arithmetic_term MINUS { System.out.println("Operator: -"); } arithmetic_sum
+    | arithmetic_term PLUS arithmetic_term { System.out.println("Operator: +"); }
+    | arithmetic_term MINUS arithmetic_term { System.out.println("Operator: -"); }
+    ;
+
+
 arithmetic_expr
-    : arithmetic_term arithmetic_op_priority2
+    : arithmetic_sum
     | arithmetic_term
     ;
 
@@ -395,15 +395,19 @@ logical_expr
 //    | equality_expr
 //    ;
 
-expression
-    : logical_expr CONCAT expression { System.out.println("Operator: <<"); }
-    | logical_expr
+append_expr
+    : logical_expr CONCAT { System.out.println("Operator: <<"); } append_expr
+    | logical_expr CONCAT logical_expr { System.out.println("Operator: <<"); }
 //    | logical_expr_mobina
     ;
 
+expression
+    : append_expr
+    | logical_expr
+;
 
-statement
     // ID = lambda_function! TYPE CHECKING!
+statement
     : expression SEMICOLON // handles foo(5);
     | assignment SEMICOLON // handles fib5 = fib.match(5);
     | loop_do
