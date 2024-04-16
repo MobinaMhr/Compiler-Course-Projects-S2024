@@ -399,7 +399,6 @@ append_expr
 
 expression
     : append_expr
-    | logical_expr
 ;
 
     // ID = lambda_function! TYPE CHECKING!
