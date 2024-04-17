@@ -250,13 +250,13 @@ list_literal
 
 literal
     // COMPOUND VALUES
-    : list_literal // [1, 3, 5]
-    | function_ptr // method(:fooFunction)
-    | lambda_function //////////////////// Give Test Case
+    : list_literal
+    | function_ptr
+    | lambda_function
     // ATOMIC VALUES
-    | numeric_literal  // int float
-    | string_literal // "hi there"
-    | bool_literal // True False
+    | numeric_literal
+    | string_literal
+    | bool_literal
     ;
 
 lambda_function:
@@ -301,8 +301,8 @@ function_call
     : built_in_function
     | { System.out.println("FunctionCall"); } ID LPAR args? RPAR function_call_suffix
     | { System.out.println("FunctionCall"); } ID LPAR args? RPAR
-    | { System.out.println("FunctionCall"); } lambda_function (LPAR args? RPAR) function_call_suffix
-    | { System.out.println("FunctionCall"); } lambda_function (LPAR args? RPAR)
+    | lambda_function { System.out.println("FunctionCall"); } (LPAR args? RPAR) function_call_suffix
+    | lambda_function { System.out.println("FunctionCall"); } (LPAR args? RPAR)
     | { System.out.println("FunctionCall"); } function_ptr (LPAR args? RPAR) function_call_suffix
     | { System.out.println("FunctionCall"); } function_ptr (LPAR args? RPAR)
     | { System.out.println("Built-In: MATCH"); } ID DOT MATCH LPAR args RPAR function_call_suffix
@@ -317,10 +317,10 @@ function_call_suffix
 factor
     : LPAR expression RPAR factor_suffix
     | LPAR expression RPAR
-    | NOT LPAR factor RPAR factor_suffix
-    | NOT LPAR factor RPAR
-    | MINUS factor factor_suffix
-    | MINUS factor
+    | NOT { System.out.println("Operator: !"); } LPAR factor RPAR factor_suffix
+    | NOT { System.out.println("Operator: !"); } LPAR factor RPAR
+    | MINUS { System.out.println("Operator: -"); } factor factor_suffix
+    | MINUS { System.out.println("Operator: -"); } factor
     | function_call factor_suffix
     | function_call
     | ID factor_suffix
@@ -395,16 +395,16 @@ expression
 ;
 
 statement
-    : expression SEMICOLON // handles foo(5);
-    | assignment SEMICOLON // handles fib5 = fib.match(5);
+    : expression SEMICOLON
+    | assignment SEMICOLON
     | loop_do
     | for_in
     | conditional_expression
     ;
 
 statement_in_loop
-    : expression SEMICOLON // handles foo(5);
-    | assignment SEMICOLON // handles fib5 = fib.match(5);
+    : expression SEMICOLON
+    | assignment SEMICOLON
     | loop_do
     | for_in
     | conditional_expression_in_loop
@@ -422,55 +422,47 @@ built_in_function
 
 ARROW: '->';
 DECREMENT:   '--';
-INCREMENT:   '++';
+
+
 CONCAT: '<<';
-
-// Keywords: Control Structures
-DEF: 'def';
-END: 'end';
-RETURN: 'return';
-
-// Keywords: Boolean Values
-TRUE: 'true';
-FALSE: 'false';
-
-// Keywords: Method Definition
-METHOD: 'method';
-
-// Arithmetic Operators
-PLUS:  '+';
-MINUS: '-';
-MULT:  '*';
-DIV:   '/';
-MOD:    '%';
-
-// Relational Operators
-GEQ: '>=';
 LEQ: '<=';
-GTR: '>';
 LES: '<';
-EQL: '==';
-NEQ: '!=';
 
-// Logical Operators
-AND: '&&';
-OR:  '||';
+
+GEQ: '>=';
+
+GTR: '>';
+
+
+MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
+EQL: '==';
+ASSIGN: '=';
+
+NEQ: '!=';
 NOT: '!';
 
-// Assignment Operators
-ASSIGN: '=';
-PLUS_ASSIGN: '+=';
-MINUS_ASSIGN: '-=';
-MULT_ASSIGN: '*=';
-DIV_ASSIGN: '/=';
-MOD_ASSIGN: '%=';
+AND: '&&';
+OR:  '||';
 
-// Conditional Statements
+INCREMENT:   '++';
+PLUS_ASSIGN: '+=';
+PLUS:  '+';
+
+MINUS_ASSIGN: '-=';
+MINUS: '-';
+
+MULT_ASSIGN: '*=';
+MULT:  '*';
+
+DIV_ASSIGN: '/=';
+DIV:   '/';
+
+MOD_ASSIGN: '%=';
+MOD:    '%';
+
 IF: 'if';
 ELSE: 'else';
 ELSEIF: 'elseif';
-
-// Built in Functions
 PUTS: 'puts';
 PUSH: 'push';
 LEN: 'Len';
@@ -478,8 +470,12 @@ MAIN: 'main';
 CHOP: 'chop';
 CHOMP: 'chomp';
 MATCH: 'match';
-
-// Loops
+DEF: 'def';
+END: 'end';
+RETURN: 'return';
+TRUE: 'true';
+FALSE: 'false';
+METHOD: 'method';
 LOOP_DO: 'loop do';
 FOR: 'for';
 IN: 'in';
@@ -487,12 +483,10 @@ BREAK: 'break';
 BREAK_IF: 'break if';
 NEXT: 'next';
 NEXT_IF: 'next if';
-
-// Pattern Matching Structure
 PATTERN: 'pattern';
+
 PATTERN_INDENT: ('\r'?'\n')('\t|' | '    |');
 
-// Symbols
 LBRACE:    '{';
 RBRACE:    '}';
 LBRACKET: '[';
@@ -504,12 +498,10 @@ COMMA:     ',';
 COLON:     ':';
 SEMICOLON: ';';
 
+FLOAT_VAL:   INT_VAL? '.' [0-9]+;
 INT_VAL:     ([0] | [1-9][0-9]*);
 STR_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"';
-//CHAR_VAL:   '\'' ('\\' ["\\] | ~["\\\r\n]) '\''; //'a' '0'
-FLOAT_VAL:   INT_VAL '.' [0-9]+;
 
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
-MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 WS:         [ \r\n]+ -> skip;
