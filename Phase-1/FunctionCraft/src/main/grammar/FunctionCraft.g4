@@ -100,7 +100,6 @@ loop_do
     :
     LOOP_DO { System.out.println("Loop: DO"); }
     loop_body
-//    return_statement?
     END
     ;
 
@@ -109,7 +108,6 @@ for_in
     FOR { System.out.println("Loop: FOR"); }
     ID IN range
     loop_body
-//    return_statement?
     END
     ;
 
@@ -211,7 +209,7 @@ function_ptr:
     METHOD
     LPAR
     COLON
-    name = ID // Should we log sth in function_ptr???
+    name = ID
     RPAR
     ;
 
@@ -227,7 +225,7 @@ range:
     range_operator
     (ID | INT_VAL)
     RPAR
-    | factor // may be ID and other ?
+    | factor
     ;
 
 numeric_literal
@@ -259,7 +257,6 @@ literal
     | numeric_literal  // int float
     | string_literal // "hi there"
     | bool_literal // True False
-    // CHAR_LITERAL
     ;
 
 lambda_function:
@@ -352,7 +349,6 @@ arithmetic_sum
     ((PLUS arithmetic_term { System.out.println("Operator: +"); }) | (MINUS arithmetic_term { System.out.println("Operator: -"); }))*
     ;
 
-
 arithmetic_expr
     : arithmetic_sum
     ;
@@ -375,22 +371,11 @@ equality_expr
     : compare_expr ((EQL compare_expr { System.out.println("Operator: =="); }) | (NEQ compare_expr { System.out.println("Operator: !="); }))*
     ;
 
-//logical_product_expr
-//    : (LPAR expression RPAR) AND (LPAR logical_product_expr RPAR) { System.out.println("Operator: &&"); }
-//    | equality_expr
-//    ;
-
 logical_expr
     : (LPAR expression RPAR) AND (LPAR expression RPAR) { System.out.println("Operator: &&"); }
     | (LPAR expression RPAR) OR (LPAR expression RPAR) { System.out.println("Operator: ||"); }
     | equality_expr
     ;
-
-//logical_expr_mobina
-//    : (LPAR logical_expr_mobina RPAR) AND (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: &&"); }
-//    | (LPAR logical_expr_mobina RPAR) OR (LPAR logical_expr_mobina RPAR) { System.out.println("Operator: ||"); }
-//    | equality_expr
-//    ;
 
 append_expr
     : logical_expr ( CONCAT logical_expr { System.out.println("Operator: <<"); } )*
@@ -400,7 +385,6 @@ expression
     : append_expr
 ;
 
-    // ID = lambda_function! TYPE CHECKING!
 statement
     : expression SEMICOLON // handles foo(5);
     | assignment SEMICOLON // handles fib5 = fib.match(5);
@@ -410,7 +394,6 @@ statement
     ;
 
 statement_in_loop
-    // ID = lambda_function! TYPE CHECKING!
     : expression SEMICOLON // handles foo(5);
     | assignment SEMICOLON // handles fib5 = fib.match(5);
     | loop_do
@@ -431,7 +414,6 @@ built_in_function
 ARROW: '->';
 DECREMENT:   '--';
 INCREMENT:   '++';
-
 CONCAT: '<<';
 
 // Keywords: Control Structures
@@ -480,12 +462,12 @@ ELSE: 'else';
 ELSEIF: 'elseif';
 
 // Built in Functions
-PUTS: 'puts'; // ISNOT USED
-PUSH: 'push'; // ISNOT USED
-LEN: 'Len'; // ISNOT USED
+PUTS: 'puts';
+PUSH: 'push';
+LEN: 'Len';
 MAIN: 'main';
-CHOP: 'chop'; // ISNOT USED
-CHOMP: 'chomp'; // ISNOT USED
+CHOP: 'chop';
+CHOMP: 'chomp';
 MATCH: 'match';
 
 // Loops
@@ -497,11 +479,8 @@ BREAK_IF: 'break if';
 NEXT: 'next';
 NEXT_IF: 'next if';
 
-// 12)
 // Pattern Matching Structure
 PATTERN: 'pattern';
-//TAB: [\t] -> more, type(HIDDEN);
-//NEWLINE: '\n' | '\r';
 PATTERN_INDENT: ('\r'?'\n')('\t|' | '    |');
 
 // Symbols
@@ -518,12 +497,10 @@ SEMICOLON: ';';
 
 INT_VAL:     ([0] | [1-9][0-9]*);
 STR_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"';
-CHAR_VAL:   '\'' ('\\' ["\\] | ~["\\\r\n]) '\''; //'a' '0'
-// null value?
+//CHAR_VAL:   '\'' ('\\' ["\\] | ~["\\\r\n]) '\''; //'a' '0'
 FLOAT_VAL:   INT_VAL '.' [0-9]+;
 
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 SINGLE_LINE_COMMENT: '#' ~[\r\n]* -> skip;
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
-//WS:         [ \t\r\n]+ -> skip;
 WS:         [ \r\n]+ -> skip;
