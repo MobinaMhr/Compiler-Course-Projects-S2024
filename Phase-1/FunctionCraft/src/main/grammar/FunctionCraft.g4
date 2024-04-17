@@ -252,7 +252,7 @@ literal
     // COMPOUND VALUES
     : list_literal // [1, 3, 5]
     | function_ptr // method(:fooFunction)
-    | { System.out.println("Structure: LAMBDA"); } lambda_function //////////////////// Give Test Case
+    | lambda_function //////////////////// Give Test Case
     // ATOMIC VALUES
     | numeric_literal  // int float
     | string_literal // "hi there"
@@ -260,6 +260,7 @@ literal
     ;
 
 lambda_function:
+    { System.out.println("Structure: LAMBDA"); }
     ARROW
     LPAR function_parameter RPAR
     LBRACE
@@ -337,11 +338,17 @@ factor_suffix
     | DECREMENT { System.out.println("Operator: --"); }
     ;
 
+term_op
+    : MULT
+    | DIV
+    | MOD
+    ;
+
 arithmetic_term
-    : factor MULT { System.out.println("Operator: *"); } arithmetic_term
-    | factor DIV  { System.out.println("Operator: /"); } arithmetic_term
-    | factor MOD  { System.out.println("Operator: %"); } arithmetic_term
-    | factor
+    : factor (
+        op = term_op
+        factor
+        { System.out.println("FuncDec: " + $op.text); } )*
     ;
 
 arithmetic_sum
@@ -362,9 +369,11 @@ relational_op
 
 compare_expr
     : arithmetic_expr
-    (op = relational_op
-    arithmetic_expr
-    { System.out.println("FuncDec: " + $op.text); })*
+        (
+        op = relational_op
+        arithmetic_expr
+        { System.out.println("FuncDec: " + $op.text); }
+        )*
     ;
 
 equality_expr
