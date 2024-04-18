@@ -106,7 +106,7 @@ loop_do
 for_in
     :
     FOR { System.out.println("Loop: FOR"); }
-    ID IN range
+    ID IN for_range
     loop_body
     END
     ;
@@ -176,33 +176,31 @@ conditional_expression_in_loop
 puts
     :
     PUTS { System.out.println("Built-In: PUTS"); }
-    LPAR expression RPAR
+    LPAR args RPAR
     ;
 
 len
     :
     LEN { System.out.println("Built-In: LEN"); }
-    LPAR factor RPAR
+    LPAR args RPAR
     ;
 
 push
     :
     PUSH { System.out.println("Built-In: PUSH"); }
-    LPAR
-    (list_literal | ID | STR_VAL) COMMA expression
-    RPAR
+    LPAR args RPAR
     ;
 
 chop
     :
     CHOP { System.out.println("Built-In: CHOP"); }
-    LPAR factor RPAR
+    LPAR args RPAR
     ;
 
 chomp
     :
     CHOMP { System.out.println("Built-In: CHOMP"); }
-    LPAR factor RPAR
+    LPAR args RPAR
     ;
 
 function_ptr:
@@ -213,19 +211,13 @@ function_ptr:
     RPAR
     ;
 
-range_operator
-    :
-    DOT
-    DOT
-    ;
-
-range:
+for_range:
     LPAR
-    (ID | INT_VAL)
-    range_operator
-    (ID | INT_VAL)
+    expression
+    RANGE_OP
+    expression
     RPAR
-    | factor
+    | expression
     ;
 
 numeric_literal
@@ -464,30 +456,30 @@ DIV:   '/';
 MOD_ASSIGN: '%=';
 MOD:    '%';
 
-IF: 'if';
-ELSE: 'else';
-ELSEIF: 'elseif';
-PUTS: 'puts';
-PUSH: 'push';
-LEN: 'Len';
-MAIN: 'main';
+BREAK_IF: 'break if';
+BREAK: 'break';
 CHOP: 'chop';
 CHOMP: 'chomp';
-MATCH: 'match';
 DEF: 'def';
+ELSEIF: 'elseif';
+ELSE: 'else';
 END: 'end';
+FALSE: 'false';
+FOR: 'for';
+IF: 'if';
+IN: 'in';
+MAIN: 'main';
+MATCH: 'match';
+METHOD: 'method';
+NEXT_IF: 'next if';
+NEXT: 'next';
+PATTERN: 'pattern';
+PUTS: 'puts';
+PUSH: 'push';
 RETURN: 'return';
 TRUE: 'true';
-FALSE: 'false';
-METHOD: 'method';
+LEN: 'Len';
 LOOP_DO: 'loop do';
-FOR: 'for';
-IN: 'in';
-BREAK: 'break';
-BREAK_IF: 'break if';
-NEXT: 'next';
-NEXT_IF: 'next if';
-PATTERN: 'pattern';
 
 PATTERN_INDENT: ('\r'?'\n')('\t|' | '    |');
 
@@ -500,6 +492,7 @@ RBRACKET: ']';
 LPAR: '(';
 RPAR: ')';
 
+RANGE_OP:   DOT DOT;
 DOT:       '.';
 COMMA:     ',';
 COLON:     ':';
