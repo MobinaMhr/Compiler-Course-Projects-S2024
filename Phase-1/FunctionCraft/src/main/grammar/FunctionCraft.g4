@@ -229,7 +229,7 @@ range:
     ;
 
 numeric_literal
-    : num = INT_VAL | FLOAT_VAL
+    : INT_VAL | FLOAT_VAL
     ;
 
 string_literal
@@ -291,7 +291,7 @@ assignment_op
 
 assignment
     :
-    name = ID
+    name = factor
     assignment_op
     expression
     { System.out.println("Assignment: " + $name.text); }
@@ -317,10 +317,10 @@ function_call_suffix
 factor
     : LPAR expression RPAR factor_suffix
     | LPAR expression RPAR
-    | NOT { System.out.println("Operator: !"); } LPAR factor RPAR factor_suffix
-    | NOT { System.out.println("Operator: !"); } LPAR factor RPAR
-    | MINUS { System.out.println("Operator: -"); } factor factor_suffix
-    | MINUS { System.out.println("Operator: -"); } factor
+    | NOT LPAR factor RPAR factor_suffix { System.out.println("Operator: !"); }
+    | NOT LPAR factor RPAR { System.out.println("Operator: !"); }
+    | MINUS factor factor_suffix { System.out.println("Operator: -"); }
+    | MINUS factor { System.out.println("Operator: -"); }
     | function_call factor_suffix
     | function_call
     | ID factor_suffix
@@ -353,7 +353,10 @@ arithmetic_term
 
 arithmetic_sum
     : arithmetic_term
-    ((PLUS arithmetic_term { System.out.println("Operator: +"); }) | (MINUS arithmetic_term { System.out.println("Operator: -"); }))*
+    (
+        (PLUS arithmetic_term { System.out.println("Operator: +"); })
+        | (MINUS arithmetic_term { System.out.println("Operator: -"); })
+    )*
     ;
 
 arithmetic_expr
@@ -377,7 +380,11 @@ compare_expr
     ;
 
 equality_expr
-    : compare_expr ((EQL compare_expr { System.out.println("Operator: =="); }) | (NEQ compare_expr { System.out.println("Operator: !="); }))*
+    : compare_expr
+    (
+        (EQL compare_expr { System.out.println("Operator: =="); })
+        | (NEQ compare_expr { System.out.println("Operator: !="); })
+    )*
     ;
 
 logical_expr
@@ -387,7 +394,8 @@ logical_expr
     ;
 
 append_expr
-    : logical_expr ( CONCAT logical_expr { System.out.println("Operator: <<"); } )*
+    : logical_expr
+    ( CONCAT logical_expr { System.out.println("Operator: <<"); } )*
     ;
 
 expression
@@ -423,16 +431,12 @@ built_in_function
 ARROW: '->';
 DECREMENT:   '--';
 
-
 CONCAT: '<<';
 LEQ: '<=';
 LES: '<';
 
-
 GEQ: '>=';
-
 GTR: '>';
-
 
 MULTI_LINE_COMMENT: '=begin' .*? '=end' -> skip;
 EQL: '==';
@@ -489,16 +493,19 @@ PATTERN_INDENT: ('\r'?'\n')('\t|' | '    |');
 
 LBRACE:    '{';
 RBRACE:    '}';
+
 LBRACKET: '[';
 RBRACKET: ']';
+
 LPAR: '(';
 RPAR: ')';
+
 DOT:       '.';
 COMMA:     ',';
 COLON:     ':';
 SEMICOLON: ';';
 
-FLOAT_VAL:   INT_VAL? '.' [0-9]+;
+FLOAT_VAL: ([0-9]+ DOT [0-9]* | [0-9]* DOT [0-9]+);
 INT_VAL:     ([0] | [1-9][0-9]*);
 STR_VAL:   '"' ('\\' ["\\] | ~["\\\r\n])* '"';
 
