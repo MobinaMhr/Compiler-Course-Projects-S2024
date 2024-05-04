@@ -1,0 +1,7 @@
+Line:33-> Redefinition of function myfunc2
+Line:46-> function myFunc is not declared
+Line:46-> variable c is not declared
+Line:48-> function ali is not declared
+Line:49-> number of arguments provided for function aa does not match with its declaration
+*-> defenition of functions hh, z, y contains circular dependency
+*-> defenition of functions f, g contains circular dependency
