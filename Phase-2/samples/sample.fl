@@ -1,11 +1,10 @@
-def f(b, c)
-    return g(multiply(b, c));
+def a()
+    return b();
 end
 
-def multiply(a, b)
-    return a*b;
+def b()
+    a();
 end
 
 def main()
-    puts("Salam!");
 end

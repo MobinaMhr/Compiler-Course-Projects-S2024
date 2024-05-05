@@ -82,6 +82,7 @@ public class NameAnalyzer extends Visitor<Void> {
             }
         }
 
+
         //visitFunctions
         int visitingFunctionIndex = 0;
         for (FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()) {
@@ -93,6 +94,7 @@ public class NameAnalyzer extends Visitor<Void> {
             SymbolTable.pop();
             visitingFunctionIndex += 1;
         }
+
 
         //visitPatterns
         int visitingPatternIndex = 0;
@@ -184,9 +186,9 @@ public class NameAnalyzer extends Visitor<Void> {
                     nameErrors.add(new ArgMisMatch(accessExpression.getLine(), name));
                 }
 
-                for (var stmt : funcDec.getBody()) {
-                    stmt.accept(this);
-                }
+//                for (var stmt : funcDec.getBody()) {
+//                    stmt.accept(this);
+//                }
 
             } catch (ItemNotFound e) {
                 nameErrors.add(new FunctionNotDeclared(accessExpression.getLine(),
@@ -212,9 +214,9 @@ public class NameAnalyzer extends Visitor<Void> {
                 nameErrors.add(new ArgMisMatch(accessExpression.getLine(), name));
             }
 
-            for (var stmt : lambdaExpression.getBody()) {
-                stmt.accept(this);
-            }
+//            for (var stmt : lambdaExpression.getBody()) {
+//                stmt.accept(this);
+//            }
         }
         else if (!accessExpression.isFunctionCall()) { // list access
             try {
@@ -315,6 +317,7 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(ReturnStatement returnStatement){
         var retExpr = returnStatement.getReturnExp();
+
         if (retExpr != null) {
             retExpr.accept(this);
         }

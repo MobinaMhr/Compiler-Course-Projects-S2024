@@ -1,183 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/libraries/antlr_4_13_1_complete.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraft.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraft.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftBaseListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftBaseVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftLexer.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftLexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftParser.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/gen/main/grammar/FunctionCraftVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraft.g4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraft.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraft.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftBaseListener.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftBaseVisitor.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftLexer.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftLexer.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftListener.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Append_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$ArgsContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Arithmetic_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Arithmetic_termContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$AssignmentContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Assignment_opContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$BodyContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Bool_literalContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Break_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$ChompContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$ChopContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$CommentContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Compare_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Condition_clauseContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Conditional_expressionContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Else_if_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Else_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Equality_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$ExpressionContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$FactorContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$For_inContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$FunctionContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$FunctionCraftContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Function_callContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Function_parameterContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Function_ptrContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$If_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Lambda_functionContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$LenContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$List_literalContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$LiteralContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Logical_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Logical_product_exprContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Loop_bodyContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Loop_doContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$MainContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Next_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Numeric_literalContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Optional_parameterContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Other_expressionContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Pattern_clauseContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Pattern_matchingContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$PushContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$PutsContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$RangeContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Range_operatorContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Relational_opContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Required_parameterContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$Return_statementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$StatementContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser$String_literalContext.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftParser.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/out/production/FunctionCraft/main/grammar/FunctionCraftVisitor.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/samples/out.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/samples/sample.fl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/FunctionCraft.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/Node.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/Program.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/declaration/Declaration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/declaration/FunctionDeclaration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/declaration/MainDeclaration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/declaration/PatternDeclaration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/declaration/VarDeclaration.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/AccessExpression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/AppendExpression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/BinaryExpression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/ChompStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/ChopStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/Expression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/Identifier.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/LambdaExpression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/LenStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/MatchPatternStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/UnaryExpression.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/operators/BinaryOperator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/operators/UnaryOperator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/FunctionPointer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/ListValue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/Value.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/primitive/BoolValue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/primitive/FloatValue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/primitive/IntValue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/expression/value/primitive/StringValue.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/AssignOperator.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/AssignStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/ExpressionStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/ForStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/IfStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/LoopDoStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/PushStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/PutStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/ReturnStatement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/ast/nodes/statement/Statement.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/CompileError.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/ArgMisMatch.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/CircularDependency.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/DuplicateArg.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/FunctionNotDeclared.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/IdenticalArgFunctionName.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/IdenticalArgPatternName.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/PatternNotDeclared.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/RedefinitionOfFunction.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/RedefinitionOfPattern.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/compileError/nameErrors/VariableNotDeclared.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/grammar/FunctionCraft.g4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/SymbolTable.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/exceptions/ItemAlreadyExists.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/exceptions/ItemNotFound.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/item/FunctionItem.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/item/PatternItem.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/item/SymbolTableItem.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/item/VarItem.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/utils/Graph.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/symbolTable/utils/Stack.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/visitor/IVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/visitor/Visitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/visitor/astPrinter/AstPrinter.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/visitor/nameAnalyzer/DependencyDetector.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraft.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraft.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftBaseListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftBaseVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftLexer.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftLexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftParser.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/src/parsers/FunctionCraftVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FunctionCraft/utilities/antlr-4.13.1-complete.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraft.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraft.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftBaseListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftBaseVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftLexer.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftLexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftParser.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fl/FunctionCraftVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraft.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraft.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftBaseListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftBaseVisitor.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftLexer.interp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftLexer.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftParser.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/grammar/FunctionCraftVisitor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/samples/sample.fl" beforeDir="false" afterPath="$PROJECT_DIR$/samples/sample.fl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/DependencyDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/DependencyDetector.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -187,31 +18,38 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="2g2t9Wv5JrAF7iOzSLhUeuOJMsC" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.sample.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/ASUS/Desktop/github-clones/Compiler-Course-Projects-S2024/Phase-2/utilities/antlr-4.13.1-complete.jar",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Libraries",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.sample.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/ASUS/Desktop/github-clones/Compiler-Course-Projects-S2024/Phase-2/utilities/antlr-4.13.1-complete.jar&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="sample" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="main.FunctionCraft" />
@@ -237,7 +75,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1714907349032</updated>
-      <workItem from="1714907350117" duration="168000" />
+      <workItem from="1714907350117" duration="307000" />
+      <workItem from="1714908453303" duration="4848000" />
     </task>
     <servers />
   </component>
