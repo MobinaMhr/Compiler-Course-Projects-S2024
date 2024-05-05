@@ -132,7 +132,7 @@ public class DependencyDetector extends Visitor<Void> {
     }
     @Override
     public Void visit(BinaryExpression binaryExpression) {
-        binaryExpression.getSecondOperand().accept(this);
+        binaryExpression.getFirstOperand().accept(this);
         binaryExpression.getSecondOperand().accept(this);
         return null;
     }
