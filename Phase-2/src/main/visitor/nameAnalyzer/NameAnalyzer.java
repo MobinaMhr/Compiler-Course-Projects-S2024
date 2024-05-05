@@ -113,7 +113,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(FunctionDeclaration functionDeclaration){
+    public Void visit(FunctionDeclaration functionDeclaration) {
         for (VarDeclaration varDec : functionDeclaration.getArgs()) {
             if (varDec.getName().getName().equals(functionDeclaration.getFunctionName().getName())) {
                 nameErrors.add(new IdenticalArgFunctionName(functionDeclaration.getLine(),
@@ -294,7 +294,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(AppendExpression appendExpression){
+    public Void visit(AppendExpression appendExpression) {
         var appendeeExpr = appendExpression.getAppendee();
         appendeeExpr.accept(this);
 
@@ -340,7 +340,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(PutStatement putStatement){
+    public Void visit(PutStatement putStatement) {
         var expr = putStatement.getExpression();
         expr.accept(this);
 
@@ -354,7 +354,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(PushStatement pushStatement){
+    public Void visit(PushStatement pushStatement) {
         var initExpr = pushStatement.getInitial();
         initExpr.accept(this);
 
@@ -380,7 +380,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(ForStatement forStatement){
+    public Void visit(ForStatement forStatement) {
         Identifier id = forStatement.getIteratorId();
         id.accept(this);
 
@@ -404,7 +404,7 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(ChopStatement chopStatement){
+    public Void visit(ChopStatement chopStatement) {
         var expr = chopStatement.getChopExpression();
         expr.accept(this);
 
@@ -427,6 +427,13 @@ public class NameAnalyzer extends Visitor<Void> {
         assignId.accept(this);
 
         var expr = assignStatement.getAssignExpression();
+//        // if instance of identifier
+//        try {
+//            SymbolTable item = SymbolTable.root.getItem(FUNCTION_START_KEY + "");
+//
+//        } catch (ItemNotFound e) {
+//            nameErrors.add(new FunctionNotDeclared());
+//        }
         expr.accept(this);
 
         return null;
