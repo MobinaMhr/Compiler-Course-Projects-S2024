@@ -1,15 +1,15 @@
-def g(x)
-    return x + 1;
-end
+pattern fib(n)
+    | (n == 0) = 1
+    | (n == 1) = 1
+    | (n > 2) = fib.match(n-1) + fib.match(n-1)
+;
 
-def a()
-    var = b() + 5;
-    return var;
-end
-
-def b()
-    return a();
-end
+pattern fib(n)
+    | (n == 0) = 2
+    | (n == 1) = 3
+    | (n > 2) = fib.match(n-1) + fib.match(n-1)
+;
 
 def main()
+    fib_5 = fib.match(5);
 end

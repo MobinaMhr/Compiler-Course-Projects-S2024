@@ -135,6 +135,12 @@ public class NameAnalyzer extends Visitor<Void> {
             nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(),
                     patternDeclaration.getPatternName().getName()));
         }
+        VarItem varItem = new VarItem(targetVarId);
+        try {
+            SymbolTable.top.put(varItem);
+        } catch (ItemAlreadyExists e) {
+//            nameErrors.add(new )
+        }
         targetVarId.accept(this);
 
         for (var condition : patternDeclaration.getConditions()) {
@@ -271,7 +277,6 @@ public class NameAnalyzer extends Visitor<Void> {
 
         try {
             SymbolTable.root.getItem(PATTERN_START_KEY + patternId.getName());
-            patternId.accept(this);
         } catch (ItemNotFound e) {
             nameErrors.add(new PatternNotDeclared(patternId.getLine(),
                     patternId.getName()));

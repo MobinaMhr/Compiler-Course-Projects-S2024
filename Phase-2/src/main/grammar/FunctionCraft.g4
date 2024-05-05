@@ -96,16 +96,12 @@ patternMatching returns [PatternDeclaration patternRet]:
     }
     RPAR
     (
-        PATTERN_MATCHING_SEPARATOR c = condition
-        ASSIGN e = expression
-        {
-            $patternRet.setConditions($condition.conditionRet);
-            $patternRet.addReturnExp($e.expRet);
-        }
+        PATTERN_MATCHING_SEPARATOR c = condition{$patternRet.setConditions($c.conditionRet);}
+        ASSIGN e = expression{$patternRet.addReturnExp($e.expRet);}
     )*
     SEMICOLLON
     {
-//        System.out.printLen("This is patternDecl line number: " + $pat.getLine());
+//        System.out.println("This is patternDecl line number: " + $pat.getLine());
         $patternRet.setLine($pat.getLine());
     }
     ;
