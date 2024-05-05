@@ -100,7 +100,9 @@ public class AstPrinter extends Visitor<Void> {
     @Override
     public Void visit(PutStatement putStatement){
         printMessage(putStatement.getLine(), putStatement.toString());
-        putStatement.getExpression().accept(this);
+        if (putStatement.getExpression() != null) {
+            putStatement.getExpression().accept(this);
+        }
         return null;
     }
     @Override

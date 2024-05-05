@@ -6,7 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/FunctionCraft.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/FunctionCraft.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/grammar/FunctionCraft.g4" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/grammar/FunctionCraft.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/astPrinter/AstPrinter.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/astPrinter/AstPrinter.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraft.interp" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraft.interp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AccessExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AccessExpressionContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AccessListContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AccessListContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AdditiveExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$AdditiveExpressionContext.class" afterDir="false" />
@@ -15,34 +19,27 @@
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$BoolValueContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$BoolValueContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ChompStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ChompStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ChopStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ChopStatementContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ConditionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ConditionContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$EqaulityExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$EqaulityExpressionContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ExpressionContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ForStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ForStatementContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$FunctionArgumentsContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$FunctionArgumentsContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$FunctionPointerContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$FunctionPointerContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$IfStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$IfStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LambdaFunctionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LambdaFunctionContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LenStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LenStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ListValueContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ListValueContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LoopBodyContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LoopBodyContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LoopDoStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$LoopDoStatementContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MainContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MainContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MatchPatternStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MatchPatternStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MultiplicativeExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$MultiplicativeExpressionContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$OtherExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$OtherExpressionContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PreUnaryExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PreUnaryExpressionContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PushStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PushStatementContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PutsStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$PutsStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$RangeContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$RangeContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$RelationalExpressionContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$RelationalExpressionContext.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ReturnStatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ReturnStatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$StatementContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$StatementContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ValuesContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser$ValuesContext.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/parsers/FunctionCraftParser.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/sample.fl" beforeDir="false" afterPath="$PROJECT_DIR$/samples/sample.fl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/FunctionCraft.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/FunctionCraft.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/visitor/astPrinter/AstPrinter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/astPrinter/AstPrinter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/DependencyDetector.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/DependencyDetector.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/parsers/FunctionCraft.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/parsers/FunctionCraft.interp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -112,7 +109,8 @@
       <updated>1714907349032</updated>
       <workItem from="1714907350117" duration="307000" />
       <workItem from="1714908453303" duration="4848000" />
-      <workItem from="1714920276952" duration="4995000" />
+      <workItem from="1714920276952" duration="9879000" />
+      <workItem from="1714932082426" duration="2443000" />
     </task>
     <servers />
   </component>

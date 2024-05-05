@@ -21,7 +21,9 @@ public class DependencyDetector extends Visitor<Void> {
     @Override
     public Void visit(Program program){
         for(FunctionDeclaration functionDeclaration : program.getFunctionDeclarations()){
-            functionDeclaration.accept(this);
+            if (functionDeclaration != null) {
+                functionDeclaration.accept(this);
+            }
         }
 
         return null;
@@ -29,46 +31,64 @@ public class DependencyDetector extends Visitor<Void> {
     @Override
     public Void visit(ForStatement forStatement) {
         for (var expr : forStatement.getRangeExpressions()) {
-            expr.accept(this);
+            if (expr != null) {
+                expr.accept(this);
+            }
         }
 
         for (var expr : forStatement.getLoopBodyExpressions()) {
-            expr.accept(this);
+            if (expr != null) {
+                expr.accept(this);
+            }
         }
 
         for (var stmt_ : forStatement.getLoopBody()) {
-            stmt_.accept(this);
+            if (stmt_ != null){
+                stmt_.accept(this);
+            }
         }
 
         var stmt_ = forStatement.getReturnStatement();
         if (stmt_ != null) {
-            stmt_.accept(this);
+            if (stmt_ != null) {
+                stmt_.accept(this);
+            }
         }
         return null;
     }
     @Override
     public Void visit(IfStatement ifStatement) {
         for (var condition : ifStatement.getConditions()) {
-            condition.accept(this);
+            if (condition != null) {
+                condition.accept(this);
+            }
         }
 
         for (var stmt_ : ifStatement.getThenBody()) {
-            stmt_.accept(this);
+            if (stmt_ != null) {
+                stmt_.accept(this);
+            }
         }
 
         for (var stmt_ : ifStatement.getElseBody()) {
-            stmt_.accept(this);
+            if (stmt_ != null) {
+                stmt_.accept(this);
+            }
         }
         return null;
     }
     @Override
     public Void visit(LoopDoStatement loopDoStatement) {
         for (var condition : loopDoStatement.getLoopConditions()) {
-            condition.accept(this);
+            if (condition != null) {
+                condition.accept(this);
+            }
         }
 
         for (var stmt_ : loopDoStatement.getLoopBodyStmts()) {
-            stmt_.accept(this);
+            if (stmt_ != null) {
+                stmt_.accept(this);
+            }
         }
         var stmt_ = loopDoStatement.getLoopRetStmt();
         if (stmt_ != null) {
@@ -78,22 +98,30 @@ public class DependencyDetector extends Visitor<Void> {
     }
     @Override
     public Void visit(AssignStatement assignStmt) {
-        assignStmt.getAssignExpression().accept(this);
+        if (assignStmt.getAssignExpression() != null) {
+            assignStmt.getAssignExpression().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(ExpressionStatement expressionStatement) {
-        expressionStatement.getExpression().accept(this);
+        if (expressionStatement.getExpression() != null) {
+            expressionStatement.getExpression().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(PushStatement pushStatement) {
-        pushStatement.getToBeAdded().accept(this);
+        if (pushStatement.getToBeAdded() != null) {
+            pushStatement.getToBeAdded().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(PutStatement putStatement) {
-        putStatement.getExpression().accept(this);
+        if (putStatement.getExpression() != null) {
+            putStatement.getExpression().accept(this);
+        }
         return null;
     }
     @Override
@@ -111,50 +139,72 @@ public class DependencyDetector extends Visitor<Void> {
 
 
         for (var arg : accessExpression.getArguments()) {
-            arg.accept(this);
+            if (arg != null) {
+                arg.accept(this);
+            }
         }
 
         for (var dimAccess : accessExpression.getDimentionalAccess()) {
-            dimAccess.accept(this);
+            if (dimAccess != null) {
+                dimAccess.accept(this);
+            }
         }
 
         return null;
     }
     @Override
     public Void visit(UnaryExpression unaryExpression) {
-        unaryExpression.getExpression().accept(this);
+        if (unaryExpression.getExpression() != null) {
+            unaryExpression.getExpression().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(MatchPatternStatement matchPatternStatement) {
-        matchPatternStatement.getMatchArgument().accept(this);
+        if (matchPatternStatement.getMatchArgument() != null) {
+            matchPatternStatement.getMatchArgument().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(BinaryExpression binaryExpression) {
-        binaryExpression.getFirstOperand().accept(this);
-        binaryExpression.getSecondOperand().accept(this);
+        if (binaryExpression.getFirstOperand() != null) {
+            binaryExpression.getFirstOperand().accept(this);
+        }
+        if (binaryExpression.getSecondOperand() != null) {
+            binaryExpression.getSecondOperand().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(LenStatement lenStatement) {
-        lenStatement.getExpression().accept(this);
+        if (lenStatement.getExpression() != null) {
+            lenStatement.getExpression().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(ChopStatement chopStatement) {
-        chopStatement.getChopExpression().accept(this);
+        if (chopStatement.getChopExpression() != null) {
+            chopStatement.getChopExpression().accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(ChompStatement chompStatement) {
-        chompStatement.getChompExpression().accept(this);
+        if (chompStatement.getChompExpression() != null) {
+            if (chompStatement.getChompExpression() != null) {
+                chompStatement.getChompExpression().accept(this);
+            }
+        }
         return null;
     }
     @Override
     public Void visit(AppendExpression appendExpression) {
         for (var appended : appendExpression.getAppendeds()) {
-            appended.accept(this);
+            if (appended != null) {
+                appended.accept(this);
+            }
         }
 //        appendExpression.getAppendee();
         return null;
@@ -170,7 +220,9 @@ public class DependencyDetector extends Visitor<Void> {
     public Void visit(FunctionDeclaration functionDeclaration){
         funcName = functionDeclaration.getFunctionName().getName();
         for (var stmt : functionDeclaration.getBody()) {
-            stmt.accept(this);
+            if (stmt != null) {
+                stmt.accept(this);
+            }
         }
         return null;
     }

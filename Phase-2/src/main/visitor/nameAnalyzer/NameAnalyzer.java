@@ -347,24 +347,42 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(PutStatement putStatement) {
         var expr = putStatement.getExpression();
-        expr.accept(this);
+        if (expr == null) {
+            nameErrors.add(new ArgMisMatch(expr.getLine(), putStatement.toString()));
+        } else {
+            expr.accept(this);
+        }
 
         return null;
     }
     @Override
     public Void visit(LenStatement lenStatement){
         var expr = lenStatement.getExpression();
-        expr.accept(this);
+        if (expr == null) {
+            nameErrors.add(new ArgMisMatch(expr.getLine(), lenStatement.toString()));
+        } else {
+            expr.accept(this);
+        }
 
         return null;
     }
     @Override
     public Void visit(PushStatement pushStatement) {
         var initExpr = pushStatement.getInitial();
-        initExpr.accept(this);
+        if (initExpr == null) {
+            nameErrors.add(new ArgMisMatch(initExpr.getLine(), pushStatement.toString()));
+        } else {
+            initExpr.accept(this);
+        }
+
 
         var toBeAddedExpr = pushStatement.getToBeAdded();
-        toBeAddedExpr.accept(this);
+        if (toBeAddedExpr == null) {
+            nameErrors.add(new ArgMisMatch(toBeAddedExpr.getLine(), pushStatement.toString()));
+        } else {
+            toBeAddedExpr.accept(this);
+        }
+
 
         return null;
     }
@@ -387,7 +405,12 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(ForStatement forStatement) {
         Identifier id = forStatement.getIteratorId();
-        id.accept(this);
+        VarItem varItem = new VarItem(id);
+        try {
+            SymbolTable.top.put(varItem);
+        } catch (ItemAlreadyExists ignored) {
+
+        }
 
         for (var expr : forStatement.getRangeExpressions()) {
             expr.accept(this);
@@ -411,14 +434,22 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(ChopStatement chopStatement) {
         var expr = chopStatement.getChopExpression();
-        expr.accept(this);
+        if (expr == null) {
+            nameErrors.add(new ArgMisMatch(expr.getLine(), chopStatement.toString()));
+        } else {
+            expr.accept(this);
+        }
 
         return null;
     }
     @Override
     public Void visit(ChompStatement chompStatement){
         var expr = chompStatement.getChompExpression();
-        expr.accept(this);
+        if (expr == null) {
+            nameErrors.add(new ArgMisMatch(expr.getLine(), chompStatement.toString()));
+        } else {
+            expr.accept(this);
+        }
 
         return null;
     }

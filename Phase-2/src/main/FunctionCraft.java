@@ -34,10 +34,12 @@ public class FunctionCraft {
         }
         DependencyDetector dependencyDetector = new DependencyDetector();
         dependencyDetector.visit(program);
+
         dependencyDetector.findDependency();
         for(CompileError circularDependency : dependencyDetector.dependencyError){
             System.out.println(circularDependency.getErrorMessage());
         }
+
         if(nameAnalyzer.nameErrors.size() + dependencyDetector.dependencyError.size() == 0){
             AstPrinter astPrinter = new AstPrinter();
             astPrinter.visit(program);

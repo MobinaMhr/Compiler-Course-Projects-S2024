@@ -75,7 +75,7 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
        {
             Identifier id_4 = new Identifier($id4.text);
             id_4.setLine($id4.line);
-            VarDeclaration newVarDec4 = new VarDeclaration(id_);
+            VarDeclaration newVarDec4 = new VarDeclaration(id_4);
             newVarDec4.setLine($id4.line);
        }
        ASSIGN e2 = expression
@@ -251,7 +251,9 @@ loopBody returns [ArrayList<Statement> loopStmts, ArrayList<Expression> loopExps
     )?;
 
 forStatement returns [ForStatement forStRet]:
-    f = FOR id = IDENTIFIER IN r = range
+    f = FOR
+    id = IDENTIFIER IN
+    r = range
     l = loopBody
     END
     {
@@ -262,6 +264,10 @@ forStatement returns [ForStatement forStRet]:
 
 //Doesn't have setLine() method
 range returns [ArrayList<Expression> rangeRet]:
+    {
+            $rangeRet = new ArrayList<Expression>();
+    }
+    (
     (
     LPAR e1 = expression
     DOUBLEDOT e2 = expression
@@ -271,9 +277,12 @@ range returns [ArrayList<Expression> rangeRet]:
         $rangeRet.add($e2.expRet);
     }
     |
-     (LBRACK (e3 = expression
-    (COMMA e4 = expression
-    )*) RBRACK)
+    (LBRACK
+    (
+        e3 = expression
+        (COMMA e4 = expression)
+    *)
+    RBRACK)
     {
         $rangeRet.add($e3.expRet);
         $rangeRet.add($e4.expRet);
@@ -283,6 +292,7 @@ range returns [ArrayList<Expression> rangeRet]:
     {
         $rangeRet.add(new Identifier($id.text));
     }
+    )
     ;
 
 matchPatternStatement returns [MatchPatternStatement matchPatRet]:
@@ -390,8 +400,9 @@ eqaulityExpression returns[Expression expRet]:
         BinaryOperator op;
         int line;
     }
-    (op1 = EQUAL {op = BinaryOperator.EQUAL;line = $op1.line;}
-    | op2 = NOT_EQUAL {op = BinaryOperator.NOT_EQUAL;line = $op2.line;}
+    (
+        op1 = EQUAL {op = BinaryOperator.EQUAL;line = $op1.line;}
+        | op2 = NOT_EQUAL {op = BinaryOperator.NOT_EQUAL;line = $op2.line;}
     ) r1 = relationalExpression {$expRet = new BinaryExpression($e1.expRet, $r1.expRet, op);$expRet.setLine(line);}
     | r2 = relationalExpression {$expRet = $r2.expRet;};
 
@@ -401,11 +412,13 @@ relationalExpression returns [Expression expRet]:
         BinaryOperator op;
         int line;
     }
-    (gt = GREATER_THAN {op = BinaryOperator.GREATER_THAN;line = $gt.line;}
-    | lt = LESS_THAN {op = BinaryOperator.LESS_THAN;line = $lt.line;}
-    | let = LESS_EQUAL_THAN {op = BinaryOperator.LESS_EQUAL_THAN;line = $let.line;}
-    | get = GREATER_EQUAL_THAN {op = BinaryOperator.GREATER_EQUAL_THAN;line = $get.line;}
-    ) a1 = additiveExpression {$expRet = new BinaryExpression($r1.expRet, $a1.expRet, op);$expRet.setLine(line);}
+    (
+        gt = GREATER_THAN {op = BinaryOperator.GREATER_THAN;line = $gt.line;}
+        | lt = LESS_THAN {op = BinaryOperator.LESS_THAN;line = $lt.line;}
+        | let = LESS_EQUAL_THAN {op = BinaryOperator.LESS_EQUAL_THAN;line = $let.line;}
+        | get = GREATER_EQUAL_THAN {op = BinaryOperator.GREATER_EQUAL_THAN;line = $get.line;}
+    )
+    a1 = additiveExpression {$expRet = new BinaryExpression($r1.expRet, $a1.expRet, op);$expRet.setLine(line);}
     | a2 = additiveExpression {$expRet = $a2.expRet;};
 
 additiveExpression returns [Expression expRet]:
