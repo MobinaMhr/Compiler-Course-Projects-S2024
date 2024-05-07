@@ -8,7 +8,15 @@ import java.util.ArrayList;
 public class AppendExpression extends Expression{
     private Expression appendee;
     private ArrayList<Expression> appendeds = new ArrayList<>();
-    public AppendExpression(Expression appendee){this.appendee = appendee;}
+//    public AppendExpression(Expression appendee){this.appendee = appendee;}
+    public AppendExpression(Expression appendee, Expression appended){
+//        if (this.appendee == null) {
+//            this.appendee = appendee;
+//            this.appendeds.add(appended);
+//        }
+        this.appendee = appendee;
+        this.appendeds.add(appended);
+    }
     public void addAppendedExpression(Expression expression){this.appendeds.add(expression);}
     public Expression getAppendee(){return this.appendee;}
     public ArrayList<Expression> getAppendeds(){return this.appendeds;}

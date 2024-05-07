@@ -2505,15 +2505,7 @@ public class FunctionCraftParser extends Parser {
 					setState(439);
 					((ExpressionContext)_localctx).e2 = eqaulityExpression();
 
-					                  if (((ExpressionContext)_localctx).e1.expRet instanceof Identifier){
-					                      ((ExpressionContext)_localctx).expRet =  new AppendExpression(((ExpressionContext)_localctx).e1.expRet);
-					                      _localctx.expRet.setLine(((ExpressionContext)_localctx).a.getLine());
-					                  }
-					                  else if (((ExpressionContext)_localctx).e1.expRet instanceof AppendExpression){
-					                      AppendExpression expr = (AppendExpression) ((ExpressionContext)_localctx).e1.expRet;
-					                      expr.addAppendedExpression(((ExpressionContext)_localctx).e2.expRet);
-					                      ((ExpressionContext)_localctx).expRet =  expr;
-					                  }
+					                  ((ExpressionContext)_localctx).expRet =  new AppendExpression(((ExpressionContext)_localctx).e1.expRet, ((ExpressionContext)_localctx).e2.expRet);
 					              
 					}
 					} 

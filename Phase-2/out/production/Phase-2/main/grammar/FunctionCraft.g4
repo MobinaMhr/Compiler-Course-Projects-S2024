@@ -277,7 +277,6 @@ forStatement returns [ForStatement forStRet]:
     }
     ;
 
-//Doesn't have setLine() method
 range returns [ArrayList<Expression> rangeRet]:
     {
             $rangeRet = new ArrayList<Expression>();
@@ -396,15 +395,7 @@ body returns [ArrayList<Statement> bodyRet]:
 expression returns [Expression expRet]:
     e1 = expression a = APPEND e2 = eqaulityExpression
     {
-        if ($e1.expRet instanceof Identifier){
-            $expRet = new AppendExpression($e1.expRet);
-            $expRet.setLine($a.getLine());
-        }
-        else if ($e1.expRet instanceof AppendExpression){
-            AppendExpression expr = (AppendExpression) $e1.expRet;
-            expr.addAppendedExpression($e2.expRet);
-            $expRet = expr;
-        }
+        $expRet = new AppendExpression($e1.expRet, $e2.expRet);
     }
     //DONTODO:construct append expression node.the left most expression is appendee and others are appended.
     | e3 = eqaulityExpression
