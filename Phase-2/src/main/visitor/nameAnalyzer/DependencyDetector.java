@@ -3,7 +3,9 @@ package main.visitor.nameAnalyzer;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.PatternDeclaration;
+import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
+import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.statement.*;
 import main.compileError.CompileError;
 import main.compileError.nameErrors.CircularDependency;
@@ -13,6 +15,7 @@ import main.symbolTable.utils.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DependencyDetector extends Visitor<Void> {
     private String funcName;
@@ -50,9 +53,7 @@ public class DependencyDetector extends Visitor<Void> {
 
         var stmt_ = forStatement.getReturnStatement();
         if (stmt_ != null) {
-            if (stmt_ != null) {
-                stmt_.accept(this);
-            }
+            stmt_.accept(this);
         }
         return null;
     }
@@ -97,9 +98,13 @@ public class DependencyDetector extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(AssignStatement assignStmt) {
-        if (assignStmt.getAssignExpression() != null) {
-            assignStmt.getAssignExpression().accept(this);
+    public Void visit(AssignStatement assignStatement) {
+        if(assignStatement.isAccessList()) {
+            assignStatement.getAccessListExpression().accept(this);
+        }
+
+        if (assignStatement.getAssignExpression() != null) {
+            assignStatement.getAssignExpression().accept(this);
         }
         return null;
     }
@@ -134,9 +139,11 @@ public class DependencyDetector extends Visitor<Void> {
     }
     @Override
     public Void visit(AccessExpression accessExpression) {
-        Identifier id = (Identifier) accessExpression.getAccessedExpression();
-        dependencyGraph.addEdge(funcName, id.getName());
-
+        if (accessExpression.isFunctionCall() &&
+                accessExpression.getAccessedExpression() instanceof Identifier functionNameId &&
+                !Objects.equals(funcName, functionNameId.getName())) {
+            dependencyGraph.addEdge(funcName, functionNameId.getName());
+        }
 
         for (var arg : accessExpression.getArguments()) {
             if (arg != null) {
@@ -193,9 +200,7 @@ public class DependencyDetector extends Visitor<Void> {
     @Override
     public Void visit(ChompStatement chompStatement) {
         if (chompStatement.getChompExpression() != null) {
-            if (chompStatement.getChompExpression() != null) {
-                chompStatement.getChompExpression().accept(this);
-            }
+            chompStatement.getChompExpression().accept(this);
         }
         return null;
     }
@@ -206,14 +211,25 @@ public class DependencyDetector extends Visitor<Void> {
                 appended.accept(this);
             }
         }
-//        appendExpression.getAppendee();
+        var appendExpr = appendExpression.getAppendee();
+        if (appendExpr != null) {
+            appendExpr.accept(this);
+        }
+
         return null;
     }
     @Override
-    public Void visit(PatternDeclaration patternDeclaration) {
-//        patternDeclaration.getTargetVariable();
-//        patternDeclaration.getReturnExp();
-//        patternDeclaration.getConditions();
+    public Void visit(LambdaExpression lambdaExpression) {
+        for (var stmt : lambdaExpression.getBody()) {
+            stmt.accept(this);
+        }
+        return null;
+    }
+    @Override
+    public Void visit(ListValue listValue) {
+        for (var element : listValue.getElements()) {
+            element.accept(this);
+        }
         return null;
     }
     @Override
@@ -234,12 +250,4 @@ public class DependencyDetector extends Visitor<Void> {
         return null;
     }
 }
-
-
-
-//public Void visit(Identifier identifier)
-//
-//public Void visit(VarDeclaration varDeclaration)
-//
-//public Void visit(LambdaExpression lambdaExpression)
 

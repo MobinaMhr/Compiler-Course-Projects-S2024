@@ -37,4 +37,13 @@ public class SymbolTable {
         }
         throw new ItemNotFound();
     }
+    public SymbolTable createSnapshot() {
+        SymbolTable snapshot = new SymbolTable();
+        for(var item : SymbolTable.top.items.entrySet()){
+            try {
+                snapshot.put(item.getValue());
+            } catch (ItemAlreadyExists ignored){}
+        }
+        return snapshot;
+    }
 }

@@ -6,6 +6,8 @@ import main.ast.nodes.declaration.MainDeclaration;
 import main.ast.nodes.declaration.PatternDeclaration;
 import main.ast.nodes.declaration.VarDeclaration;
 import main.ast.nodes.expression.*;
+import main.ast.nodes.expression.value.FunctionPointer;
+import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.statement.*;
 import main.compileError.CompileError;
 import main.compileError.nameErrors.*;
@@ -27,6 +29,19 @@ public class NameAnalyzer extends Visitor<Void> {
     private final String VAR_START_KEY = "VAR:";
 
     public ArrayList<CompileError> nameErrors = new ArrayList<>();
+    private boolean checkArgMatch(ArrayList<VarDeclaration> args, int funcArgCount) {
+        int requiredArgCount = 0;
+        int argCount = 0;
+        for (VarDeclaration varDec : args) {
+            if (varDec.getDefaultVal() == null) {
+                requiredArgCount += 1;
+                argCount += 1;
+            } else if (varDec.getDefaultVal() != null) {
+                argCount += 1;
+            }
+        }
+        return funcArgCount >= requiredArgCount && funcArgCount <= argCount;
+    }
     @Override
     public Void visit(Program program) {
         SymbolTable.root = new SymbolTable();
@@ -129,7 +144,6 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(PatternDeclaration patternDeclaration){
-
         Identifier targetVarId = patternDeclaration.getTargetVariable();
         if (targetVarId.getName().equals(patternDeclaration.getPatternName().getName())) {
             nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(),
@@ -138,9 +152,7 @@ public class NameAnalyzer extends Visitor<Void> {
         VarItem varItem = new VarItem(targetVarId);
         try {
             SymbolTable.top.put(varItem);
-        } catch (ItemAlreadyExists e) {
-//            nameErrors.add(new )
-        }
+        } catch (ItemAlreadyExists ignored) { }
         targetVarId.accept(this);
 
         for (var condition : patternDeclaration.getConditions()) {
@@ -166,8 +178,6 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(AccessExpression accessExpression){
-        Identifier id = (Identifier) accessExpression.getAccessedExpression();
-        String name = id.getName();
         if (accessExpression.isFunctionCall() &&
                 accessExpression.getAccessedExpression() instanceof Identifier functionNameId) {
             try {
@@ -177,59 +187,43 @@ public class NameAnalyzer extends Visitor<Void> {
 
                 FunctionDeclaration funcDec = functionItem.getFunctionDeclaration();
 
-                int requiredArgCount = 0;
-                int argCount = 0;
-                for (VarDeclaration varDec : funcDec.getArgs()) {
-                    if (varDec.getDefaultVal() == null) {
-                        requiredArgCount += 1;
-                        argCount += 1;
-                    } else if (varDec.getDefaultVal() != null) {
-                        argCount += 1;
-                    }
+                if (!checkArgMatch(funcDec.getArgs(), accessExpression.getArguments().size())) {
+                    nameErrors.add(new ArgMisMatch(accessExpression.getLine(),
+                            functionNameId.getName()));
                 }
-                int funcArgCount = accessExpression.getArguments().size();
-                if (funcArgCount < requiredArgCount || funcArgCount > argCount) {
-                    nameErrors.add(new ArgMisMatch(accessExpression.getLine(), name));
-                }
-
-//                for (var stmt : funcDec.getBody()) {
-//                    stmt.accept(this);
-//                }
-
             } catch (ItemNotFound e) {
                 nameErrors.add(new FunctionNotDeclared(accessExpression.getLine(),
                         functionNameId.getName()));
             }
-            // Call the function
         }
         else if (accessExpression.isFunctionCall() &&
                 accessExpression.getAccessedExpression() instanceof LambdaExpression lambdaExpression) {
-
-            int requiredArgCount = 0;
-            int argCount = 0;
-            for (VarDeclaration varDec : lambdaExpression.getDeclarationArgs()) {
-                if (varDec.getDefaultVal() == null) {
-                    requiredArgCount += 1;
-                    argCount += 1;
-                } else if (varDec.getDefaultVal() != null) {
-                    argCount += 1;
+            if (!checkArgMatch(lambdaExpression.getDeclarationArgs(), accessExpression.getArguments().size())) {
+                nameErrors.add(new ArgMisMatch(accessExpression.getLine(),
+                        lambdaExpression.toString()));
+            }
+            SymbolTable lambdaFunctionSymbolTable = SymbolTable.top.createSnapshot();
+            SymbolTable.push(lambdaFunctionSymbolTable);
+            // -> (a, c, d, [b = 5]) { return a + b + d + c + r; }(3, 4, 2);
+            for (var arg : lambdaExpression.getDeclarationArgs()) {
+                if (arg == null) {
+                    continue;
+                }
+                var varItem = new VarItem(arg.getName());
+                try {
+                    SymbolTable.top.put(varItem);
+                } catch (ItemAlreadyExists ignored) { }
+            }
+            for (var stmt : lambdaExpression.getBody()) {
+                if (stmt != null) {
+                    stmt.accept(this);
                 }
             }
-            int funcArgCount = accessExpression.getArguments().size();
-            if (funcArgCount < requiredArgCount || funcArgCount > argCount) {
-                nameErrors.add(new ArgMisMatch(accessExpression.getLine(), name));
-            }
-
-//            for (var stmt : lambdaExpression.getBody()) {
-//                stmt.accept(this);
-//            }
+            SymbolTable.pop();
         }
-        else if (!accessExpression.isFunctionCall()) { // list access
-            try {
-                SymbolTable.top.getItem(VAR_START_KEY + name);
-            } catch (ItemNotFound e) {
-                nameErrors.add(new VariableNotDeclared(accessExpression.getLine(), name));
-            }
+        else if (!accessExpression.isFunctionCall() &&
+                accessExpression.getAccessedExpression() instanceof Identifier list) {
+            list.accept(this);
         }
 
         for (var expr : accessExpression.getArguments()) {
@@ -241,9 +235,18 @@ public class NameAnalyzer extends Visitor<Void> {
 
         return null;
     }
-    ////////////////////////////////////////////////////////////////
+    @Override
+    public Void visit(ListValue listValue) {
+        for (var element : listValue.getElements()) {
+            if (element != null) {
+                element.accept(this);
+            }
+        }
+        return null;
+    }
     @Override
     public Void visit(Identifier identifier) {
+//        System.out.println(identifier + "///" + identifier.getLine());
         try {
             SymbolTable.top.getItem(VAR_START_KEY + identifier.getName());
         } catch (ItemNotFound e) {
@@ -262,13 +265,17 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(UnaryExpression unaryExpression) {
         var expr = unaryExpression.getExpression();
-        expr.accept(this);
+        if (expr != null) {
+            expr.accept(this);
+        }
         return null;
     }
     @Override
     public Void visit(ExpressionStatement expressionStatement){
         var expr = expressionStatement.getExpression();
-        expr.accept(this);
+        if (expr != null) {
+            expr.accept(this);
+        }
         return null;
     }
     @Override
@@ -287,15 +294,17 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
     @Override
-    public Void visit(LambdaExpression lambdaExpression){
+    public Void visit(LambdaExpression lambdaExpression) {
+        //-> (k, l) { return a + b; };
+        SymbolTable lambdaSymbolTable = SymbolTable.top.createSnapshot();
+        SymbolTable.push(lambdaSymbolTable);
         for (VarDeclaration varDec : lambdaExpression.getDeclarationArgs()) {
             varDec.accept(this);
         }
-
         for (var stmt : lambdaExpression.getBody()) {
             stmt.accept(this);
         }
-
+        SymbolTable.pop();
         return null;
     }
     @Override
@@ -312,10 +321,14 @@ public class NameAnalyzer extends Visitor<Void> {
     @Override
     public Void visit(BinaryExpression binaryExpression){
         var operand1 = binaryExpression.getFirstOperand();
-        operand1.accept(this);
+        if (operand1 != null) {
+            operand1.accept(this);
+        }
 
         var operand2 = binaryExpression.getSecondOperand();
-        operand2.accept(this);
+        if (operand2 != null) {
+            operand2.accept(this);
+        }
 
         return null;
     }
@@ -334,13 +347,19 @@ public class NameAnalyzer extends Visitor<Void> {
             expr.accept(this);
         }
 
+        SymbolTable thenStmtSymbolTable = SymbolTable.top.createSnapshot();
+        SymbolTable.push(thenStmtSymbolTable);
         for (var stmt : ifStatement.getThenBody()) {
             stmt.accept(this);
         }
+        SymbolTable.pop();
 
+        SymbolTable elseStmtSymbolTable = SymbolTable.top.createSnapshot();
+        SymbolTable.push(elseStmtSymbolTable);
         for (var stmt : ifStatement.getElseBody()) {
             stmt.accept(this);
         }
+        SymbolTable.pop();
 
         return null;
     }
@@ -348,7 +367,8 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(PutStatement putStatement) {
         var expr = putStatement.getExpression();
         if (expr == null) {
-            nameErrors.add(new ArgMisMatch(expr.getLine(), putStatement.toString()));
+            nameErrors.add(new ArgMisMatch(putStatement.getLine(),
+                    putStatement.toString()));
         } else {
             expr.accept(this);
         }
@@ -359,7 +379,8 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(LenStatement lenStatement){
         var expr = lenStatement.getExpression();
         if (expr == null) {
-            nameErrors.add(new ArgMisMatch(expr.getLine(), lenStatement.toString()));
+            nameErrors.add(new ArgMisMatch(lenStatement.getLine(),
+                    lenStatement.toString()));
         } else {
             expr.accept(this);
         }
@@ -370,7 +391,7 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(PushStatement pushStatement) {
         var initExpr = pushStatement.getInitial();
         if (initExpr == null) {
-            nameErrors.add(new ArgMisMatch(initExpr.getLine(), pushStatement.toString()));
+            nameErrors.add(new ArgMisMatch(pushStatement.getLine(), pushStatement.toString()));
         } else {
             initExpr.accept(this);
         }
@@ -378,7 +399,7 @@ public class NameAnalyzer extends Visitor<Void> {
 
         var toBeAddedExpr = pushStatement.getToBeAdded();
         if (toBeAddedExpr == null) {
-            nameErrors.add(new ArgMisMatch(toBeAddedExpr.getLine(), pushStatement.toString()));
+            nameErrors.add(new ArgMisMatch(pushStatement.getLine(), pushStatement.toString()));
         } else {
             toBeAddedExpr.accept(this);
         }
@@ -388,6 +409,9 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(LoopDoStatement loopDoStatement){
+        SymbolTable loopDoSymbolTable = SymbolTable.top.createSnapshot();
+        SymbolTable.push(loopDoSymbolTable);
+
         for (var expr : loopDoStatement.getLoopConditions()) {
             expr.accept(this);
         }
@@ -400,21 +424,23 @@ public class NameAnalyzer extends Visitor<Void> {
         if (retStmt != null) {
             retStmt.accept(this);
         }
+
+        SymbolTable.pop();
         return null;
     }
     @Override
     public Void visit(ForStatement forStatement) {
-        Identifier id = forStatement.getIteratorId();
-        VarItem varItem = new VarItem(id);
-        try {
-            SymbolTable.top.put(varItem);
-        } catch (ItemAlreadyExists ignored) {
-
-        }
-
         for (var expr : forStatement.getRangeExpressions()) {
             expr.accept(this);
         }
+
+        SymbolTable forStmtSymbolTable = SymbolTable.top.createSnapshot();
+        SymbolTable.push(forStmtSymbolTable);
+
+        VarItem varItem = new VarItem(forStatement.getIteratorId());
+        try {
+            SymbolTable.top.put(varItem);
+        } catch (ItemAlreadyExists ignored) { }
 
         for (var expr : forStatement.getLoopBodyExpressions()) {
             expr.accept(this);
@@ -429,13 +455,15 @@ public class NameAnalyzer extends Visitor<Void> {
             retStmt.accept(this);
         }
 
+        SymbolTable.pop();
         return null;
     }
     @Override
     public Void visit(ChopStatement chopStatement) {
         var expr = chopStatement.getChopExpression();
         if (expr == null) {
-            nameErrors.add(new ArgMisMatch(expr.getLine(), chopStatement.toString()));
+            nameErrors.add(new ArgMisMatch(chopStatement.getLine(),
+                    chopStatement.toString()));
         } else {
             expr.accept(this);
         }
@@ -446,11 +474,22 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(ChompStatement chompStatement){
         var expr = chompStatement.getChompExpression();
         if (expr == null) {
-            nameErrors.add(new ArgMisMatch(expr.getLine(), chompStatement.toString()));
+            nameErrors.add(new ArgMisMatch(chompStatement.getLine(),
+                    chompStatement.toString()));
         } else {
             expr.accept(this);
         }
 
+        return null;
+    }
+    @Override
+    public Void visit(FunctionPointer functionPointer) {
+        try {
+            SymbolTable.root.getItem(FUNCTION_START_KEY + functionPointer.getId().getName());
+        } catch (ItemNotFound e) {
+            nameErrors.add(new FunctionNotDeclared(functionPointer.getLine(),
+                    functionPointer.getId().getName()));
+        }
         return null;
     }
     @Override
@@ -459,66 +498,44 @@ public class NameAnalyzer extends Visitor<Void> {
         VarItem varItem = new VarItem(assignId);
         try {
             SymbolTable.top.put(varItem);
-        } catch (ItemAlreadyExists ignored) {} // Do nothing
+        } catch (ItemAlreadyExists ignored) {}
         assignId.accept(this);
 
-        var expr = assignStatement.getAssignExpression();
-//        // if instance of identifier
-//        try {
-//            SymbolTable item = SymbolTable.root.getItem(FUNCTION_START_KEY + "");
-//
-//        } catch (ItemNotFound e) {
-//            nameErrors.add(new FunctionNotDeclared());
-//        }
-        expr.accept(this);
-
+        if (assignStatement.isAccessList() &&
+                assignStatement.getAccessListExpression() != null) {
+            assignStatement.getAccessListExpression().accept(this);
+        }
+        if (assignStatement.getAssignExpression() != null) {
+            assignStatement.getAssignExpression().accept(this);
+        }
         return null;
     }
 }
-//private boolean accessList;
-//private Identifier assignedId;
-//private Expression assignExpression;
-//private Expression accessListExpression;
-////assignment can be done on an element of a list.the expression inside [] is the above attribute
-////this case is determined by the attribute accessList
-//private AssignOperator assignOperator;
-///.....
-//public boolean isAccessList() {//    return accessList;
-//public Expression getAccessListExpression() {//    return accessListExpression;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//public Void visit(ListValue listValue){return null;}
-//public Void visit(BoolValue boolValue){return null;}
-//public Void visit(IntValue intValue){return null;}
-//public Void visit(StringValue stringValue){return null;}
-//public Void visit(FloatValue floatValue){return null;}
-
-
-
-
-//public Void visit(FunctionPointer functionPointer){
+// in ane khodame
+//            try {
+//SymbolTableItem item = SymbolTable.root.getItem(FUNCTION_START_KEY + funcName);
+//                if (item instanceof FunctionItem functionItem) {
+//FunctionDeclaration funcDec = functionItem.getFunctionDeclaration();
+//
+//FunctionDeclaration newFuncDec = new FunctionDeclaration();
+//                    newFuncDec.setFunctionName(assignId);
+//                    newFuncDec.setArgs(funcDec.getArgs());
+//        newFuncDec.setBody(funcDec.getBody());
+//
+//        try {
+//        SymbolTable.top.put(new FunctionItem(newFuncDec));
+//        try {
+//        SymbolTable.top.getItem(FUNCTION_START_KEY + newFuncDec.getFunctionName());
+//        } catch (ItemNotFound e) {}
+//                                } catch (ItemAlreadyExists e) {
+//        System.out.println("as expected.");
+//                        nameErrors.add(new RedefinitionOfFunction(expr.getLine(),
+//                                assignId.getName()));
+//        }
+//        }
+//        } catch (ItemNotFound e) {
+//        nameErrors.add(new FunctionNotDeclared(expr.getLine(),
+//funcName));
+//        }

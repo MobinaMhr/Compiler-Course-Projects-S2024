@@ -1,18 +1,47 @@
-def g()
-    return foo();
+def re(e)
+    return;
 end
 
-def foo()
-    foo();
+pattern fib(e)
+    | (a == 0) = 0
+    | (a > 1) = a(n-1) + a(n-2)
+;
+
+pattern help(x)
+    | (x == 0) = 0
+    | (x > 1) = 1
+;
+
+pattern fib(n)
+    | (p == 0) = 0
+    | (n > 1) = no.match(n-1) + help.match(n-2)
+;
+
+def h()
+    a = 1;
+    b = 2;
+    return myfunc2(a, b);
+end
+
+
+def myfunc2(a, b, [c=1])
+    return;
+end
+
+def myfunc2()
+    return;
+end
+
+
+def aa(a, b, c)
+    return a+b+c;
 end
 
 def main()
-    g();
-#    list = [1, 2, 3, 4, 5, 5, 6 , 9];
-#    for num in list
-#        next if (num / 2 == 1);
-#        puts(num);
-#    end
-
-#    a  = num;
+    a = 5;
+    b = 6;
+    puts("salam");
+    myfunc2(a, b);
+    myfunc2();
+    aa(a, b, 2);
 end
