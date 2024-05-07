@@ -514,31 +514,3 @@ public class NameAnalyzer extends Visitor<Void> {
         return null;
     }
 }
-
-
-// in ane khodame
-//            try {
-//SymbolTableItem item = SymbolTable.root.getItem(FUNCTION_START_KEY + funcName);
-//                if (item instanceof FunctionItem functionItem) {
-//FunctionDeclaration funcDec = functionItem.getFunctionDeclaration();
-//
-//FunctionDeclaration newFuncDec = new FunctionDeclaration();
-//                    newFuncDec.setFunctionName(assignId);
-//                    newFuncDec.setArgs(funcDec.getArgs());
-//        newFuncDec.setBody(funcDec.getBody());
-//
-//        try {
-//        SymbolTable.top.put(new FunctionItem(newFuncDec));
-//        try {
-//        SymbolTable.top.getItem(FUNCTION_START_KEY + newFuncDec.getFunctionName());
-//        } catch (ItemNotFound e) {}
-//                                } catch (ItemAlreadyExists e) {
-//        System.out.println("as expected.");
-//                        nameErrors.add(new RedefinitionOfFunction(expr.getLine(),
-//                                assignId.getName()));
-//        }
-//        }
-//        } catch (ItemNotFound e) {
-//        nameErrors.add(new FunctionNotDeclared(expr.getLine(),
-//funcName));
-//        }

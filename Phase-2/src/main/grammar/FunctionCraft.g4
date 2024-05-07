@@ -90,27 +90,33 @@ functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
     )? RPAR;
 
 patternMatching returns [PatternDeclaration patternRet]:
-    pat = PATTERN
-    patternName = IDENTIFIER
-    LPAR targetVar = IDENTIFIER
+  pat = PATTERN
+  patternName = IDENTIFIER
+  LPAR
+  targetVar = IDENTIFIER
+  {
+    Identifier patternName_ = new Identifier($patternName.text);
+    patternName_.setLine($patternName.line);
+    Identifier targetVar_ = new Identifier($targetVar.text);
+    targetVar_.setLine($targetVar.line);
+    $patternRet = new PatternDeclaration(patternName_, targetVar_);
+    $patternRet.setLine($pat.line);
+  }
+  RPAR
+  (
+    PATTERN_MATCHING_SEPARATOR
+    c = condition
     {
-        Identifier patternName_ = new Identifier($patternName.text);
-        patternName_.setLine($patternName.line);
-
-        Identifier targetVar_ = new Identifier($targetVar.text);
-        targetVar_.setLine($targetVar.line);
-        $patternRet = new PatternDeclaration(patternName_, targetVar_);
+      $patternRet.addConditions($c.conditionRet);
     }
-    RPAR
-    (
-        PATTERN_MATCHING_SEPARATOR c = condition{$patternRet.setConditions($c.conditionRet);}
-        ASSIGN e = expression{$patternRet.addReturnExp($e.expRet);}
-    )*
-    SEMICOLLON
+     ASSIGN
+    e = expression
     {
-        $patternRet.setLine($pat.getLine());
+      $patternRet.addReturnExp($e.expRet);
     }
-    ;
+  )*
+  SEMICOLLON
+  ;
 
 main returns [MainDeclaration mainRet]:
     {
@@ -205,7 +211,8 @@ condition returns [ArrayList<Expression> conditionRet]:
      {
         $conditionRet.addAll($c.conditionRet);
      }
-     (RPAR)?)*)*;
+     (RPAR)?)*)*
+     ;
 
 putsStatement returns [PutStatement putRet]:
     p = PUTS LPAR e = expression
@@ -270,7 +277,6 @@ forStatement returns [ForStatement forStRet]:
     }
     ;
 
-//Doesn't have setLine() method
 range returns [ArrayList<Expression> rangeRet]:
     {
             $rangeRet = new ArrayList<Expression>();

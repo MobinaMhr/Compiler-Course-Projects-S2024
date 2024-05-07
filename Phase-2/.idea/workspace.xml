@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/samples/sample.fl" beforeDir="false" afterPath="$PROJECT_DIR$/samples/sample.fl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/ast/nodes/declaration/PatternDeclaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/ast/nodes/declaration/PatternDeclaration.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/parsers/FunctionCraft.interp" beforeDir="false" afterPath="$PROJECT_DIR$/src/parsers/FunctionCraft.interp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -81,7 +82,7 @@
       <workItem from="1714908453303" duration="4848000" />
       <workItem from="1714920276952" duration="9879000" />
       <workItem from="1714932082426" duration="2657000" />
-      <workItem from="1715091930681" duration="28866000" />
+      <workItem from="1715091930681" duration="31321000" />
     </task>
     <servers />
   </component>

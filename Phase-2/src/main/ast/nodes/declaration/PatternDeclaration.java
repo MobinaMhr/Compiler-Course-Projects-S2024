@@ -26,6 +26,9 @@ public class PatternDeclaration extends Declaration{
     public ArrayList<Expression> getConditions(){return this.conditions;}
     public void setConditions(ArrayList<Expression> conditions){this.conditions = conditions;}
     public void addCondition(Expression condition){this.conditions.add(condition);}
+    public void addConditions(ArrayList<Expression> conditions){
+        this.conditions.addAll(conditions);
+    }
 
     public ArrayList<Expression> getReturnExp(){return this.returnExp;}
     public void setReturnExp(ArrayList<Expression> returnExp){this.returnExp = returnExp;}

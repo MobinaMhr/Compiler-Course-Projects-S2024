@@ -1,21 +1,3 @@
-def re(re)
-    return;
-end
-
-pattern fib(fib)
-    | (a == 0) = 0
-    | (a > 1) = a(n-1) + a(n-2)
-;
-
-pattern help(x)
-    | (x == 0) = 0
-    | (x > 1) = 1
-;
-
-pattern fib(n)
-    | (n == 0) = 0
-    | (n > 1) = no.match(n-1) + help.match(n-2)
-;
 
 def y()
     return z();
