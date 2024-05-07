@@ -29,7 +29,9 @@ functionDeclaration returns [FunctionDeclaration functionDeclarationRet]:
     END
     {
         $functionDeclarationRet = new FunctionDeclaration();
-        $functionDeclarationRet.setFunctionName(new Identifier($id.text));
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $functionDeclarationRet.setFunctionName(id_);
         $functionDeclarationRet.setArgs($f.argRet);
         $functionDeclarationRet.setBody($b.bodyRet);
         $functionDeclarationRet.setLine($def.getLine());
@@ -92,7 +94,12 @@ patternMatching returns [PatternDeclaration patternRet]:
     patternName = IDENTIFIER
     LPAR targetVar = IDENTIFIER
     {
-        $patternRet = new PatternDeclaration(new Identifier($patternName.text), new Identifier($targetVar.text));
+        Identifier patternName_ = new Identifier($patternName.text);
+        patternName_.setLine($patternName.line);
+
+        Identifier targetVar_ = new Identifier($targetVar.text);
+        targetVar_.setLine($targetVar.line);
+        $patternRet = new PatternDeclaration(patternName_, targetVar_);
     }
     RPAR
     (
@@ -101,7 +108,6 @@ patternMatching returns [PatternDeclaration patternRet]:
     )*
     SEMICOLLON
     {
-//        System.out.println("This is patternDecl line number: " + $pat.getLine());
         $patternRet.setLine($pat.getLine());
     }
     ;
@@ -257,7 +263,9 @@ forStatement returns [ForStatement forStRet]:
     l = loopBody
     END
     {
-        $forStRet = new ForStatement(new Identifier($id.text), $r.rangeRet, $l.loopExps, $l.loopStmts, $l.loopRetStmt);
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $forStRet = new ForStatement(id_, $r.rangeRet, $l.loopExps, $l.loopStmts, $l.loopRetStmt);
         $forStRet.setLine($f.getLine());
     }
     ;
@@ -290,7 +298,9 @@ range returns [ArrayList<Expression> rangeRet]:
     |
      id = IDENTIFIER
     {
-        $rangeRet.add(new Identifier($id.text));
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $rangeRet.add(id_);
     }
     )
     ;
@@ -298,7 +308,9 @@ range returns [ArrayList<Expression> rangeRet]:
 matchPatternStatement returns [MatchPatternStatement matchPatRet]:
     id = IDENTIFIER DOT m = MATCH LPAR e = expression RPAR
     {
-        $matchPatRet = new MatchPatternStatement(new Identifier($id.text), $e.expRet);
+        Identifier id_ = new Identifier($id.text);
+        id_.setLine($id.line);
+        $matchPatRet = new MatchPatternStatement(id_, $e.expRet);
         $matchPatRet.setLine($id.getLine());
     }
     ;

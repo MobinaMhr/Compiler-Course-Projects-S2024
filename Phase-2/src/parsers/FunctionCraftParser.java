@@ -291,7 +291,9 @@ public class FunctionCraftParser extends Parser {
 			match(END);
 
 			        ((FunctionDeclarationContext)_localctx).functionDeclarationRet =  new FunctionDeclaration();
-			        _localctx.functionDeclarationRet.setFunctionName(new Identifier((((FunctionDeclarationContext)_localctx).id!=null?((FunctionDeclarationContext)_localctx).id.getText():null)));
+			        Identifier id_ = new Identifier((((FunctionDeclarationContext)_localctx).id!=null?((FunctionDeclarationContext)_localctx).id.getText():null));
+			        id_.setLine((((FunctionDeclarationContext)_localctx).id!=null?((FunctionDeclarationContext)_localctx).id.getLine():0));
+			        _localctx.functionDeclarationRet.setFunctionName(id_);
 			        _localctx.functionDeclarationRet.setArgs(((FunctionDeclarationContext)_localctx).f.argRet);
 			        _localctx.functionDeclarationRet.setBody(((FunctionDeclarationContext)_localctx).b.bodyRet);
 			        _localctx.functionDeclarationRet.setLine(((FunctionDeclarationContext)_localctx).def.getLine());
@@ -560,7 +562,12 @@ public class FunctionCraftParser extends Parser {
 			setState(136);
 			((PatternMatchingContext)_localctx).targetVar = match(IDENTIFIER);
 
-			        ((PatternMatchingContext)_localctx).patternRet =  new PatternDeclaration(new Identifier((((PatternMatchingContext)_localctx).patternName!=null?((PatternMatchingContext)_localctx).patternName.getText():null)), new Identifier((((PatternMatchingContext)_localctx).targetVar!=null?((PatternMatchingContext)_localctx).targetVar.getText():null)));
+			        Identifier patternName_ = new Identifier((((PatternMatchingContext)_localctx).patternName!=null?((PatternMatchingContext)_localctx).patternName.getText():null));
+			        patternName_.setLine((((PatternMatchingContext)_localctx).patternName!=null?((PatternMatchingContext)_localctx).patternName.getLine():0));
+
+			        Identifier targetVar_ = new Identifier((((PatternMatchingContext)_localctx).targetVar!=null?((PatternMatchingContext)_localctx).targetVar.getText():null));
+			        targetVar_.setLine((((PatternMatchingContext)_localctx).targetVar!=null?((PatternMatchingContext)_localctx).targetVar.getLine():0));
+			        ((PatternMatchingContext)_localctx).patternRet =  new PatternDeclaration(patternName_, targetVar_);
 			    
 			setState(138);
 			match(RPAR);
@@ -1662,7 +1669,9 @@ public class FunctionCraftParser extends Parser {
 			setState(316);
 			match(END);
 
-			        ((ForStatementContext)_localctx).forStRet =  new ForStatement(new Identifier((((ForStatementContext)_localctx).id!=null?((ForStatementContext)_localctx).id.getText():null)), ((ForStatementContext)_localctx).r.rangeRet, ((ForStatementContext)_localctx).l.loopExps, ((ForStatementContext)_localctx).l.loopStmts, ((ForStatementContext)_localctx).l.loopRetStmt);
+			        Identifier id_ = new Identifier((((ForStatementContext)_localctx).id!=null?((ForStatementContext)_localctx).id.getText():null));
+			        id_.setLine((((ForStatementContext)_localctx).id!=null?((ForStatementContext)_localctx).id.getLine():0));
+			        ((ForStatementContext)_localctx).forStRet =  new ForStatement(id_, ((ForStatementContext)_localctx).r.rangeRet, ((ForStatementContext)_localctx).l.loopExps, ((ForStatementContext)_localctx).l.loopStmts, ((ForStatementContext)_localctx).l.loopRetStmt);
 			        _localctx.forStRet.setLine(((ForStatementContext)_localctx).f.getLine());
 			    
 			}
@@ -1793,7 +1802,9 @@ public class FunctionCraftParser extends Parser {
 				setState(341);
 				((RangeContext)_localctx).id = match(IDENTIFIER);
 
-				        _localctx.rangeRet.add(new Identifier((((RangeContext)_localctx).id!=null?((RangeContext)_localctx).id.getText():null)));
+				        Identifier id_ = new Identifier((((RangeContext)_localctx).id!=null?((RangeContext)_localctx).id.getText():null));
+				        id_.setLine((((RangeContext)_localctx).id!=null?((RangeContext)_localctx).id.getLine():0));
+				        _localctx.rangeRet.add(id_);
 				    
 				}
 				break;
@@ -1865,7 +1876,9 @@ public class FunctionCraftParser extends Parser {
 			setState(350);
 			match(RPAR);
 
-			        ((MatchPatternStatementContext)_localctx).matchPatRet =  new MatchPatternStatement(new Identifier((((MatchPatternStatementContext)_localctx).id!=null?((MatchPatternStatementContext)_localctx).id.getText():null)), ((MatchPatternStatementContext)_localctx).e.expRet);
+			        Identifier id_ = new Identifier((((MatchPatternStatementContext)_localctx).id!=null?((MatchPatternStatementContext)_localctx).id.getText():null));
+			        id_.setLine((((MatchPatternStatementContext)_localctx).id!=null?((MatchPatternStatementContext)_localctx).id.getLine():0));
+			        ((MatchPatternStatementContext)_localctx).matchPatRet =  new MatchPatternStatement(id_, ((MatchPatternStatementContext)_localctx).e.expRet);
 			        _localctx.matchPatRet.setLine(((MatchPatternStatementContext)_localctx).id.getLine());
 			    
 			}

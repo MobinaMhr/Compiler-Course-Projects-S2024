@@ -22,6 +22,8 @@ import main.visitor.Visitor;
 
 import java.util.ArrayList;
 
+import static main.ast.nodes.statement.AssignOperator.ASSIGN;
+
 
 public class NameAnalyzer extends Visitor<Void> {
     private final String FUNCTION_START_KEY = "Function:";
@@ -67,8 +69,7 @@ public class NameAnalyzer extends Visitor<Void> {
                 functionItems.add(newItem);
                 try {
                     SymbolTable.root.put(newItem);
-                } catch (ItemAlreadyExists ignored) {
-                }
+                } catch (ItemAlreadyExists ignored) { }
             }
         }
 
@@ -92,8 +93,7 @@ public class NameAnalyzer extends Visitor<Void> {
                 patternItems.add(newItem);
                 try {
                     SymbolTable.root.put(newItem);
-                } catch (ItemAlreadyExists ignored) {
-                }
+                } catch (ItemAlreadyExists ignored) { }
             }
         }
 
@@ -246,7 +246,6 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(Identifier identifier) {
-//        System.out.println(identifier + "///" + identifier.getLine());
         try {
             SymbolTable.top.getItem(VAR_START_KEY + identifier.getName());
         } catch (ItemNotFound e) {
@@ -496,10 +495,14 @@ public class NameAnalyzer extends Visitor<Void> {
     public Void visit(AssignStatement assignStatement) {
         Identifier assignId = assignStatement.getAssignedId();
         VarItem varItem = new VarItem(assignId);
-        try {
-            SymbolTable.top.put(varItem);
-        } catch (ItemAlreadyExists ignored) {}
-        assignId.accept(this);
+        if (assignStatement.getAssignOperator() == ASSIGN) {
+            try {
+                SymbolTable.top.put(varItem);
+            } catch (ItemAlreadyExists ignored) {}
+            assignId.accept(this);
+        } else {
+            assignId.accept(this);
+        }
 
         if (assignStatement.isAccessList() &&
                 assignStatement.getAccessListExpression() != null) {

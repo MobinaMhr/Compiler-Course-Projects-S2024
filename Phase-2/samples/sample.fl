@@ -1,8 +1,8 @@
-def re(e)
+def re(re)
     return;
 end
 
-pattern fib(e)
+pattern fib(fib)
     | (a == 0) = 0
     | (a > 1) = a(n-1) + a(n-2)
 ;
@@ -13,9 +13,29 @@ pattern help(x)
 ;
 
 pattern fib(n)
-    | (p == 0) = 0
+    | (n == 0) = 0
     | (n > 1) = no.match(n-1) + help.match(n-2)
 ;
+
+def y()
+    return z();
+end
+
+def z()
+    return hh();
+end
+
+def hh()
+    y();
+end
+
+def f()
+    g();
+end
+
+def g()
+    return f();
+end
 
 def h()
     a = 1;
@@ -41,7 +61,8 @@ def main()
     a = 5;
     b = 6;
     puts("salam");
+    myFunc(c, b);
     myfunc2(a, b);
-    myfunc2();
-    aa(a, b, 2);
+    ali(a);
+    aa(a, b);
 end
