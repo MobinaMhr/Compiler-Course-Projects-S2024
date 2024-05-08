@@ -20,7 +20,8 @@ program returns [Program flProgram]:
         f = functionDeclaration{$flProgram.addFunctionDeclaration($f.functionDeclarationRet);}
         | p = patternMatching{$flProgram.addPatternDeclaration($p.patternRet);}
     )*
-    m = main{$flProgram.setMain($m.mainRet);};
+    m = main{$flProgram.setMain($m.mainRet);}
+;
 
 functionDeclaration returns [FunctionDeclaration functionDeclarationRet]:
     def = DEF  id = IDENTIFIER
@@ -36,7 +37,7 @@ functionDeclaration returns [FunctionDeclaration functionDeclarationRet]:
         $functionDeclarationRet.setBody($b.bodyRet);
         $functionDeclarationRet.setLine($def.getLine());
     }
-    ;
+;
 
 functionArgumentsDeclaration returns [ArrayList<VarDeclaration> argRet]:
     {

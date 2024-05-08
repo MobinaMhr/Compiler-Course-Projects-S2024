@@ -35,11 +35,9 @@ public class NameAnalyzer extends Visitor<Void> {
         int requiredArgCount = 0;
         int argCount = 0;
         for (VarDeclaration varDec : args) {
+            argCount += 1;
             if (varDec.getDefaultVal() == null) {
                 requiredArgCount += 1;
-                argCount += 1;
-            } else if (varDec.getDefaultVal() != null) {
-                argCount += 1;
             }
         }
         return funcArgCount >= requiredArgCount && funcArgCount <= argCount;
@@ -129,6 +127,7 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(FunctionDeclaration functionDeclaration) {
+        // System.out.println("FunctionDeclaration:" + functionDeclaration.getFunctionName());
         for (VarDeclaration varDec : functionDeclaration.getArgs()) {
             if (varDec.getName().getName().equals(functionDeclaration.getFunctionName().getName())) {
                 nameErrors.add(new IdenticalArgFunctionName(functionDeclaration.getLine(),
@@ -144,6 +143,7 @@ public class NameAnalyzer extends Visitor<Void> {
     }
     @Override
     public Void visit(PatternDeclaration patternDeclaration){
+        // System.out.println("PatternDeclaration:" + patternDeclaration.getPatternName() + " on variable:" + patternDeclaration.getTargetVariable().getName());
         Identifier targetVarId = patternDeclaration.getTargetVariable();
         if (targetVarId.getName().equals(patternDeclaration.getPatternName().getName())) {
             nameErrors.add(new IdenticalArgPatternName(patternDeclaration.getLine(),
@@ -198,10 +198,6 @@ public class NameAnalyzer extends Visitor<Void> {
         }
         else if (accessExpression.isFunctionCall() &&
                 accessExpression.getAccessedExpression() instanceof LambdaExpression lambdaExpression) {
-            if (!checkArgMatch(lambdaExpression.getDeclarationArgs(), accessExpression.getArguments().size())) {
-                nameErrors.add(new ArgMisMatch(accessExpression.getLine(),
-                        lambdaExpression.toString()));
-            }
             SymbolTable lambdaFunctionSymbolTable = SymbolTable.top.createSnapshot();
             SymbolTable.push(lambdaFunctionSymbolTable);
             // -> (a, c, d, [b = 5]) { return a + b + d + c + r; }(3, 4, 2);
@@ -218,6 +214,10 @@ public class NameAnalyzer extends Visitor<Void> {
                 if (stmt != null) {
                     stmt.accept(this);
                 }
+            }
+            if (!checkArgMatch(lambdaExpression.getDeclarationArgs(), accessExpression.getArguments().size())) {
+                nameErrors.add(new ArgMisMatch(accessExpression.getLine(),
+                        lambdaExpression.toString()));
             }
             SymbolTable.pop();
         }

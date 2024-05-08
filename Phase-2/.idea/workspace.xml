@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/ast/nodes/expression/AppendExpression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/ast/nodes/expression/AppendExpression.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/grammar/FunctionCraft.g4" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/grammar/FunctionCraft.g4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/samples/sample.fl" beforeDir="false" afterPath="$PROJECT_DIR$/samples/sample.fl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/grammar/FunctionCraft.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/parsers/FunctionCraftParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,26 +31,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.sample.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/ASUS/Desktop/github-clones/Compiler-Course-Projects-S2024/Phase-2/utilities/antlr-4.13.1-complete.jar&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Libraries&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.sample.executor": "Run",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/amirparsamobed/Documents/University/Term 6/Compiler Design Programming Languages/CA/CA2/Github Repository/Compiler-Course-Projects-S2024/Phase-2",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Libraries",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="sample" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="main.FunctionCraft" />
@@ -63,7 +64,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
+        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
       </set>
     </attachedChunks>
   </component>
@@ -78,9 +80,8 @@
       <workItem from="1714907350117" duration="307000" />
       <workItem from="1714908453303" duration="4848000" />
       <workItem from="1714920276952" duration="9879000" />
-      <workItem from="1714932082426" duration="2657000" />
-      <workItem from="1715091930681" duration="31321000" />
-      <workItem from="1715124525261" duration="839000" />
+      <workItem from="1714932082426" duration="2443000" />
+      <workItem from="1715009358625" duration="34353000" />
     </task>
     <servers />
   </component>
