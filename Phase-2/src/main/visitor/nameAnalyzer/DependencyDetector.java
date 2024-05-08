@@ -235,6 +235,11 @@ public class DependencyDetector extends Visitor<Void> {
     @Override
     public Void visit(FunctionDeclaration functionDeclaration){
         funcName = functionDeclaration.getFunctionName().getName();
+        for (VarDeclaration arg : functionDeclaration.getArgs()) {
+            if (arg.getDefaultVal() != null) {
+                arg.getDefaultVal().accept(this);
+            }
+        }
         for (var stmt : functionDeclaration.getBody()) {
             if (stmt != null) {
                 stmt.accept(this);
