@@ -1,6 +1,53 @@
+
+def y()
+    return z();
+end
+
+def z()
+    return hh();
+end
+
+def hh()
+    y();
+end
+
+def f()
+    g();
+end
+
+def g()
+    return f();
+end
+
+def h()
+    a = 1;
+    b = 2;
+    return myfunc2(a, b);
+end
+
+
+def myfunc2(a, b, [c=1])
+    return;
+end
+
+def myfunc2()
+    return;
+end
+
+
+def aa(a, b, c)
+    return a+b+c;
+end
+
+def mobina(a, [b = mobina(2)])
+end
+
 def main()
-    a = 4;
-    b = 3;
-    -> () { return a + b; };
-    -> (a, c, d, [b = 5]) { return a + b + d + c + r; } (3, 4);
+    a = 5;
+    b = 6;
+    puts("salam");
+    myFunc(c, b);
+    myfunc2(a, b);
+    ali(a);
+    aa(a, b);
 end

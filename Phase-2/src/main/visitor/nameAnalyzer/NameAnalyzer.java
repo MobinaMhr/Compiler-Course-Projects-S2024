@@ -174,6 +174,9 @@ public class NameAnalyzer extends Visitor<Void> {
             nameErrors.add(new DuplicateArg(varDeclaration.getLine(),
                     varDeclaration.getName().getName()));
         }
+        if (varDeclaration.getDefaultVal() != null) {
+            varDeclaration.getDefaultVal().accept(this);
+        }
         return null;
     }
     @Override
