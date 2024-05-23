@@ -1,0 +1,32 @@
+pattern fib(a)
+    | (a>1) = 0
+    | (a<2) = 2
+;
+
+def f(a, b, [c = 10])
+    if (!(c == 10))
+        return a+b;
+    else
+        return a>b;
+    end
+    return "ali";
+end
+
+def g(a, b)
+    return a+b;
+end
+
+def main()
+    b = [1, 3, 4];
+    fptr = method(:f);
+    b[fptr(1, 2, 30)] = 10;
+   fib.match(1);
+    a = 10;
+   for i in a
+       puts(i);
+   end
+   gg = ++10 + 20;
+   fptr(1, 2, gg);
+   index = g("hello", "world");
+   b[index] = 5;
+end

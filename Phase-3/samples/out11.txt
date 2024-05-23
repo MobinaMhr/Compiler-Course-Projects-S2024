@@ -1,0 +1,5 @@
+Line:6-> types of return expressions of the function `f` must be the same
+Line:16-> unsupported operand type for operator PLUS
+Line:22-> access index must be integer
+Line:25-> only lists can be iterated over
+Line:31-> access index must be integer
