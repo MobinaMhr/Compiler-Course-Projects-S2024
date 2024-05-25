@@ -47,18 +47,23 @@ public class TypeChecker extends Visitor<Type> {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     functionDeclaration.getFunctionName().getName());
             ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
+
             for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
                 VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
-                argItem.setType(currentArgTypes.get(i));
+                Type argType = (i < currentArgTypes.size()) ? currentArgTypes.get(i)
+                        : functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
+                argItem.setType(argType);
                 try {
                     SymbolTable.top.put(argItem);
                 }catch (ItemAlreadyExists ignored){}
             }
         }catch (ItemNotFound ignored){}
+
         Type retType = new NoType();
         for(Statement statement : functionDeclaration.getBody()) {
             if (statement instanceof ReturnStatement retStatement) {
                 Type currentRetType = retStatement.accept(this);
+                // TODO;found a bug in test 1
                 if (retType instanceof NoType) {
                     retType = currentRetType;
                 } else if (!retType.equals(currentRetType)) {
@@ -121,24 +126,45 @@ public class TypeChecker extends Visitor<Type> {
         Expression accessedExpr = accessExpression.getAccessedExpression();
         Type accessedExprType = accessedExpr.accept(this);
         if (accessExpression.isFunctionCall()) {
-            try {
-                String functionName = "";
-                if (accessedExpr instanceof Identifier functionId) {
-                    functionName = functionId.getName();
-                }
-                else if (accessedExpr instanceof FunctionPointer functionPointer) {
-                    functionName = functionPointer.getId().getName();
-                }
-                else {
-                    typeErrors.add(new IsNotCallable(accessExpression.getLine()));
-                    return new NoType();
-                }
-
-                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
-                        functionName);
-//              DONE:visit its declaration
-                return functionItem.getFunctionDeclaration().accept(this);
-            } catch (ItemNotFound ignored) {}
+            if (accessedExpr instanceof Identifier functionId) {
+                Type functionType = functionId.accept(this);
+                String functionName = (functionType instanceof FptrType fptrType)
+                        ? fptrType.getFunctionName()
+                        : functionId.getName();
+                try {
+                    FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+                            functionName);
+                    for (Expression argExpr : accessExpression.getArguments()) {
+                        Type currentArgType = argExpr.accept(this);
+                        functionItem.setArgumentType(currentArgType);
+                    }
+                    return functionItem.getFunctionDeclaration().accept(this);
+                } catch (ItemNotFound ignored) {}
+//                return functionId.accept(this);
+            }
+            else {
+                typeErrors.add(new IsNotCallable(accessExpression.getLine()));
+                return new NoType();
+            }
+//            try {
+////                else if (accessedExpr instanceof FunctionPointer functionPointer) {
+////                    functionName = functionPointer.getId().getName();
+////                }
+//                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+//                        functionName);
+////              DONE:visit its declaration
+//                return functionItem.getFunctionDeclaration().accept(this);
+//            } catch (ItemNotFound ignored) {
+//                try {
+//                    VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+//                            functionName);
+//                    if (varItem.getType() instanceof FptrType) {
+//                        try {
+//                            FunctionItem functionItem = (FunctionItem) SymbolTable.root.ge
+//                        }catch (ItemNotFound ignored) {}
+//                    }
+//                } catch (ItemNotFound ignored2) {}
+//            }
         }
         else { // !(accessExpression.isFunctionCall())
             Type accessedType = accessedExpr.accept(this);
@@ -222,8 +248,8 @@ public class TypeChecker extends Visitor<Type> {
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         assignStatement.getAssignedId().getName());
-
                 Type assignedIdType = varItem.getType();
+
                 if (assignedIdType instanceof ListType listType &&
                         (!(listType.getType().sameType(assignExprType)))) {
                     typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine()));
@@ -231,7 +257,7 @@ public class TypeChecker extends Visitor<Type> {
                 }
 
                 Type indexType = assignStatement.getAccessListExpression().accept(this);
-                if(!(indexType.sameType(new IntType()))) {
+                if (!(indexType instanceof IntType)) {
                     typeErrors.add(new AccessIndexIsNotInt(assignStatement.getLine()));
                     return new NoType();
                 }
@@ -493,7 +519,13 @@ public class TypeChecker extends Visitor<Type> {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
             return varItem.getType();
-        } catch (ItemNotFound ignored) {}
+        } catch (ItemNotFound ignored) {
+            try {
+                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+                        identifier.getName());
+                return functionItem.getFunctionDeclaration().accept(this);
+            } catch (ItemNotFound ignored2) {}
+        }
         return null;
     }
     @Override
