@@ -475,34 +475,35 @@ accessExpression returns [Expression expRet]:
         ArrayList<Expression> dimentions = new ArrayList<Expression>();
     }
     o = otherExpression
-    (LPAR f = functionArguments //arrayList of expression
-    {
-        isAccessExpression = true;
-        isFunctionCall =true;
-        args.addAll($f.funcArgsRet);
-    }
-    RPAR)*
-    (a = accessList //single expression
-    {
-        isMultiDimentional = true;
-        isAccessExpression = true;
-        dimentions.add($a.accessListExp);
-    }
+    (
+        LPAR f = functionArguments //arrayList of expression
+        {
+            isAccessExpression = true;
+            isFunctionCall =true;
+            args.addAll($f.funcArgsRet);
+        }
+        RPAR
+    )*
+    (
+        a = accessList //single expression
+        {
+            isMultiDimentional = true;
+            isAccessExpression = true;
+            dimentions.add($a.accessListExp);
+        }
     )*
     {
-        if(!isAccessExpression){
+        if(!isAccessExpression) {
             $expRet = $o.expRet;
         }
-        else{
+        else {
             AccessExpression accessExp = new AccessExpression($o.expRet, args);
             accessExp.setIsFunctionCall(isFunctionCall);
-            if(isMultiDimentional){
-
+            if(isMultiDimentional) {
                 accessExp.setDimentionalAccess(dimentions);
             }
             $expRet = accessExp;
             $expRet.setLine($o.expRet.getLine());
-
         }
     }
     ;
