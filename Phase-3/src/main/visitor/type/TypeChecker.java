@@ -20,6 +20,7 @@ import java.util.*;
 //TODO:: mind the difference between type equality and sameType and handle in code
 public class TypeChecker extends Visitor<Type> {
     public ArrayList<CompileError> typeErrors = new ArrayList<>();
+    private HashSet<Type> returnTypes = new HashSet<>();
     @Override
     public Type visit(Program program){
         SymbolTable.root = new SymbolTable();
@@ -42,6 +43,7 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(FunctionDeclaration functionDeclaration){
+        this.returnTypes = new HashSet<>();
         SymbolTable.push(new SymbolTable());
         String functionName = "";
         try {
@@ -65,26 +67,30 @@ public class TypeChecker extends Visitor<Type> {
             }
         }catch (ItemNotFound ignored){}
 
-        Type retType = new NoType();
         for(Statement statement : functionDeclaration.getBody()) {
-//            System.out.println("statement=="+statement);
-            Type currentReturnedType = statement.accept(this);
-//            System.out.println("retType=="+retType);
-//            System.out.println("currentReturnedType=="+currentReturnedType);
-            if (retType instanceof NoType && !(currentReturnedType instanceof NoType)) {
-                retType = currentReturnedType;
-            } else if ((!(retType instanceof NoType) && !(retType.equals(currentReturnedType)))) {
-                typeErrors.add(new FunctionIncompatibleReturnTypes(functionDeclaration.getLine(),
-                        functionName));
-            }
-            if (retType == null) {
-                typeErrors.add(new FunctionIncompatibleReturnTypes(functionDeclaration.getLine(),
-                        functionName));
-            }
+            statement.accept(this);
         }
         SymbolTable.pop();
+
+        Iterator<Type> it = this.returnTypes.iterator();
+        Type retType = new NoType();
+        if (this.returnTypes.isEmpty()) {
+            return retType;
+        }
+        if (this.returnTypes.size() == 1) {
+            retType = it.next();
+            return retType;
+        }
+        it.next();
+        while (it.hasNext()) {
+            it.next();
+            typeErrors.add(new FunctionIncompatibleReturnTypes(
+                    functionDeclaration.getLine(),
+                    functionName)
+            );
+        }
+        return new NoType();
         //DONE:Return the infered type of the function
-        return retType;
     }
     @Override
     public Type visit(PatternDeclaration patternDeclaration){
@@ -184,7 +190,12 @@ public class TypeChecker extends Visitor<Type> {
         //DONE:Note that return type of functions are specified here
         //DONE:Visit return statement.
         Expression retExpr = returnStatement.getReturnExp();
-        return retExpr.accept(this);
+        Type returnedType = new NoType();
+        if (retExpr != null) {
+            returnedType = retExpr.accept(this);
+        }
+        this.returnTypes.add(returnedType);
+        return returnedType;
     }
     @Override
     public Type visit(ExpressionStatement expressionStatement){
@@ -194,6 +205,11 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(ForStatement forStatement){
         SymbolTable.push(SymbolTable.top.copy());
         forStatement.getRangeExpression().accept(this);
+        //        Expression rangeExpr = forStatement.getRangeExpression();
+//        Type rangeExprType = rangeExpr.accept(this);
+//        if (!(rangeExprType instanceof ListType)) {
+//            typeErrors.add(new IsNotIterable(rangeExpr.getLine()));
+//        }
         VarItem varItem = new VarItem(forStatement.getIteratorId());
         try{
             SymbolTable.top.put(varItem);
@@ -217,21 +233,17 @@ public class TypeChecker extends Visitor<Type> {
         }
         Type retType = new NoType();
         for(Statement statement : ifStatement.getThenBody()) {
-//            System.out.println(":::::then body");
             retType = statement.accept(this);
             if (retType != null && !(retType instanceof NoType)) {
                 retTypeSet.add(retType);
             }
         }
-//        System.out.println("retTypeSet:::"+retTypeSet);
         for(Statement statement : ifStatement.getElseBody()) {
-//            System.out.println(":::::else body");
             retType = statement.accept(this);
             if (retType != null && !(retType instanceof NoType)) {
                 retTypeSet.add(retType);
             }
         }
-//        System.out.println("retTypeSet:::"+retTypeSet);
         SymbolTable.pop();
         return (retTypeSet.isEmpty()) ?
                 new NoType() : (retTypeSet.size() == 1) ?
@@ -652,8 +664,7 @@ public class TypeChecker extends Visitor<Type> {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         rangeId.getName());
                 // Is this sufficient? Or we should add other types?
-
-                if (!(varItem.getType().equals(new IntType()))) {
+                if (!(varItem.getType() instanceof ListType)) {
                     typeErrors.add(new IsNotIterable(rangeId.getLine()));
                 }
             } catch (ItemNotFound ignored) {}
