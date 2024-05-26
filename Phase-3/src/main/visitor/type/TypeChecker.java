@@ -50,8 +50,12 @@ public class TypeChecker extends Visitor<Type> {
 
             for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
                 VarItem argItem = new VarItem(functionDeclaration.getArgs().get(i).getName());
-                Type argType = (i < currentArgTypes.size()) ? currentArgTypes.get(i)
-                        : functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
+                Type argType = new NoType();
+                if (i < currentArgTypes.size()) {
+                    argType = currentArgTypes.get(i);
+                } else if (i < functionDeclaration.getArgs().size()) {
+                    argType = functionDeclaration.getArgs().get(i).getDefaultVal().accept(this);
+                }
                 argItem.setType(argType);
                 try {
                     SymbolTable.top.put(argItem);
@@ -130,56 +134,38 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override // TODO::What about array[0](1, 2)
     public Type visit(AccessExpression accessExpression){
-        Expression accessedExpr = accessExpression.getAccessedExpression();
-        Type accessedExprType = accessedExpr.accept(this);
-        if (accessExpression.isFunctionCall()) {
-            if (accessedExpr instanceof Identifier functionId) {
-                Type functionType = functionId.accept(this);
-                String functionName = (functionType instanceof FptrType fptrType)
-                        ? fptrType.getFunctionName()
-                        : functionId.getName();
-                try {
-                    FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
-                            functionName);
-                    for (Expression argExpr : accessExpression.getArguments()) {
-                        Type currentArgType = argExpr.accept(this);
-                        functionItem.setArgumentType(currentArgType);
-                    }
-                    return functionItem.getFunctionDeclaration().accept(this);
-                } catch (ItemNotFound ignored) {}
-//                return functionId.accept(this);
-            }
-            else {
+        if(accessExpression.isFunctionCall()){
+            if (!(accessExpression.getAccessedExpression() instanceof Identifier)) {
                 typeErrors.add(new IsNotCallable(accessExpression.getLine()));
+                System.out.println("The Accessed Expr is not an instance of Id, so handle it");
                 return new NoType();
             }
-//            try {
-////                else if (accessedExpr instanceof FunctionPointer functionPointer) {
-////                    functionName = functionPointer.getId().getName();
-////                }
-//                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
-//                        functionName);
-////              DONE:visit its declaration
-//                return functionItem.getFunctionDeclaration().accept(this);
-//            } catch (ItemNotFound ignored) {
-//                try {
-//                    VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
-//                            functionName);
-//                    if (varItem.getType() instanceof FptrType) {
-//                        try {
-//                            FunctionItem functionItem = (FunctionItem) SymbolTable.root.ge
-//                        }catch (ItemNotFound ignored) {}
-//                    }
-//                } catch (ItemNotFound ignored2) {}
-//            }
+
+            String functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
+            try {
+                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+                        functionName);
+                if (varItem.getType() instanceof FptrType fptrType) {
+                    functionName = fptrType.getFunctionName();
+                } else { System.out.println("I don't know what the hell is happening give me the test.");}
+            } catch (ItemNotFound ignored) {}
+
+            try {
+                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+                        functionName);
+                for (Expression argExpr : accessExpression.getArguments()) {
+                    functionItem.setArgumentType(argExpr.accept(this));
+                }
+                return functionItem.getFunctionDeclaration().accept(this);
+            } catch (ItemNotFound ignored) {}
+            //DONE:function is called here.set the arguments type and visit its declaration
         }
-        else { // !(accessExpression.isFunctionCall())
-            Type accessedType = accessedExpr.accept(this);
+        else{
+            Type accessedType = accessExpression.getAccessedExpression().accept(this);
             if(!(accessedType instanceof StringType) && !(accessedType instanceof ListType)){
                 typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
                 return new NoType();
             }
-
             //DONE:index of access list must be int
             // In this phase we use one dimensional lists
             for (Expression indexExpr : accessExpression.getDimentionalAccess()) {
@@ -188,7 +174,6 @@ public class TypeChecker extends Visitor<Type> {
                     typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
                 }
             }
-
             if (accessedType instanceof ListType listType) {
                 return listType.getType();
             }
@@ -557,6 +542,19 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(Identifier identifier){
         // DONE:visit Identifier
+        try {
+            VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+                    identifier.getName());
+            System.out.println("var item type = "+ varItem.getType());
+            return varItem.getType();
+        } catch (ItemNotFound ignored) {}
+        try {
+            FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+                    identifier.getName());
+            return functionItem.getFunctionDeclaration().accept(this);
+            // Copy and paste just like what mahdi does.
+        } catch (ItemNotFound ignored) {}
+        ///////////////////////////////////////////////////////////////////////////////////////
         try {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
