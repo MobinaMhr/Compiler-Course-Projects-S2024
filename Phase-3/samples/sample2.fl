@@ -1,0 +1,45 @@
+def func1(arg1, arg2, [arg3 = 5])
+    if (arg3 == 5)
+        puts("arg3 is 5");
+    else
+        return arg1 + arg2;
+    end
+end
+
+def func2(arg1, [arg2 = 5])
+    if (arg2 != 5)
+        return func1(1, 2);
+    else
+        if (arg2 == 5)
+            return "is arg2 5?";
+        end
+    end
+end
+
+def func3()
+    return "give me string!";
+end
+
+def main()
+    a = 1;
+    b = "string";
+    c = [1, 2, 3, 4];
+
+    e1 = b + c[1];
+    e2 = b[1] * b[2 - "1"];
+    e3 = ++method(:func1);
+    puts(func1("hello", "world"));
+    func2(2);
+    d = [1, 2, "ali", true, false];
+    puts(c[b[2]]);
+    f = len(func1(1, 2, 3));
+    f_true = len(func3());
+    puts(c[f_true]);
+
+    g = ["str"];
+    for i in (1..10)
+        push(g, i);
+        push(i, g);
+        push(g, func3());
+    end
+end

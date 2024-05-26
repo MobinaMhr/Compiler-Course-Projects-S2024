@@ -1,0 +1,12 @@
+Line:5-> unsupported operand type for operator PLUS
+Line:9-> types of return expressions of the function `func2` must be same
+Line:28-> operands of operator PLUS must be the same
+Line:29-> operands of operator MINUS must be the same
+Line:29-> access index must be integer
+Line:29-> unsupported operand type for operator MULT
+Line:30-> unsupported operand type for operator INC
+Line:33-> all elements of the list must have same type
+Line:34-> access index must be integer
+Line:35-> type of `len` function argument must be list or string
+Line:41-> types of `push` function argument must be string or same as list's type
+Line:42-> only lists and strings can get pushed into
