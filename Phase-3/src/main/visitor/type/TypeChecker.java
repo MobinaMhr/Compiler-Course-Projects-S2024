@@ -43,9 +43,11 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(FunctionDeclaration functionDeclaration){
         SymbolTable.push(new SymbolTable());
+        String functionName = "";
         try {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     functionDeclaration.getFunctionName().getName());
+            functionName = functionItem.getName();
             ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
 
             for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
@@ -65,25 +67,20 @@ public class TypeChecker extends Visitor<Type> {
 
         Type retType = new NoType();
         for(Statement statement : functionDeclaration.getBody()) {
+//            System.out.println("statement=="+statement);
             Type currentReturnedType = statement.accept(this);
+//            System.out.println("retType=="+retType);
+//            System.out.println("currentReturnedType=="+currentReturnedType);
             if (retType instanceof NoType && !(currentReturnedType instanceof NoType)) {
                 retType = currentReturnedType;
-            } else if (!(retType instanceof NoType) && !(retType.equals(currentReturnedType))) {
-                typeErrors.add(new FunctionIncompatibleReturnTypes(statement.getLine(),
-                        functionDeclaration.getFunctionName().toString()));
+            } else if ((!(retType instanceof NoType) && !(retType.equals(currentReturnedType)))) {
+                typeErrors.add(new FunctionIncompatibleReturnTypes(functionDeclaration.getLine(),
+                        functionName));
             }
-//            if (statement instanceof ReturnStatement retStatement) {
-//                Type currentRetType = retStatement.accept(this);
-//                // TODO;found a bug in test 1
-//                if (retType instanceof NoType && !(currentRetType instanceof NoType)) {
-//                    retType = currentRetType;
-//                } else if (!retType.equals(currentRetType)) {
-//                    typeErrors.add(new FunctionIncompatibleReturnTypes(retStatement.getLine(),
-//                            functionDeclaration.getFunctionName().toString()));
-//                }
-//            } else {
-//                statement.accept(this);
-//            }
+            if (retType == null) {
+                typeErrors.add(new FunctionIncompatibleReturnTypes(functionDeclaration.getLine(),
+                        functionName));
+            }
         }
         SymbolTable.pop();
         //DONE:Return the infered type of the function
@@ -153,6 +150,7 @@ public class TypeChecker extends Visitor<Type> {
             try {
                 FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                         functionName);
+                functionItem.clearArgumentTypeList();
                 for (Expression argExpr : accessExpression.getArguments()) {
                     functionItem.setArgumentType(argExpr.accept(this));
                 }
@@ -210,6 +208,7 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(IfStatement ifStatement) {
+        HashSet<Type> retTypeSet = new HashSet<Type>();
         SymbolTable.push(SymbolTable.top.copy());
         for(Expression expression : ifStatement.getConditions()) {
             if(!(expression.accept(this) instanceof BoolType)) {
@@ -218,13 +217,36 @@ public class TypeChecker extends Visitor<Type> {
         }
         Type retType = new NoType();
         for(Statement statement : ifStatement.getThenBody()) {
+//            System.out.println(":::::then body");
             retType = statement.accept(this);
+            if (retType != null && !(retType instanceof NoType)) {
+                retTypeSet.add(retType);
+            }
         }
+//        System.out.println("retTypeSet:::"+retTypeSet);
         for(Statement statement : ifStatement.getElseBody()) {
-            statement.accept(this);
+//            System.out.println(":::::else body");
+            retType = statement.accept(this);
+            if (retType != null && !(retType instanceof NoType)) {
+                retTypeSet.add(retType);
+            }
         }
+//        System.out.println("retTypeSet:::"+retTypeSet);
         SymbolTable.pop();
-        return retType;
+        return (retTypeSet.isEmpty()) ?
+                new NoType() : (retTypeSet.size() == 1) ?
+                retTypeSet.stream().findFirst().get() : null;
+//        if (retTypeSet.size() == 1) {
+//            return retTypeSet.stream().findFirst().get();
+//        } else if (retTypeSet.isEmpty()) {
+//            return new NoType();
+//        }
+//        else {
+//            System.out.println("[retTypeSet]="+retTypeSet);
+////            System.out.println("");
+//            return null;
+//        }
+////        return retType;
     }
     @Override
     public Type visit(LoopDoStatement loopDoStatement){
@@ -485,7 +507,8 @@ public class TypeChecker extends Visitor<Type> {
         if (unaryExpression.getOperator().equals(UnaryOperator.NOT)) {
             if (unaryExprType.sameType(new FloatType())
                 || unaryExprType.sameType(new IntType())
-                || unaryExprType.sameType(new StringType())) {
+                || unaryExprType.sameType(new StringType())
+                || unaryExprType instanceof FptrType) { //TODO
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -494,7 +517,8 @@ public class TypeChecker extends Visitor<Type> {
         }
         if (unaryExpression.getOperator().equals(UnaryOperator.MINUS)) {
             if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())) {
+                || unaryExprType.sameType(new StringType())
+                || unaryExprType instanceof FptrType) { //TODO
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -503,16 +527,19 @@ public class TypeChecker extends Visitor<Type> {
         }
         if (unaryExpression.getOperator().equals(UnaryOperator.INC)) {
             if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())) {
+                || unaryExprType.sameType(new StringType())
+                || unaryExprType instanceof FptrType) { //TODO
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
             }
+
             return unaryExprType;
         }
         if (unaryExpression.getOperator().equals(UnaryOperator.DEC)) {
             if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())) {
+                || unaryExprType.sameType(new StringType())
+                || unaryExprType instanceof FptrType) { //TODO
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -545,7 +572,6 @@ public class TypeChecker extends Visitor<Type> {
         try {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
-            System.out.println("var item type = "+ varItem.getType());
             return varItem.getType();
         } catch (ItemNotFound ignored) {}
         try {
