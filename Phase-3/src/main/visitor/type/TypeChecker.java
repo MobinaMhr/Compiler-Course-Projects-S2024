@@ -45,11 +45,9 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(FunctionDeclaration functionDeclaration){
         this.returnTypes = new HashSet<>();
         SymbolTable.push(new SymbolTable());
-        String functionName = "";
         try {
-            FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
-                    functionDeclaration.getFunctionName().getName());
-            functionName = functionItem.getName();
+            FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(
+                    FunctionItem.START_KEY + functionDeclaration.getFunctionName().getName());
             ArrayList<Type> currentArgTypes = functionItem.getArgumentTypes();
 
             for (int i = 0; i < functionDeclaration.getArgs().size(); i++) {
@@ -65,30 +63,31 @@ public class TypeChecker extends Visitor<Type> {
                     SymbolTable.top.put(argItem);
                 }catch (ItemAlreadyExists ignored){}
             }
+
+            for(Statement stmt : functionDeclaration.getBody()) {
+                stmt.accept(this);
+            }
+            SymbolTable.pop();
+
+            Iterator<Type> it = this.returnTypes.iterator();
+            Type retType = new NoType();
+            if (this.returnTypes.isEmpty()) {
+                return retType;
+            }
+            if (this.returnTypes.size() == 1) {
+                retType = it.next();
+                return retType;
+            }
+            it.next();
+            while (it.hasNext()) {
+                it.next();
+                typeErrors.add(new FunctionIncompatibleReturnTypes(
+                        functionDeclaration.getLine(),
+                        functionItem.getName())
+                );
+            }
         }catch (ItemNotFound ignored){}
 
-        for(Statement statement : functionDeclaration.getBody()) {
-            statement.accept(this);
-        }
-        SymbolTable.pop();
-
-        Iterator<Type> it = this.returnTypes.iterator();
-        Type retType = new NoType();
-        if (this.returnTypes.isEmpty()) {
-            return retType;
-        }
-        if (this.returnTypes.size() == 1) {
-            retType = it.next();
-            return retType;
-        }
-        it.next();
-        while (it.hasNext()) {
-            it.next();
-            typeErrors.add(new FunctionIncompatibleReturnTypes(
-                    functionDeclaration.getLine(),
-                    functionName)
-            );
-        }
         return new NoType();
     }
     @Override
@@ -198,8 +197,9 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(ForStatement forStatement){
         SymbolTable.push(SymbolTable.top.copy());
-        forStatement.getRangeExpression().accept(this);
+        Type rangeExprType = forStatement.getRangeExpression().accept(this);
         VarItem varItem = new VarItem(forStatement.getIteratorId());
+        varItem.setType(new IntType());
         try{
             SymbolTable.top.put(varItem);
         }catch (ItemAlreadyExists ignored){}
@@ -258,6 +258,7 @@ public class TypeChecker extends Visitor<Type> {
                 Type assignedIdType = varItem.getType();
 
                 if (assignedIdType instanceof ListType listType &&
+                        (!(listType.getType() instanceof NoType)) &&
                         (!(listType.getType().sameType(assignExprType)))) {
                     typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine()));
                     return new NoType();
@@ -322,7 +323,6 @@ public class TypeChecker extends Visitor<Type> {
         else {
             typeErrors.add(new IsNotPushedable(pushInitial.getLine()));
         }
-
         return new NoType();
     }
 
@@ -354,11 +354,9 @@ public class TypeChecker extends Visitor<Type> {
         Type elementType = new NoType();
         for (var expression : listValue.getElements()) {
             Type currentType = expression.accept(this);
-//            System.out.println("currentType="+currentType);
             if (elementType instanceof NoType) {
                 elementType = currentType;
             } else if (!elementType.sameType(currentType)) {
-//                System.out.println("elementType="+elementType);
                 typeErrors.add(new ListElementsTypesMisMatch(expression.getLine()));
                 return new ListType(new NoType());
             }
@@ -598,25 +596,34 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(RangeExpression rangeExpression){
+//      DONE --> mind that the lists are declared explicitly in the grammar in this node, so handle the errors
         ArrayList<Expression> rangeExpressions = rangeExpression.getRangeExpressions();
         RangeType rangeType = rangeExpression.getRangeType();
-//      DONE --> mind that the lists are declared explicitly in the grammar in this node, so handle the errors
+
         if(rangeType.equals(RangeType.LIST)) {
-            Type listElementType = new NoType();
+            HashSet<Type> typeSet = new HashSet<>();
             for (Expression expr : rangeExpressions) {
                 Type exprType = expr.accept(this);
+                if (exprType != null)
+                    typeSet.add(exprType);
+            }
+            Iterator<Type> it = typeSet.iterator();
 
-                if (listElementType instanceof NoType) {
-                    listElementType = exprType;
-                }
-                else if (!(listElementType.sameType(exprType))) {
-                    typeErrors.add(new ListElementsTypesMisMatch(expr.getLine()));
-                }
+            Type retType = new NoType();
+            if (typeSet.isEmpty()) {
+                return retType;
             }
-            if (!(listElementType instanceof IntType)) {
-                typeErrors.add(new IsNotIterable(rangeExpression.getLine()));
+            if (typeSet.size() == 1) {
+                retType = it.next();
+                return retType;
             }
-            return new ListType(listElementType);
+
+            it.next();
+            while (it.hasNext()) {
+                it.next();
+                typeErrors.add(new ListElementsTypesMisMatch(rangeExpression.getLine()));
+            }
+            return retType;
         }
         if(rangeType.equals(RangeType.DOUBLE_DOT)) {
             Type beginExprType = rangeExpressions.get(0).accept(this);
@@ -632,7 +639,6 @@ public class TypeChecker extends Visitor<Type> {
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         rangeId.getName());
-                // Is this sufficient? Or we should add other types?
                 if (!(varItem.getType() instanceof ListType)) {
                     typeErrors.add(new IsNotIterable(rangeId.getLine()));
                 }
