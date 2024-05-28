@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/DependencyDetector.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/DependencyDetector.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Phase-2/main/visitor/nameAnalyzer/NameAnalyzer.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/sample.fl" beforeDir="false" afterPath="$PROJECT_DIR$/samples/sample.fl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/visitor/nameAnalyzer/NameAnalyzer.java" afterDir="false" />
-    </list>
+    <list default="true" id="e257b217-c892-4890-bd36-b2413e66408e" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -64,7 +58,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="jdk-21.0.2-openjdk-21.0.2-4caba194b151-4f524021" />
+        <option value="bundled-jdk-9f38398b9061-18abd8497189-intellij.indexing.shared.core-IU-241.14494.240" />
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-IU-241.14494.240" />
       </set>
     </attachedChunks>
   </component>
@@ -83,6 +78,7 @@
       <workItem from="1715009358625" duration="34353000" />
       <workItem from="1715196537569" duration="118000" />
       <workItem from="1715197951606" duration="388000" />
+      <workItem from="1716874810682" duration="31000" />
     </task>
     <servers />
   </component>

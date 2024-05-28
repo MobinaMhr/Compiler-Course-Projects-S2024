@@ -157,9 +157,11 @@ public class TypeChecker extends Visitor<Type> {
                 FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                         functionName);
                 functionItem.clearArgumentTypeList();
+                ArrayList<Type> argumentTypes = new ArrayList<>();
                 for (Expression argExpr : accessExpression.getArguments()) {
-                    functionItem.setArgumentType(argExpr.accept(this));
+                    argumentTypes.add(argExpr.accept(this));
                 }
+                functionItem.setArgumentTypes(argumentTypes);
                 return functionItem.getFunctionDeclaration().accept(this);
             } catch (ItemNotFound ignored) {}
             //DONE:function is called here.set the arguments type and visit its declaration
@@ -298,6 +300,9 @@ public class TypeChecker extends Visitor<Type> {
             // DONE:maybe new type for a variable   anId += "another element";
             VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
             newVarItem.setType(assignExprType);
+            try {
+                SymbolTable.top.delete(newVarItem);
+            } catch (ItemNotFound ignored) {}
             try {
                 SymbolTable.top.put(newVarItem);
             }catch (ItemAlreadyExists ignored){}

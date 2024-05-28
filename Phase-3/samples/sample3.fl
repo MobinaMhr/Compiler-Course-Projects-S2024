@@ -1,0 +1,54 @@
+def fib(n)
+    if ((n == 1) || (n == 2))
+        return 1;
+    end
+    return fib2(n);
+end
+
+def fib2(x)
+    x = "aaa";
+    push(x, "bbb");
+    return len(x);
+end
+
+def main()
+    l = [];
+    push(l, "a");
+    push(l, 2);
+    x = "aaa";
+    push(x, l[0]);
+    x = 2;
+    len(2);
+    y = 2;
+    if (y + x)
+        l[x + y];
+        l[x == y];
+    end
+    res = "aaa" + "bbb";
+    res = (x == 1) + (y == 2);
+    res = (x == 1) + 4;
+    c = [1, 2, "aaa"];
+    c = [1, 2];
+    c[0] = "a";
+    for i in [1, 2, "aa"]
+        puts(i);
+    end
+    for i in [1, 2, 3]
+        puts(i);
+    end
+    b = ["a", "c"];
+    a = c[b[0]];
+    b = [1, 2];
+    a = c[b[0]];
+    a = c[b[0] == 1];
+    len(b);
+    len(b[0]);
+    b = ["a", "b"];
+    len(b[1]);
+    push([1, 2], "ASFA");
+    push([1, 2], 1);
+    push("AFAF", b[0]);
+    push("AFAF", 1);
+    push(12.2, "a");
+end
+

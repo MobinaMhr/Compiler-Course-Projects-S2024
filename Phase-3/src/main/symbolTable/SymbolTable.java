@@ -29,6 +29,11 @@ public class SymbolTable {
             throw new ItemAlreadyExists();
         items.put(item.getKey(), item);
     }
+    public void delete(SymbolTableItem item) throws ItemNotFound {
+        if (!items.containsKey(item.getKey()))
+            throw new ItemNotFound();
+        items.remove(item.getKey());
+    }
     public SymbolTableItem getItem(String key) throws ItemNotFound {
         SymbolTableItem symbolTableItem = this.items.get(key);
         if( symbolTableItem != null ){
