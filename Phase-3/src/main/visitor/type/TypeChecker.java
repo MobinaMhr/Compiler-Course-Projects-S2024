@@ -69,23 +69,18 @@ public class TypeChecker extends Visitor<Type> {
             }
             SymbolTable.pop();
 
-            Iterator<Type> it = this.returnTypes.iterator();
-            Type retType = new NoType();
             if (this.returnTypes.isEmpty()) {
-                return retType;
+                return new NoType();
             }
             if (this.returnTypes.size() == 1) {
-                retType = it.next();
-                return retType;
+                return this.returnTypes.iterator().next();
             }
-            it.next();
-            while (it.hasNext()) {
-                it.next();
-                typeErrors.add(new FunctionIncompatibleReturnTypes(
-                        functionDeclaration.getLine(),
-                        functionItem.getName())
-                );
-            }
+
+            typeErrors.add(new FunctionIncompatibleReturnTypes(
+                    functionDeclaration.getLine(),
+                    functionItem.getName())
+            );
+            return new NoType();
         }catch (ItemNotFound ignored){}
 
         return new NoType();
@@ -251,7 +246,9 @@ public class TypeChecker extends Visitor<Type> {
         Expression assignExpr = assignStatement.getAssignExpression();
         Type assignExprType = assignExpr.accept(this);
 
-        if(assignStatement.isAccessList()) { // DONE:assignment to list  anId[3] += "another element";
+        // anId[3] += "";
+        // anId += "";
+        if(assignStatement.isAccessList()) {
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         assignStatement.getAssignedId().getName());
@@ -271,7 +268,7 @@ public class TypeChecker extends Visitor<Type> {
                 }
             } catch (ItemNotFound ignored) {}
         }
-        else { // DONE:maybe new type for a variable   anId += "another element";
+        else { // DONE:maybe new type for a variable
             VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
             newVarItem.setType(assignExprType);
             try {
@@ -604,26 +601,19 @@ public class TypeChecker extends Visitor<Type> {
             HashSet<Type> typeSet = new HashSet<>();
             for (Expression expr : rangeExpressions) {
                 Type exprType = expr.accept(this);
-                if (exprType != null)
+                if (exprType != null) {
                     typeSet.add(exprType);
+                }
             }
-            Iterator<Type> it = typeSet.iterator();
 
-            Type retType = new NoType();
             if (typeSet.isEmpty()) {
-                return retType;
+                return new NoType();
             }
             if (typeSet.size() == 1) {
-                retType = it.next();
-                return retType;
+                return typeSet.iterator().next();
             }
-
-            it.next();
-            while (it.hasNext()) {
-                it.next();
-                typeErrors.add(new ListElementsTypesMisMatch(rangeExpression.getLine()));
-            }
-            return retType;
+            typeErrors.add(new ListElementsTypesMisMatch(rangeExpression.getLine()));
+            return new NoType();
         }
         if(rangeType.equals(RangeType.DOUBLE_DOT)) {
             Type beginExprType = rangeExpressions.get(0).accept(this);
