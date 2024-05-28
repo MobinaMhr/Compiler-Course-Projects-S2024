@@ -100,19 +100,26 @@ public class TypeChecker extends Visitor<Type> {
             for(Expression expression : patternDeclaration.getConditions()){
                 if(!(expression.accept(this) instanceof BoolType)){
                     typeErrors.add(new ConditionIsNotBool(expression.getLine()));
-                    SymbolTable.pop();      // What is this ? should be after every typeError?
-                    return new NoType();    // What is this ? should be after every typeError?
+                    SymbolTable.pop();
+                    return new NoType();
                 }
             }
-        //  DONE:1-figure out whether return expression of different cases in pattern are of the same type/
+
+            HashSet<Type> typeSet = new HashSet<>();
             for (Expression retExpression : patternDeclaration.getReturnExp()) {
-                Type currentRetType = retExpression.accept(this);
-                if (retType instanceof NoType) {
-                    retType = currentRetType;
-                } else if (!retType.equals(currentRetType)) {
-                    typeErrors.add(new PatternIncompatibleReturnTypes(retExpression.getLine(),
-                            patternDeclaration.getPatternName().toString()));
+                Type exprType = retExpression.accept(this);
+                if (exprType != null) {
+                    typeSet.add(exprType);
                 }
+            }
+            if (typeSet.size() == 1) {
+                retType = typeSet.iterator().next();
+            }
+            if (typeSet.size() > 1) {
+                typeErrors.add(new PatternIncompatibleReturnTypes(
+                        patternDeclaration.getLine(),
+                        patternDeclaration.getPatternName().toString())
+                );
             }
         }catch (ItemNotFound ignored){}
 
@@ -268,7 +275,7 @@ public class TypeChecker extends Visitor<Type> {
                 }
             } catch (ItemNotFound ignored) {}
         }
-        else { // DONE:maybe new type for a variable
+        else {
             VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
             newVarItem.setType(assignExprType);
             try {
@@ -326,7 +333,6 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(PutStatement putStatement){
         Expression putExpr = putStatement.getExpression();
-        // Did we check putExpr != null ??
         if (((putExpr.accept(this)) instanceof FptrType)) {
             typeErrors.add(new IsNotPrintable(putExpr.getLine()));
         }
