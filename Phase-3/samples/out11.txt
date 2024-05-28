@@ -1,0 +1,15 @@
+Line:17-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
+Line:21-> type of `len` function argument must be list or string
+Line:23-> condition's type must be boolean
+Line:25-> access index must be integer
+Line:27-> unsupported operand type for operator PLUS
+Line:28-> unsupported operand type for operator PLUS
+Line:29-> operands of operator PLUS must be the same
+Line:30-> all elements of the list must have same type
+Line:32-> all elements of the list must have same type
+Line:33-> all elements of the list must have same type
+Line:40-> access index must be integer
+Line:43-> access index must be integer
+Line:45-> type of `len` function argument must be list or string
+Line:48-> types of `push` function arguments must be string or the type of the second argument must be the same as the type of the elements in the list
+Line:51-> types of `push` function arguments must be string or the type of the second argume

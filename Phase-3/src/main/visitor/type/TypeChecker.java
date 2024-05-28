@@ -124,18 +124,16 @@ public class TypeChecker extends Visitor<Type> {
         }catch (ItemNotFound ignored){}
 
         SymbolTable.pop();
-        //DONE:2-return the infered type
         return retType;
     }
     @Override
     public Type visit(MainDeclaration mainDeclaration){
-        //DONE:visit main
         for (Statement stmt : mainDeclaration.getBody()) {
             stmt.accept(this);
         }
         return null;
     }
-    @Override // TODO::What about array[0](1, 2)
+    @Override
     public Type visit(AccessExpression accessExpression){
         if(accessExpression.isFunctionCall()){
             if (!(accessExpression.getAccessedExpression() instanceof Identifier)) {
@@ -164,7 +162,6 @@ public class TypeChecker extends Visitor<Type> {
                 functionItem.setArgumentTypes(argumentTypes);
                 return functionItem.getFunctionDeclaration().accept(this);
             } catch (ItemNotFound ignored) {}
-            //DONE:function is called here.set the arguments type and visit its declaration
         }
         else{
             Type accessedType = accessExpression.getAccessedExpression().accept(this);
@@ -172,8 +169,6 @@ public class TypeChecker extends Visitor<Type> {
                 typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
                 return new NoType();
             }
-            //DONE:index of access list must be int
-            // In this phase we use one dimensional lists
             for (Expression indexExpr : accessExpression.getDimentionalAccess()) {
                 Type indexExprType = indexExpr.accept(this);
                 if (!(indexExprType instanceof IntType)) {
@@ -183,14 +178,12 @@ public class TypeChecker extends Visitor<Type> {
             if (accessedType instanceof ListType listType) {
                 return listType.getType();
             }
-            return new StringType(); // For character
+            return new StringType();
         }
         return null;
     }
     @Override
     public Type visit(ReturnStatement returnStatement){
-        //DONE:Note that return type of functions are specified here
-        //DONE:Visit return statement.
         Expression retExpr = returnStatement.getReturnExp();
         Type returnedType = new NoType();
         if (retExpr != null) {
@@ -207,11 +200,6 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(ForStatement forStatement){
         SymbolTable.push(SymbolTable.top.copy());
         forStatement.getRangeExpression().accept(this);
-        //        Expression rangeExpr = forStatement.getRangeExpression();
-//        Type rangeExprType = rangeExpr.accept(this);
-//        if (!(rangeExprType instanceof ListType)) {
-//            typeErrors.add(new IsNotIterable(rangeExpr.getLine()));
-//        }
         VarItem varItem = new VarItem(forStatement.getIteratorId());
         try{
             SymbolTable.top.put(varItem);
@@ -226,7 +214,7 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(IfStatement ifStatement) {
-        HashSet<Type> retTypeSet = new HashSet<Type>();
+        HashSet<Type> retTypeSet = new HashSet<>();
         SymbolTable.push(SymbolTable.top.copy());
         for(Expression expression : ifStatement.getConditions()) {
             if(!(expression.accept(this) instanceof BoolType)) {
@@ -250,17 +238,6 @@ public class TypeChecker extends Visitor<Type> {
         return (retTypeSet.isEmpty()) ?
                 new NoType() : (retTypeSet.size() == 1) ?
                 retTypeSet.stream().findFirst().get() : null;
-//        if (retTypeSet.size() == 1) {
-//            return retTypeSet.stream().findFirst().get();
-//        } else if (retTypeSet.isEmpty()) {
-//            return new NoType();
-//        }
-//        else {
-//            System.out.println("[retTypeSet]="+retTypeSet);
-////            System.out.println("");
-//            return null;
-//        }
-////        return retType;
     }
     @Override
     public Type visit(LoopDoStatement loopDoStatement){
@@ -270,9 +247,8 @@ public class TypeChecker extends Visitor<Type> {
         SymbolTable.pop();
         return new NoType();
     }
-    @Override // Shall we check existence in Symbol Table?
+    @Override
     public Type visit(AssignStatement assignStatement){
-        // right hand side
         Expression assignExpr = assignStatement.getAssignExpression();
         Type assignExprType = assignExpr.accept(this);
 
@@ -327,7 +303,6 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(PushStatement pushStatement){
-        //DONE:visit push statement
         Expression pushInitial = pushStatement.getInitial();
         Type pushInitialType = pushInitial.accept(this);
 
@@ -356,7 +331,6 @@ public class TypeChecker extends Visitor<Type> {
 
     @Override
     public Type visit(PutStatement putStatement){
-        //DONE:visit putStatement
         Expression putExpr = putStatement.getExpression();
         // Did we check putExpr != null ??
         if (((putExpr.accept(this)) instanceof FptrType)) {
@@ -380,7 +354,6 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(ListValue listValue){
-        // DONE:visit listValue
         Type elementType = new NoType();
         for (var expression : listValue.getElements()) {
             Type currentType = expression.accept(this);
@@ -408,7 +381,6 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(BinaryExpression binaryExpression){
-        //DONE:visit binary expression
         Expression firstOperand = binaryExpression.getFirstOperand();
         Type firstOperandType = firstOperand.accept(this);
 
@@ -418,7 +390,7 @@ public class TypeChecker extends Visitor<Type> {
         if (!firstOperandType.sameType(secondOperandType)) {
             typeErrors.add(new NonSameOperands(binaryExpression.getFirstOperand().getLine(),
                     binaryExpression.getOperator()));
-            return new NoType(); // AFTER::Check if correct or not
+            return new NoType();
         }
 
         if (binaryExpression.getOperator().equals(BinaryOperator.EQUAL)) {
@@ -516,16 +488,14 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(UnaryExpression unaryExpression){
-        //DONE:visit unaryExpression
         Expression unaryExpr = unaryExpression.getExpression();
         Type unaryExprType = unaryExpr.accept(this);
 
-        //What about these: FunctionPointer and ListValue
         if (unaryExpression.getOperator().equals(UnaryOperator.NOT)) {
             if (unaryExprType.sameType(new FloatType())
                 || unaryExprType.sameType(new IntType())
                 || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) { //TODO
+                || unaryExprType instanceof FptrType) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -535,7 +505,7 @@ public class TypeChecker extends Visitor<Type> {
         if (unaryExpression.getOperator().equals(UnaryOperator.MINUS)) {
             if (unaryExprType.sameType(new BoolType())
                 || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) { //TODO
+                || unaryExprType instanceof FptrType) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -545,7 +515,7 @@ public class TypeChecker extends Visitor<Type> {
         if (unaryExpression.getOperator().equals(UnaryOperator.INC)) {
             if (unaryExprType.sameType(new BoolType())
                 || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) { //TODO
+                || unaryExprType instanceof FptrType) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -556,7 +526,7 @@ public class TypeChecker extends Visitor<Type> {
         if (unaryExpression.getOperator().equals(UnaryOperator.DEC)) {
             if (unaryExprType.sameType(new BoolType())
                 || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) { //TODO
+                || unaryExprType instanceof FptrType) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -585,7 +555,6 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(Identifier identifier){
-        // DONE:visit Identifier
         try {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
@@ -595,9 +564,7 @@ public class TypeChecker extends Visitor<Type> {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     identifier.getName());
             return functionItem.getFunctionDeclaration().accept(this);
-            // Copy and paste just like what mahdi does.
         } catch (ItemNotFound ignored) {}
-        ///////////////////////////////////////////////////////////////////////////////////////
         try {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
@@ -613,7 +580,6 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(LenStatement lenStatement){
-        //DONE:visit LenStatement.
         Type lenExprType = lenStatement.getExpression().accept(this);
         if(!(lenExprType instanceof StringType) && !(lenExprType instanceof ListType)){
             typeErrors.add(new LenArgumentTypeMisMatch(lenStatement.getExpression().getLine()));
@@ -648,9 +614,8 @@ public class TypeChecker extends Visitor<Type> {
                     typeErrors.add(new ListElementsTypesMisMatch(expr.getLine()));
                 }
             }
-            //TODO: remove based on Javad's opinion
             if (!(listElementType instanceof IntType)) {
-                typeErrors.add(new IsNotIterable(rangeExpression.getLine())); // Not sure
+                typeErrors.add(new IsNotIterable(rangeExpression.getLine()));
             }
             return new ListType(listElementType);
         }
@@ -659,12 +624,12 @@ public class TypeChecker extends Visitor<Type> {
             Type endExprType = rangeExpressions.get(1).accept(this);
 
             if (!(beginExprType.equals(new IntType()) && endExprType.equals(new IntType()))) {
-                typeErrors.add(new RangeValuesMisMatch(rangeExpressions.get(0).getLine()));
+                typeErrors.add(new RangeValuesMisMatch(rangeExpressions.getFirst().getLine()));
             }
 
         }
         if(rangeType.equals(RangeType.IDENTIFIER)) {
-            Identifier rangeId = (Identifier) rangeExpressions.get(0);
+            Identifier rangeId = (Identifier) rangeExpressions.getFirst();
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         rangeId.getName());
