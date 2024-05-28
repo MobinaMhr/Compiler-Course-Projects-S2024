@@ -39,7 +39,7 @@ public class TypeChecker extends Visitor<Type> {
         }
         program.getMain().accept(this);
 
-        return null; // Should it change?
+        return null;
     }
     @Override
     public Type visit(FunctionDeclaration functionDeclaration){
@@ -90,7 +90,6 @@ public class TypeChecker extends Visitor<Type> {
             );
         }
         return new NoType();
-        //DONE:Return the infered type of the function
     }
     @Override
     public Type visit(PatternDeclaration patternDeclaration){
@@ -252,8 +251,7 @@ public class TypeChecker extends Visitor<Type> {
         Expression assignExpr = assignStatement.getAssignExpression();
         Type assignExprType = assignExpr.accept(this);
 
-        if(assignStatement.isAccessList()) {
-            // DONE:assignment to list  anId[3] += "another element";
+        if(assignStatement.isAccessList()) { // DONE:assignment to list  anId[3] += "another element";
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         assignStatement.getAssignedId().getName());
@@ -272,8 +270,7 @@ public class TypeChecker extends Visitor<Type> {
                 }
             } catch (ItemNotFound ignored) {}
         }
-        else {
-            // DONE:maybe new type for a variable   anId += "another element";
+        else { // DONE:maybe new type for a variable   anId += "another element";
             VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
             newVarItem.setType(assignExprType);
             try {
@@ -357,9 +354,11 @@ public class TypeChecker extends Visitor<Type> {
         Type elementType = new NoType();
         for (var expression : listValue.getElements()) {
             Type currentType = expression.accept(this);
+//            System.out.println("currentType="+currentType);
             if (elementType instanceof NoType) {
                 elementType = currentType;
-            } else if (!elementType.equals(currentType)) {
+            } else if (!elementType.sameType(currentType)) {
+//                System.out.println("elementType="+elementType);
                 typeErrors.add(new ListElementsTypesMisMatch(expression.getLine()));
                 return new ListType(new NoType());
             }
