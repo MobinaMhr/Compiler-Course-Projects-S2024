@@ -1,0 +1,6 @@
+def main()
+    for i in [1, 2, "aa", false, 0.2, 8.9]
+        puts(i);
+    end
+end
+
