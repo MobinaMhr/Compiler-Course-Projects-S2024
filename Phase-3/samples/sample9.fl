@@ -1,6 +1,9 @@
-def main()
-    for i in [1, 2, "aa", false, 0.2, 8.9]
-        puts(i);
-    end
-end
+pattern fib(a)
+    | (a>1) = "0"
+    | (a<2) = 2
+    | (a > 2) = 2.5
+;
 
+def main()
+   fib.match(1);
+end

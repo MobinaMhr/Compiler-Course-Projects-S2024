@@ -1,15 +1,10 @@
-# this one not handled yet.
-
 def f3()
-
 end
 
 def f2()
-
 end
 
 def f1()
-
 end
 
 def main()
