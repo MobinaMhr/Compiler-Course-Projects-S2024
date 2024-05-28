@@ -1,7 +1,9 @@
-
 def f(x)
-    x = x+7;
-    return x;
+    if (true)
+        return x;
+    else
+        return "55";
+    end
 end
 
 def main()
