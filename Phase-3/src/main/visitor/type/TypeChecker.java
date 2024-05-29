@@ -151,14 +151,13 @@ public class TypeChecker extends Visitor<Type> {
                 System.out.println("The Accessed Expr is not an instance of Id, so handle it");
                 return new NoType();
             }
-            try {
-                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
-                        functionName);
-//                System.out.println("===");
+//            try {
+//                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+//                        functionName);
 //                if (varItem.getType() instanceof FptrType fptrType) {
 //                    functionName = fptrType.getFunctionName();
 //                }
-            } catch (ItemNotFound ignored) {}
+//            } catch (ItemNotFound ignored) {}
             try {
                 FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                         functionName);
@@ -170,13 +169,12 @@ public class TypeChecker extends Visitor<Type> {
                 functionItem.setArgumentTypes(argumentTypes);
                 Type functionRetType = functionItem.getFunctionDeclaration().accept(this);
                 accessedExprType = functionRetType;
-//                return functionRetType;
             } catch (ItemNotFound ignored) {}
         }
         if (accessExpression.getDimentionalAccess().isEmpty()) {
-            System.out.println("tagho "+accessedExprType);
             return accessedExprType;
         }
+
         for (var indexExpr : accessExpression.getDimentionalAccess()) {
             Type indexExprType = indexExpr.accept(this);
             if (!(indexExprType instanceof IntType)) {
@@ -209,9 +207,13 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(ForStatement forStatement){
         SymbolTable.push(SymbolTable.top.copy());
-        Type rangeExprType = forStatement.getRangeExpression().accept(this);
         VarItem varItem = new VarItem(forStatement.getIteratorId());
-        varItem.setType(new IntType());
+        Type iteratorType = forStatement.getRangeExpression().accept(this);
+        if (iteratorType instanceof ListType listType) {
+            iteratorType = listType.getType();
+        }
+        varItem.setType(iteratorType);
+
         try{
             SymbolTable.top.put(varItem);
         }catch (ItemAlreadyExists ignored){}
@@ -271,10 +273,19 @@ public class TypeChecker extends Visitor<Type> {
                         assignStatement.getAssignedId().getName());
                 Type assignedIdType = varItem.getType();
 
+                if (!(assignedIdType instanceof ListType) &&
+                        !(assignedIdType instanceof StringType)) {
+                    typeErrors.add(new IsNotIndexable(assignStatement.getLine()));
+                    return new NoType();
+                }
                 if (assignedIdType instanceof ListType listType &&
                         (!(listType.getType() instanceof NoType)) &&
                         (!(listType.getType().sameType(assignExprType)))) {
                     typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine()));
+                    return new NoType();
+                }
+                if (assignedIdType instanceof StringType && !(assignExprType instanceof StringType)) {
+//                    typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine())); (TODO)
                     return new NoType();
                 }
 
@@ -283,6 +294,7 @@ public class TypeChecker extends Visitor<Type> {
                     typeErrors.add(new AccessIndexIsNotInt(assignStatement.getLine()));
                     return new NoType();
                 }
+
             } catch (ItemNotFound ignored) {}
         }
         else {
@@ -307,10 +319,13 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(NextStatement nextStatement){
-        for(Expression expression : nextStatement.getConditions())
+        for(Expression expression : nextStatement.getConditions()) {
+            System.out.println("av|"+expression);
             if(!((expression.accept(this)) instanceof BoolType)) {
                 typeErrors.add(new ConditionIsNotBool(expression.getLine()));
             }
+        }
+        System.out.println("av1");
         return null;
     }
     @Override
@@ -377,7 +392,7 @@ public class TypeChecker extends Visitor<Type> {
             return new ListType(typeSet.iterator().next());
         }
         typeErrors.add(new ListElementsTypesMisMatch(listValue.getLine()));
-        return new ListType(new NoType());
+        return new ListType(typeSet.iterator().next());
     }
     @Override
     public Type visit(FunctionPointer functionPointer){
@@ -387,23 +402,19 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(AppendExpression appendExpression){
         Type appendeeType = appendExpression.getAppendee().accept(this);
         if (!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)) {
-            System.out.println("@appendeeType@"+appendeeType);
             typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             return new NoType();
         }
 
         HashSet<Type> typeSet = new HashSet<>();
-        System.out.println("QQQQ" + appendExpression.getAppendeds());
         for (var appendedExpr : appendExpression.getAppendeds()) {
             Type appendedExprType = appendedExpr.accept(this);
-            System.out.println("1111"+appendedExprType);
             if (appendedExprType == null) {
                 continue;
             }
             typeSet.add(appendedExprType);
         }
 
-        System.out.println("!!!!!!!!!!!!1" + typeSet);
         if (typeSet.isEmpty()) {
             return appendeeType;
         }
@@ -416,13 +427,11 @@ public class TypeChecker extends Visitor<Type> {
         if (appendeeType instanceof ListType listType) {
             Type listElementType = listType.getType();
             if (!(listElementType.sameType(appendedType))) {
-                System.out.println("@@");
                 typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             }
         }
         else {
             if (!(appendedType instanceof StringType)) {
-                System.out.println("@@@");
                 typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             }
         }
@@ -649,10 +658,8 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(RangeExpression rangeExpression){
-//      DONE --> mind that the lists are declared explicitly in the grammar in this node, so handle the errors
         ArrayList<Expression> rangeExpressions = rangeExpression.getRangeExpressions();
         RangeType rangeType = rangeExpression.getRangeType();
-
         if(rangeType.equals(RangeType.LIST)) {
             HashSet<Type> typeSet = new HashSet<>();
             for (Expression expr : rangeExpressions) {
@@ -678,9 +685,10 @@ public class TypeChecker extends Visitor<Type> {
             if (!(beginExprType.equals(new IntType()) && endExprType.equals(new IntType()))) {
                 typeErrors.add(new RangeValuesMisMatch(rangeExpressions.getFirst().getLine()));
             }
-
+            return new IntType();
         }
         if(rangeType.equals(RangeType.IDENTIFIER)) {
+            Type type = new NoType();
             Identifier rangeId = (Identifier) rangeExpressions.getFirst();
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
@@ -688,9 +696,10 @@ public class TypeChecker extends Visitor<Type> {
                 if (!(varItem.getType() instanceof ListType)) {
                     typeErrors.add(new IsNotIterable(rangeId.getLine()));
                 }
+                type = varItem.getType();
             } catch (ItemNotFound ignored) {}
+            return type;
         }
-
         return new NoType();
     }
 }
