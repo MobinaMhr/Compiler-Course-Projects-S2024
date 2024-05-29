@@ -220,27 +220,26 @@ public class TypeChecker extends Visitor<Type> {
                     argumentTypes.add(argExpr.accept(this));
                 }
                 functionItem.setArgumentTypes(argumentTypes);
-                Type functionRetType = functionItem.getFunctionDeclaration().accept(this);
-                accessedExprType = functionRetType;
+                accessedExprType = functionItem.getFunctionDeclaration().accept(this);
             } catch (ItemNotFound ignored) {}
         }
         if (accessExpression.isFunctionCall() &&
                 accessExpression.getDimentionalAccess().isEmpty()) {
             return accessedExprType;
         }
-
+        Type accessedType = accessExpression.getAccessedExpression().accept(this);
         for (var indexExpr : accessExpression.getDimentionalAccess()) {
             Type indexExprType = indexExpr.accept(this);
             if (!(indexExprType instanceof IntType)) {
                 typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
             }
         }
-        if(!(accessedExprType instanceof StringType) && !(accessedExprType instanceof ListType)){
-            System.out.println("vay1");
+        if(!(accessedType instanceof StringType) && !(accessedType instanceof ListType)){
+            System.out.println("vay1"+accessedType);
             typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
             return new NoType();
         }
-        if (accessedExprType instanceof ListType listType) {
+        if (accessedType instanceof ListType listType) {
             return listType.getType();
         }
         return new StringType();
