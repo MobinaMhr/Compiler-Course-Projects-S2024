@@ -17,7 +17,6 @@ import main.symbolTable.item.*;
 import main.visitor.Visitor;
 
 import java.util.*;
-//TODO:: mind the difference between type equality and sameType and handle in code
 public class TypeChecker extends Visitor<Type> {
     public ArrayList<CompileError> typeErrors = new ArrayList<>();
     private HashSet<Type> returnTypes = new HashSet<>();
@@ -278,7 +277,6 @@ public class TypeChecker extends Visitor<Type> {
                     return new NoType();
                 }
                 if (assignedIdType instanceof StringType && !(assignExprType instanceof StringType)) {
-//                    typeErrors.add(new ListElementsTypesMisMatch(assignStatement.getLine())); (TODO)
                     return new NoType();
                 }
 
@@ -389,19 +387,17 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(FunctionPointer functionPointer){
         return new FptrType(functionPointer.getId().getName());
     }
-    @Override //AppendTypesMisMatch - IsNotAppendable
+    @Override
     public Type visit(AppendExpression appendExpression){
         Type appendeeType = appendExpression.getAppendee().accept(this);
         if (!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)) {
             typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             return new NoType();
         }
-        System.out.println("/"+appendExpression.getAppendeds());
 
         HashSet<Type> typeSet = new HashSet<>();
         for (var appendedExpr : appendExpression.getAppendeds()) {
             Type appendedExprType = appendedExpr.accept(this);
-            System.out.println("/"+appendedExprType);
             if (appendedExprType == null) {
                 continue;
             }
@@ -411,12 +407,10 @@ public class TypeChecker extends Visitor<Type> {
         if (typeSet.isEmpty()) {
             return appendeeType;
         }
-        System.out.println("/");
         if (typeSet.size() > 1) {
             typeErrors.add(new AppendTypesMisMatch(appendExpression.getLine()));
             return appendeeType;
         }
-        System.out.println("/");
         Type appendedType = typeSet.iterator().next();
         if (appendeeType instanceof ListType listType) {
             Type listElementType = listType.getType();
@@ -429,7 +423,6 @@ public class TypeChecker extends Visitor<Type> {
                 typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             }
         }
-        System.out.println("/");
         return appendeeType;
     }
     @Override
@@ -440,97 +433,36 @@ public class TypeChecker extends Visitor<Type> {
         Expression secondOperand = binaryExpression.getSecondOperand();
         Type secondOperandType = secondOperand.accept(this);
 
-        if (!firstOperandType.sameType(secondOperandType)) {
+        if (!firstOperandType.sameType(secondOperandType) &&
+                binaryExpression.getOperator() != BinaryOperator.EQUAL &&
+                binaryExpression.getOperator() != BinaryOperator.NOT_EQUAL) {
             typeErrors.add(new NonSameOperands(binaryExpression.getFirstOperand().getLine(),
                     binaryExpression.getOperator()));
             return new NoType();
         }
 
-        if (binaryExpression.getOperator().equals(BinaryOperator.EQUAL)) {
+        if (binaryExpression.getOperator() == BinaryOperator.NOT_EQUAL
+            || binaryExpression.getOperator() == BinaryOperator.EQUAL) {
             return new BoolType();
         }
-        if (binaryExpression.getOperator().equals(BinaryOperator.NOT_EQUAL)) {
-            return new BoolType();
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.GREATER_THAN)) {
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return new BoolType();
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.LESS_THAN)) {
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
+        if (binaryExpression.getOperator() == BinaryOperator.LESS_EQUAL_THAN
+            || binaryExpression.getOperator() == BinaryOperator.GREATER_EQUAL_THAN
+            || binaryExpression.getOperator() == BinaryOperator.LESS_THAN
+            || binaryExpression.getOperator() == BinaryOperator.GREATER_THAN) {
+            if (!(firstOperandType instanceof IntType && secondOperandType instanceof IntType
+                    || firstOperandType instanceof FloatType && secondOperandType instanceof FloatType)) {
                 typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
                         binaryExpression.getOperator().toString()));
                 return new NoType();
             }
             return new BoolType();
         }
-        if (binaryExpression.getOperator().equals(BinaryOperator.LESS_EQUAL_THAN)) {
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return new BoolType();
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.GREATER_EQUAL_THAN)) {
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return new BoolType();
-        }
-
-        if (binaryExpression.getOperator().equals(BinaryOperator.PLUS)) {
-            if (firstOperandType.equals(new StringType()) || secondOperandType.equals(new StringType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return firstOperandType;
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.MINUS)) {
-            if (firstOperandType.equals(new StringType()) || secondOperandType.equals(new StringType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return firstOperandType;
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.MULT)) {
-            if (firstOperandType.equals(new StringType()) || secondOperandType.equals(new StringType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return firstOperandType;
-        }
-        if (binaryExpression.getOperator().equals(BinaryOperator.DIVIDE)) {
-            if (firstOperandType.equals(new StringType()) || secondOperandType.equals(new StringType())) {
-                typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
-                        binaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            if (firstOperandType.equals(new BoolType()) || secondOperandType.equals(new BoolType())) {
+        if (binaryExpression.getOperator() == BinaryOperator.MULT
+            || binaryExpression.getOperator() == BinaryOperator.DIVIDE
+            || binaryExpression.getOperator() == BinaryOperator.MINUS
+            || binaryExpression.getOperator() == BinaryOperator.PLUS) {
+            if (!(firstOperandType instanceof IntType && secondOperandType instanceof IntType
+                    || firstOperandType instanceof FloatType && secondOperandType instanceof FloatType)) {
                 typeErrors.add(new UnsupportedOperandType(binaryExpression.getFirstOperand().getLine(),
                         binaryExpression.getOperator().toString()));
                 return new NoType();
@@ -544,42 +476,19 @@ public class TypeChecker extends Visitor<Type> {
         Expression unaryExpr = unaryExpression.getExpression();
         Type unaryExprType = unaryExpr.accept(this);
 
-        if (unaryExpression.getOperator().equals(UnaryOperator.NOT)) {
-            if (unaryExprType.sameType(new FloatType())
-                || unaryExprType.sameType(new IntType())
-                || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) {
+        if (unaryExpression.getOperator() == UnaryOperator.NOT) {
+            if (!(unaryExprType instanceof BoolType)) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
             }
             return unaryExprType;
         }
-        if (unaryExpression.getOperator().equals(UnaryOperator.MINUS)) {
-            if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) {
-                typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
-                        unaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-            return unaryExprType;
-        }
-        if (unaryExpression.getOperator().equals(UnaryOperator.INC)) {
-            if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) {
-                typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
-                        unaryExpression.getOperator().toString()));
-                return new NoType();
-            }
-
-            return unaryExprType;
-        }
-        if (unaryExpression.getOperator().equals(UnaryOperator.DEC)) {
-            if (unaryExprType.sameType(new BoolType())
-                || unaryExprType.sameType(new StringType())
-                || unaryExprType instanceof FptrType) {
+        if (unaryExpression.getOperator() == UnaryOperator.MINUS
+            || unaryExpression.getOperator() == UnaryOperator.INC
+            || unaryExpression.getOperator() == UnaryOperator.DEC) {
+            if (!(unaryExprType instanceof IntType
+                    || unaryExprType instanceof FloatType)) {
                 typeErrors.add(new UnsupportedOperandType(unaryExpression.getExpression().getLine(),
                         unaryExpression.getOperator().toString()));
                 return new NoType();
@@ -616,21 +525,8 @@ public class TypeChecker extends Visitor<Type> {
         try {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     identifier.getName());
-            // TODO set the vals.
             return functionItem.getFunctionDeclaration().accept(this);
         } catch (ItemNotFound ignored) {}
-        // IS this redundant? TODO
-        try {
-            VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
-                    identifier.getName());
-            return varItem.getType();
-        } catch (ItemNotFound ignored) {
-            try {
-                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
-                        identifier.getName());
-                return functionItem.getFunctionDeclaration().accept(this);
-            } catch (ItemNotFound ignored2) {}
-        }
         return null;
     }
     @Override
@@ -648,8 +544,7 @@ public class TypeChecker extends Visitor<Type> {
             PatternItem patternItem = (PatternItem)SymbolTable.root.getItem(PatternItem.START_KEY +
                     matchPatternStatement.getPatternId().getName());
             patternItem.setTargetVarType(matchPatternStatement.getMatchArgument().accept(this));
-            Type patternReturnType = patternItem.getPatternDeclaration().accept(this);
-            return patternReturnType;
+            return patternItem.getPatternDeclaration().accept(this);
         }catch (ItemNotFound ignored){}
         return new NoType();
     }
