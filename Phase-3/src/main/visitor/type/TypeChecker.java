@@ -21,6 +21,7 @@ import java.util.*;
 public class TypeChecker extends Visitor<Type> {
     public ArrayList<CompileError> typeErrors = new ArrayList<>();
     private HashSet<Type> returnTypes = new HashSet<>();
+    private Stack<HashSet<Type>> returnTypesStack = new Stack<>();
     @Override
     public Type visit(Program program){
         SymbolTable.root = new SymbolTable();
@@ -43,6 +44,7 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(FunctionDeclaration functionDeclaration){
+        this.returnTypesStack.push(returnTypes);
         this.returnTypes = new HashSet<>();
         SymbolTable.push(new SymbolTable());
         try {
@@ -67,13 +69,15 @@ public class TypeChecker extends Visitor<Type> {
             for(Statement stmt : functionDeclaration.getBody()) {
                 stmt.accept(this);
             }
+            HashSet<Type> returnTypesOfThisFunction = this.returnTypes;
+            this.returnTypes = returnTypesStack.pop();
             SymbolTable.pop();
 
-            if (this.returnTypes.isEmpty()) {
+            if (returnTypesOfThisFunction.isEmpty()) {
                 return new NoType();
             }
-            if (this.returnTypes.size() == 1) {
-                return this.returnTypes.iterator().next();
+            if (returnTypesOfThisFunction.size() == 1) {
+                return returnTypesOfThisFunction.iterator().next();
             }
 
             typeErrors.add(new FunctionIncompatibleReturnTypes(

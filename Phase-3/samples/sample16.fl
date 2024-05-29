@@ -1,0 +1,7 @@
+def return_string_func()
+    return "fffffffffffffffffff";
+end
+def main()
+    s = return_string_func();
+    push(s, 1.0);
+end
