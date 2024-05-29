@@ -138,30 +138,79 @@ public class TypeChecker extends Visitor<Type> {
         }
         return null;
     }
+//    @Override
+//    public Type visit(AccessExpression accessExpression){
+//        Type accessedExprType = new NoType();
+//        if(accessExpression.isFunctionCall()){
+//            String functionName;
+//            Expression accessedExpr = accessExpression.getAccessedExpression();
+//            accessedExprType = accessedExpr.accept(this);
+//            if (accessedExprType instanceof FptrType fptrType) {
+//                functionName = fptrType.getFunctionName();
+//            }
+//            else if (accessedExpr instanceof Identifier) {
+//                functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
+//            }
+//            else {
+//                typeErrors.add(new IsNotCallable(accessExpression.getLine()));
+//                System.out.println("The Accessed Expr is not an instance of Id, so handle it");
+//                return new NoType();
+//            }
+////            try {
+////                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+////                        functionName);
+////                if (varItem.getType() instanceof FptrType fptrType) {
+////                    functionName = fptrType.getFunctionName();
+////                }
+////            } catch (ItemNotFound ignored) {}
+//            try {
+//                FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
+//                        functionName);
+//                functionItem.clearArgumentTypeList();
+//                ArrayList<Type> argumentTypes = new ArrayList<>();
+//                for (Expression argExpr : accessExpression.getArguments()) {
+//                    argumentTypes.add(argExpr.accept(this));
+//                }
+//                functionItem.setArgumentTypes(argumentTypes);
+//                Type functionRetType = functionItem.getFunctionDeclaration().accept(this);
+//                accessedExprType = functionRetType;
+//            } catch (ItemNotFound ignored) {}
+//        }
+//        if (!accessExpression.getDimentionalAccess().isEmpty()){
+//            return accessedExprType;
+//        }
+//        Type accessedType = accessExpression.getAccessedExpression().accept(this); // TODO
+//        if(!(accessedType instanceof StringType) && !(accessedType instanceof ListType)){
+//            typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
+//            return new NoType();
+//        }
+//        //TODO:index of access list must be int
+//        for (var indexExpr : accessExpression.getDimentionalAccess()) {
+//            Type indexExprType = indexExpr.accept(this);
+//            if (!(indexExprType instanceof IntType)) {
+//                typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
+//            }
+//        }
+//        if (accessedType instanceof ListType listType) {
+//            return listType.getType();
+//        }
+//        return new StringType();
+////        return null;
+//    }
     @Override
     public Type visit(AccessExpression accessExpression){
         Expression accessedExpr = accessExpression.getAccessedExpression();
-        Type accessedExprType = accessedExpr.accept(this);
+        Type accessedExprType = new NoType();
         if(accessExpression.isFunctionCall()){
             String functionName;
-            if (accessedExprType instanceof FptrType fptrType) {
-                functionName = fptrType.getFunctionName();
-            }
-            else if (accessedExpr instanceof Identifier) {
-                functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
-            }
-            else {
-                typeErrors.add(new IsNotCallable(accessExpression.getLine()));
-                System.out.println("The Accessed Expr is not an instance of Id, so handle it");
-                return new NoType();
-            }
-//            try {
-//                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
-//                        functionName);
-//                if (varItem.getType() instanceof FptrType fptrType) {
-//                    functionName = fptrType.getFunctionName();
-//                }
-//            } catch (ItemNotFound ignored) {}
+            functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
+            try {
+                VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
+                        functionName);
+                if (varItem.getType() instanceof FptrType fptrType) {
+                    functionName = fptrType.getFunctionName();
+                }
+            } catch (ItemNotFound ignored) {}
             try {
                 FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                         functionName);
@@ -175,7 +224,8 @@ public class TypeChecker extends Visitor<Type> {
                 accessedExprType = functionRetType;
             } catch (ItemNotFound ignored) {}
         }
-        if (accessExpression.getDimentionalAccess().isEmpty()) {
+        if (accessExpression.isFunctionCall() &&
+                accessExpression.getDimentionalAccess().isEmpty()) {
             return accessedExprType;
         }
 
@@ -186,6 +236,7 @@ public class TypeChecker extends Visitor<Type> {
             }
         }
         if(!(accessedExprType instanceof StringType) && !(accessedExprType instanceof ListType)){
+            System.out.println("vay1");
             typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
             return new NoType();
         }
@@ -268,7 +319,6 @@ public class TypeChecker extends Visitor<Type> {
     public Type visit(AssignStatement assignStatement){
         Expression assignExpr = assignStatement.getAssignExpression();
         Type assignExprType = assignExpr.accept(this);
-
         // anId[3] += "";
         // anId += "";
         if(assignStatement.isAccessList()) {
@@ -324,12 +374,10 @@ public class TypeChecker extends Visitor<Type> {
     @Override
     public Type visit(NextStatement nextStatement){
         for(Expression expression : nextStatement.getConditions()) {
-            System.out.println("av|"+expression);
             if(!((expression.accept(this)) instanceof BoolType)) {
                 typeErrors.add(new ConditionIsNotBool(expression.getLine()));
             }
         }
-        System.out.println("av1");
         return null;
     }
     @Override
@@ -625,8 +673,10 @@ public class TypeChecker extends Visitor<Type> {
         try {
             FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                     identifier.getName());
+            // TODO set the vals.
             return functionItem.getFunctionDeclaration().accept(this);
         } catch (ItemNotFound ignored) {}
+        // IS this redundant? TODO
         try {
             VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                     identifier.getName());
