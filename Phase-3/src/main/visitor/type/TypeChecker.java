@@ -151,15 +151,14 @@ public class TypeChecker extends Visitor<Type> {
                 System.out.println("The Accessed Expr is not an instance of Id, so handle it");
                 return new NoType();
             }
-
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         functionName);
-                if (varItem.getType() instanceof FptrType fptrType) {
-                    functionName = fptrType.getFunctionName();
-                } else { System.out.println("I don't know what the hell is happening give me the test.");}
+//                System.out.println("===");
+//                if (varItem.getType() instanceof FptrType fptrType) {
+//                    functionName = fptrType.getFunctionName();
+//                }
             } catch (ItemNotFound ignored) {}
-
             try {
                 FunctionItem functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY +
                         functionName);
@@ -169,26 +168,29 @@ public class TypeChecker extends Visitor<Type> {
                     argumentTypes.add(argExpr.accept(this));
                 }
                 functionItem.setArgumentTypes(argumentTypes);
-                return functionItem.getFunctionDeclaration().accept(this);
+                Type functionRetType = functionItem.getFunctionDeclaration().accept(this);
+                accessedExprType = functionRetType;
+//                return functionRetType;
             } catch (ItemNotFound ignored) {}
         }
-        else{
-            if(!(accessedExprType instanceof StringType) && !(accessedExprType instanceof ListType)){
-                typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
-                return new NoType();
-            }
-            for (Expression indexExpr : accessExpression.getDimentionalAccess()) {
-                Type indexExprType = indexExpr.accept(this);
-                if (!(indexExprType instanceof IntType)) {
-                    typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
-                }
-            }
-            if (accessedExprType instanceof ListType listType) {
-                return listType.getType();
-            }
-            return new StringType();
+        if (accessExpression.getDimentionalAccess().isEmpty()) {
+            System.out.println("tagho "+accessedExprType);
+            return accessedExprType;
         }
-        return null;
+        for (var indexExpr : accessExpression.getDimentionalAccess()) {
+            Type indexExprType = indexExpr.accept(this);
+            if (!(indexExprType instanceof IntType)) {
+                typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
+            }
+        }
+        if(!(accessedExprType instanceof StringType) && !(accessedExprType instanceof ListType)){
+            typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
+            return new NoType();
+        }
+        if (accessedExprType instanceof ListType listType) {
+            return listType.getType();
+        }
+        return new StringType();
     }
     @Override
     public Type visit(ReturnStatement returnStatement){
@@ -391,14 +393,17 @@ public class TypeChecker extends Visitor<Type> {
         }
 
         HashSet<Type> typeSet = new HashSet<>();
+        System.out.println("QQQQ" + appendExpression.getAppendeds());
         for (var appendedExpr : appendExpression.getAppendeds()) {
             Type appendedExprType = appendedExpr.accept(this);
+            System.out.println("1111"+appendedExprType);
             if (appendedExprType == null) {
                 continue;
             }
             typeSet.add(appendedExprType);
         }
 
+        System.out.println("!!!!!!!!!!!!1" + typeSet);
         if (typeSet.isEmpty()) {
             return appendeeType;
         }
