@@ -108,9 +108,10 @@ public class TypeChecker extends Visitor<Type> {
             HashSet<Type> typeSet = new HashSet<>();
             for (Expression retExpression : patternDeclaration.getReturnExp()) {
                 Type exprType = retExpression.accept(this);
-                if (exprType != null) {
-                    typeSet.add(exprType);
+                if (exprType == null) {
+                    continue;
                 }
+                typeSet.add(exprType);
             }
             if (typeSet.size() == 1) {
                 retType = typeSet.iterator().next();
@@ -118,7 +119,7 @@ public class TypeChecker extends Visitor<Type> {
             if (typeSet.size() > 1) {
                 typeErrors.add(new PatternIncompatibleReturnTypes(
                         patternDeclaration.getLine(),
-                        patternDeclaration.getPatternName().toString())
+                        patternItem.getName())
                 );
             }
         }catch (ItemNotFound ignored){}
@@ -135,14 +136,22 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(AccessExpression accessExpression){
+        Expression accessedExpr = accessExpression.getAccessedExpression();
+        Type accessedExprType = accessedExpr.accept(this);
         if(accessExpression.isFunctionCall()){
-            if (!(accessExpression.getAccessedExpression() instanceof Identifier)) {
+            String functionName;
+            if (accessedExprType instanceof FptrType fptrType) {
+                functionName = fptrType.getFunctionName();
+            }
+            else if (accessedExpr instanceof Identifier) {
+                functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
+            }
+            else {
                 typeErrors.add(new IsNotCallable(accessExpression.getLine()));
                 System.out.println("The Accessed Expr is not an instance of Id, so handle it");
                 return new NoType();
             }
 
-            String functionName = ((Identifier) accessExpression.getAccessedExpression()).getName();
             try {
                 VarItem varItem = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY +
                         functionName);
@@ -164,8 +173,7 @@ public class TypeChecker extends Visitor<Type> {
             } catch (ItemNotFound ignored) {}
         }
         else{
-            Type accessedType = accessExpression.getAccessedExpression().accept(this);
-            if(!(accessedType instanceof StringType) && !(accessedType instanceof ListType)){
+            if(!(accessedExprType instanceof StringType) && !(accessedExprType instanceof ListType)){
                 typeErrors.add(new IsNotIndexable(accessExpression.getLine()));
                 return new NoType();
             }
@@ -175,7 +183,7 @@ public class TypeChecker extends Visitor<Type> {
                     typeErrors.add(new AccessIndexIsNotInt(indexExpr.getLine()));
                 }
             }
-            if (accessedType instanceof ListType listType) {
+            if (accessedExprType instanceof ListType listType) {
                 return listType.getType();
             }
             return new StringType();
@@ -329,7 +337,6 @@ public class TypeChecker extends Visitor<Type> {
         }
         return new NoType();
     }
-
     @Override
     public Type visit(PutStatement putStatement){
         Expression putExpr = putStatement.getExpression();
@@ -354,28 +361,65 @@ public class TypeChecker extends Visitor<Type> {
     }
     @Override
     public Type visit(ListValue listValue){
-        Type elementType = new NoType();
-        for (var expression : listValue.getElements()) {
-            Type currentType = expression.accept(this);
-            if (elementType instanceof NoType) {
-                elementType = currentType;
-            } else if (!elementType.sameType(currentType)) {
-                typeErrors.add(new ListElementsTypesMisMatch(expression.getLine()));
-                return new ListType(new NoType());
+        HashSet<Type> typeSet = new HashSet<>();
+        for (var expr : listValue.getElements()) {
+            Type exprType = expr.accept(this);
+            if (exprType != null) {
+                typeSet.add(exprType);
             }
         }
-        return new ListType(elementType);
+        if (typeSet.isEmpty()) {
+            return new ListType(new NoType());
+        }
+        if (typeSet.size() == 1) {
+            return new ListType(typeSet.iterator().next());
+        }
+        typeErrors.add(new ListElementsTypesMisMatch(listValue.getLine()));
+        return new ListType(new NoType());
     }
     @Override
     public Type visit(FunctionPointer functionPointer){
         return new FptrType(functionPointer.getId().getName());
     }
-    @Override
+    @Override //AppendTypesMisMatch - IsNotAppendable
     public Type visit(AppendExpression appendExpression){
         Type appendeeType = appendExpression.getAppendee().accept(this);
-        if(!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)){
+        if (!(appendeeType instanceof ListType) && !(appendeeType instanceof StringType)) {
+            System.out.println("@appendeeType@"+appendeeType);
             typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
             return new NoType();
+        }
+
+        HashSet<Type> typeSet = new HashSet<>();
+        for (var appendedExpr : appendExpression.getAppendeds()) {
+            Type appendedExprType = appendedExpr.accept(this);
+            if (appendedExprType == null) {
+                continue;
+            }
+            typeSet.add(appendedExprType);
+        }
+
+        if (typeSet.isEmpty()) {
+            return appendeeType;
+        }
+        if (typeSet.size() > 1) {
+            typeErrors.add(new AppendTypesMisMatch(appendExpression.getLine()));
+            return appendeeType;
+        }
+
+        Type appendedType = typeSet.iterator().next();
+        if (appendeeType instanceof ListType listType) {
+            Type listElementType = listType.getType();
+            if (!(listElementType.sameType(appendedType))) {
+                System.out.println("@@");
+                typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
+            }
+        }
+        else {
+            if (!(appendedType instanceof StringType)) {
+                System.out.println("@@@");
+                typeErrors.add(new IsNotAppendable(appendExpression.getLine()));
+            }
         }
         return appendeeType;
     }
@@ -593,7 +637,8 @@ public class TypeChecker extends Visitor<Type> {
             PatternItem patternItem = (PatternItem)SymbolTable.root.getItem(PatternItem.START_KEY +
                     matchPatternStatement.getPatternId().getName());
             patternItem.setTargetVarType(matchPatternStatement.getMatchArgument().accept(this));
-            return patternItem.getPatternDeclaration().accept(this);
+            Type patternReturnType = patternItem.getPatternDeclaration().accept(this);
+            return patternReturnType;
         }catch (ItemNotFound ignored){}
         return new NoType();
     }
