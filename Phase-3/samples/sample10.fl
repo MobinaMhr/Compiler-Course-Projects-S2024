@@ -1,0 +1,14 @@
+def retList(n)
+    a = [0];
+    for i in (0..n)
+        next if (n / 2 == 0);
+        push(a, i);
+    end
+    return a;
+end
+
+def main()
+    a = retList(10);
+    a[0] = "1";
+    puts(a);
+end

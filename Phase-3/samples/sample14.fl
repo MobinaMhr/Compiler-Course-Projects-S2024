@@ -1,0 +1,56 @@
+def return_int_func()
+    return 3+2+len("salam");
+end
+
+def return_float_func()
+    return 3.2+2.3;
+end
+
+def return_bool_func()
+    return 1 > 2;
+end
+
+def return_string_func()
+    return "fffffffffffffffffff";
+end
+
+def return_fptr_func()
+    return method(:return_fptr_func);
+end
+
+def return_list_func()
+    return [];
+end
+
+pattern return_int_pat(a)
+    | (true) = return_int_func()
+    | (true) = 2
+;
+
+pattern return_float_pat(a)
+    | (true) = return_float_func()
+    | (true) = 2.4
+;
+
+pattern return_bool_pat(a)
+    | (true) = return_bool_func()
+    | (true) = false
+;
+
+pattern return_string_pat(a)
+    | (true) = return_string_func()
+    | (true) = "2"
+;
+
+pattern return_fptr_pat(a)
+    | (true) = return_fptr_func()
+    | (true) = method(:return_fptr_func)
+;
+
+pattern return_list_pat(a)
+    | (true) = return_list_func()
+    | (true) = []
+;
+##################################################################################
+def main()
+end

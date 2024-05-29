@@ -1,0 +1,19 @@
+def return_string_func()
+    return "fffffffffffffffffff";
+end
+def main()
+    # [[3], [], [3], [3], []]
+    list = [];
+    list << [];
+    list << [3];
+    list[1] << 3;
+    list << [3];
+    list << [];
+    # append expression should change list structure like push statement.
+    s = "string";
+    s << 3;
+    s << 3.5;
+    s << ture;
+    s << "3";
+    s << return_string_func();
+end
