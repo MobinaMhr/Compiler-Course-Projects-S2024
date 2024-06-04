@@ -1,0 +1,26 @@
+def f2(a, b, [c=10])
+    return "2";
+end
+
+def f3()
+    return "3";
+end
+
+def f1()
+    if (true)
+        return "1";
+    else
+        return f2(1, "sss", true);
+    end
+    f3();
+    return "11";
+end
+
+def f4(v)
+    return v;
+end
+
+def main()
+    f1();
+    f4(1);
+end
