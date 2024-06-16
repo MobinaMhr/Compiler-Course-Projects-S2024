@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="jarFiles">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/utilities/jarFiles/jasmin.jar!/" />
+      <root url="jar://$PROJECT_DIR$/utilities/jarFiles/classFileAnalyzer.jar!/" />
+      <root url="jar://$PROJECT_DIR$/utilities/jarFiles/antlr-4.13.1-complete.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

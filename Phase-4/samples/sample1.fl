@@ -1,26 +1,26 @@
-def f2(a, b, [c=10])
-    return "2";
-end
-
-def f3()
-    return "3";
-end
-
-def f1()
-    if (true)
-        return "1";
-    else
-        return f2(1, "sss", true);
+def start(a, b)
+    if ((!(a)) || (b > 100))
+        if (a)
+            puts(b / 30);
+        else
+            puts(b * 30);
+        end
     end
-    f3();
-    return "11";
+    itList();
 end
 
-def f4(v)
-    return v;
+def itList()
+    printRecursive(["ata", "souri", "javad", "nemati", "darabi"], 0);
+end
+
+def printRecursive(myList, j)
+    if (j == 5)
+        return;
+    end
+    puts(myList[j]);
+    printRecursive(myList, j + 1);
 end
 
 def main()
-    f1();
-    f4(1);
+    start(true, 300);
 end

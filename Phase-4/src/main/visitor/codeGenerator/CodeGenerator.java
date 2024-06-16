@@ -4,6 +4,7 @@ import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
 import main.ast.nodes.expression.*;
+import main.ast.nodes.expression.operators.BinaryOperator;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.expression.value.primitive.BoolValue;
@@ -166,6 +167,15 @@ public class CodeGenerator extends Visitor<String> {
         String returnType = ""; // TODO
         commands += ".method public " + functionDeclaration.getFunctionName().getName();
         commands += args + returnType + "\n";
+        for (var arg : functionDeclaration.getArgs()) {
+            //
+        }
+        for (var stmt : functionDeclaration.getBody()) {
+            if (stmt instanceof ReturnStatement returnStatement) {
+
+            }
+            commands += stmt.accept(this);
+        }
         // TODO headers, body and return with corresponding type
 
         addCommand(commands);
@@ -229,7 +239,73 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(BinaryExpression binaryExpression){
         //TODO
-        return null;
+        String commands = "";
+        Type operandType = binaryExpression.getFirstOperand().accept(typeChecker);
+        commands += binaryExpression.getFirstOperand().accept(this);
+        commands += binaryExpression.getSecondOperand().accept(this);
+        BinaryOperator operator = binaryExpression.getOperator();
+
+        switch (binaryExpression.getOperator()) {
+            case EQUAL -> {
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += (operandType instanceof IntType ||
+                            operandType instanceof BoolType)
+                        ? "if_icmpeq " : "if_acmpeq ";
+                commands += L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
+            }
+            case NOT_EQUAL -> {
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += (operandType instanceof IntType ||
+                        operandType instanceof BoolType)
+                        ? "if_icmpne " : "if_acmpne ";
+                commands += L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
+            }
+            case GREATER_THAN -> {
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += "if_icmpgt " + L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
+            }
+            case LESS_THAN -> {
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += "if_icmplt " + L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
+            }
+            case LESS_EQUAL_THAN -> {
+                commands += "\n"; // TODO Mobed
+            }
+            case GREATER_EQUAL_THAN -> {
+                commands += "\n"; // TODO Mobed
+            }
+            case PLUS -> commands += "iadd\n";
+            case MINUS -> commands += "isub\n";
+            case MULT -> commands += "imul\n";
+            case DIVIDE -> commands += "idiv\n";
+            default -> {}
+        }
+        addCommand(commands);
+        return null;//what does addCommands do?
     }
     @Override
     public String visit(UnaryExpression unaryExpression){

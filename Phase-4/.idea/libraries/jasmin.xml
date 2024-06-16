@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jasmin">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/codeGenOutput/jasmin.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
