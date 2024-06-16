@@ -204,6 +204,7 @@ public class CodeGenerator extends Visitor<String> {
         return null;
     }
     public String visit(AccessExpression accessExpression){
+        String commands = "";
         if (accessExpression.isFunctionCall()) {
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
             String args = ""; // TODO
@@ -229,11 +230,6 @@ public class CodeGenerator extends Visitor<String> {
             commands += "aload " + slot + "\n";
             commands += assignedId.accept(this);
 
-            Type assignedIdType = assignedId.accept(typeChecker);
-            if (assignedIdType instanceof IntType) commands += "iastore\n";
-            else if (assignedIdType instanceof BoolType) commands += "iastore\n";
-            else commands += "aastore\n";
-
             Expression accessListExpr = assignStatement.getAccessListExpression(); // [3]
             commands += accessListExpr.accept(this);
         }
@@ -241,6 +237,11 @@ public class CodeGenerator extends Visitor<String> {
             commands += assignedId.accept(this);
             commands += "istore " + slot + "\n";
         }
+
+        Type assignedIdType = assignedId.accept(typeChecker);
+        if (assignedIdType instanceof IntType) commands += "iastore\n";
+        else if (assignedIdType instanceof BoolType) commands += "iastore\n";
+        else commands += "aastore\n";
 
         Expression assignExpr = assignStatement.getAssignExpression(); // ""
         commands += assignExpr.accept(this);
