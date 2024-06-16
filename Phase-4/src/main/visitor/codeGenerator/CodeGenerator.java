@@ -1,5 +1,6 @@
 package main.visitor.codeGenerator;
 
+import com.sun.jdi.VoidType;
 import main.ast.nodes.Program;
 import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
@@ -16,6 +17,7 @@ import main.ast.type.FptrType;
 import main.ast.type.ListType;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.BoolType;
+import main.ast.type.primitiveType.FloatType;
 import main.ast.type.primitiveType.IntType;
 import main.ast.type.primitiveType.StringType;
 import main.symbolTable.SymbolTable;
@@ -92,9 +94,7 @@ public class CodeGenerator extends Visitor<String> {
             File file = new File(path);
             file.createNewFile();
             mainFile = new FileWriter(path);
-        } catch (IOException e){
-            // ignore
-        }
+        } catch (IOException ignored){}
     }
     private void copyFile(String toBeCopied, String toBePasted){
         try {
@@ -122,9 +122,7 @@ public class CodeGenerator extends Visitor<String> {
             else
                 mainFile.write("\t\t" + command + "\n");
             mainFile.flush();
-        } catch (IOException e){
-            // ignore
-        }
+        } catch (IOException ignored){}
     }
     private void handleMainClass(){
         String commands = """
@@ -226,11 +224,24 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(PutStatement putStatement){
         //TODO
+        String commands = "";
+        commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
+        Expression putExpr = putStatement.getExpression();
+        commands += putExpr.accept(this);
+        addCommand(commands);
         return null;
     }
     @Override
     public String visit(ReturnStatement returnStatement){
         //TODO
+        String commands = "";
+        Expression retExpr = returnStatement.getReturnExp();
+        Type retType = retExpr.accept(typeChecker);
+        if (retType instanceof VoidType) commands += "return\n";
+        else if (retType instanceof IntType) commands += "ireturn\n";
+        else if (retType instanceof BoolType) commands += "ireturn\n";
+        else commands += "areturn\n";
+        addCommand(commands);
         return null;
     }
     @Override
@@ -294,10 +305,24 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case LESS_EQUAL_THAN -> {
-                commands += "\n"; // TODO Mobed
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += "if_icmple " + L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
             }
             case GREATER_EQUAL_THAN -> {
-                commands += "\n"; // TODO Mobed
+                String L1 = getFreshLabel();
+                String exitL = getFreshLabel();
+                commands += "if_icmpge " + L1 + "\n";
+                commands += "ldc 0\n";
+                commands += "goto " + exitL + "\n";
+                commands += L1 +  ":\n";
+                commands += "ldc 1\n";
+                commands += exitL + ":\n";
             }
             case PLUS -> commands += "iadd\n";
             case MINUS -> commands += "isub\n";
@@ -337,6 +362,12 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(Identifier identifier){
         //TODO
+        String commands = "";
+        Type type = identifier.accept(typeChecker);
+        String typeSign = (type instanceof IntType) ? "i"
+                : (type instanceof FloatType) ? "f" : "a";
+        commands += typeSign + "load" + slotOf(identifier.getName()) + "\n";
+        addCommand(commands);
         return null;
     }
     @Override
@@ -382,17 +413,22 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(IntValue intValue){
-        //TODO, use "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer" to convert to primitive
-        return null;
+        String commands = "";
+        commands += "ldc " + intValue.getIntVal() + "\n";
+        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";
+        return commands;
     }
     @Override
     public String visit(BoolValue boolValue){
-        //TODO, use "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean" to convert to primitive
-        return null;
+        String commands = "";
+        commands += "ldc " + boolValue.getBool() + "\n";
+        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";
+        return commands;
     }
     @Override
     public String visit(StringValue stringValue){
-        //TODO
-        return null;
+        String commands = "";
+        commands += "ldc " + stringValue.getStr() + "\n";
+        return commands;
     }
 }
