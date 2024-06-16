@@ -436,11 +436,21 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(LenStatement lenStatement){
         //TODO
+        String commands = "";
+        commands += "getstatic java/lang/System/out Ljava/io/LenStatement;\n";
+        Expression lenExpr = lenStatement.getExpression();
+        commands += lenExpr.accept(this);
+        addCommand(commands);
         return null;
     }
     @Override
     public String visit(ChopStatement chopStatement){
         //TODO
+        String commands = "";
+        commands += "getstatic java/lang/System/out Ljava/io/ChopStatement;\n";
+        Expression chopExpr = chopStatement.getChopExpression();
+        commands += chopExpr.accept(this);
+        addCommand(commands);
         return null;
     }
     @Override
