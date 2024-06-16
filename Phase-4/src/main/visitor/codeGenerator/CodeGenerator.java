@@ -391,6 +391,18 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(LoopDoStatement loopDoStatement){
         //TODO
+        String commands = "";
+        String startL = getFreshLabel();
+        String exitL = getFreshLabel();
+        commands += startL + ":\n";
+
+        for (var stmt : loopDoStatement.getLoopBodyStmts()) {
+            commands += stmt.accept(this);
+        }
+        commands += "goto " + startL + "\n";
+        commands += exitL + ":\n";
+
+        addCommand(commands);
         return null;
     }
     @Override
