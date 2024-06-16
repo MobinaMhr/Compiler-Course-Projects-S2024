@@ -15,14 +15,19 @@ import main.ast.nodes.expression.value.primitive.StringValue;
 import main.ast.nodes.statement.*;
 import main.ast.type.FptrType;
 import main.ast.type.ListType;
+import main.ast.type.NoType;
 import main.ast.type.Type;
 import main.ast.type.primitiveType.BoolType;
 import main.ast.type.primitiveType.FloatType;
 import main.ast.type.primitiveType.IntType;
 import main.ast.type.primitiveType.StringType;
+import main.compileError.typeErrors.AccessIndexIsNotInt;
+import main.compileError.typeErrors.ListElementsInconsistentType;
 import main.symbolTable.SymbolTable;
+import main.symbolTable.exceptions.ItemAlreadyExists;
 import main.symbolTable.exceptions.ItemNotFound;
 import main.symbolTable.item.FunctionItem;
+import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 import main.visitor.type.TypeChecker;
 
@@ -213,7 +218,34 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(AssignStatement assignStatement){
-        //TODO
+        //TODO indexing you asked sour
+        String commands = "";
+//        assignStatement.getAssignOperator();
+
+        Identifier assignedId = assignStatement.getAssignedId(); // anId
+        int slot = slotOf(assignStatement.getAssignedId().getName());
+
+        if (assignStatement.isAccessList()) { // anId[3] += "";
+            commands += "aload " + slot + "\n";
+            commands += assignedId.accept(this);
+
+            Type assignedIdType = assignedId.accept(typeChecker);
+            if (assignedIdType instanceof IntType) commands += "iastore\n";
+            else if (assignedIdType instanceof BoolType) commands += "iastore\n";
+            else commands += "aastore\n";
+
+            Expression accessListExpr = assignStatement.getAccessListExpression(); // [3]
+            commands += accessListExpr.accept(this);
+        }
+        else { // anId += "";
+            commands += assignedId.accept(this);
+            commands += "istore " + slot + "\n";
+        }
+
+        Expression assignExpr = assignStatement.getAssignExpression(); // ""
+        commands += assignExpr.accept(this);
+
+        addCommand(commands);
         return null;
     }
     @Override
