@@ -5,6 +5,7 @@ import main.ast.nodes.declaration.FunctionDeclaration;
 import main.ast.nodes.declaration.MainDeclaration;
 import main.ast.nodes.expression.*;
 import main.ast.nodes.expression.operators.BinaryOperator;
+import main.ast.nodes.expression.operators.UnaryOperator;
 import main.ast.nodes.expression.value.FunctionPointer;
 import main.ast.nodes.expression.value.ListValue;
 import main.ast.nodes.expression.value.primitive.BoolValue;
@@ -310,6 +311,27 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(UnaryExpression unaryExpression){
         //TODO
+        String commands = "";
+        Type operandType = unaryExpression.getExpression().accept(typeChecker);
+        commands += unaryExpression.getExpression().accept(this);
+        UnaryOperator operator = unaryExpression.getOperator();
+        switch (operator) {
+            case NOT -> {
+                commands += "ldc 1\n"; // if BIT_NOT, ldc -1
+                commands += "ixor\n";
+            }
+            case MINUS -> commands += "ineg\n";
+            case INC -> {
+                commands += "ldc 1\n";
+                commands += "iadd\n";
+            }
+            case DEC -> {
+                commands += "ldc -1\n";
+                commands += "iadd\n";
+            }
+            default -> {}
+        }
+        addCommand(commands);
         return null;
     }
     @Override
