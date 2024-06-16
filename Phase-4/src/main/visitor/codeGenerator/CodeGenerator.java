@@ -219,6 +219,24 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(IfStatement ifStatement){
         //TODO
+        String thenL = getFreshLabel();
+        String elseL = getFreshLabel();
+        String exitL = getFreshLabel();
+
+        String commands = "";
+        commands += "ifeq " + elseL + "\n";
+        commands += thenL + ":\n";
+        for (var stmt : ifStatement.getThenBody()) {
+            commands += stmt.accept(this);
+        }
+        commands += "goto " + exitL + "\n";
+        commands += elseL + ": \n";
+        // What happens if it is empty? probably bug is here
+        for (var stmt : ifStatement.getElseBody()) {
+            commands += stmt.accept(this);
+        }
+
+        addCommand(commands);
         return null;
     }
     @Override
