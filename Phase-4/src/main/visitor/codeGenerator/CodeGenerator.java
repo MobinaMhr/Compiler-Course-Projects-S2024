@@ -398,6 +398,12 @@ public class CodeGenerator extends Visitor<String> {
 
         for (var stmt : loopDoStatement.getLoopBodyStmts()) {
             commands += stmt.accept(this);
+            if (stmt instanceof BreakStatement) {
+                commands += "ifeq " + exitL + "\n";
+            }
+            if (stmt instanceof NextStatement) {
+                commands += "ifeq " + startL + "\n";
+            }
         }
         commands += "goto " + startL + "\n";
         commands += exitL + ":\n";
@@ -408,12 +414,24 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(BreakStatement breakStatement){
         //TODO
-        return null;
+        String commands = "";
+        if (breakStatement.getConditions().isEmpty()) return null;
+        for (var expr : breakStatement.getConditions()) {
+            commands += expr.accept(this);
+        }
+//        return null;
+        return commands;
     }
     @Override
     public String visit(NextStatement nextStatement){
         //TODO
-        return null;
+        String commands = "";
+        if (nextStatement.getConditions().isEmpty()) return null;
+        for (var expr : nextStatement.getConditions()) {
+            commands += expr.accept(this);
+        }
+//        return null;
+        return commands;
     }
     @Override
     public String visit(LenStatement lenStatement){
