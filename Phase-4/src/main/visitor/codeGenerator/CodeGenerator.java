@@ -612,7 +612,7 @@ public class CodeGenerator extends Visitor<String> {
 
         Type type = identifier.accept(typeChecker);
         if (type instanceof IntType) {
-            commands += "iload";
+            commands += "iload ";
             commands += slotOf(identifier.getName()) + "\n";
         }
         else if (type instanceof FptrType fptr) {
@@ -622,12 +622,12 @@ public class CodeGenerator extends Visitor<String> {
             commands += "ldc " + "\"" + fptr.getFunctionName() + "\"\n";
             commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
         }else {
-            commands += "aload";
+            commands += "aload ";
             commands += slotOf(identifier.getName()) + "\n";
         }
 
-        addCommand(commands);
-        return null;
+//        addCommand(commands);
+        return commands;
     }
     @Override
     public String visit(LoopDoStatement loopDoStatement){

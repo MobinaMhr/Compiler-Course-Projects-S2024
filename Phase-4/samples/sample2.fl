@@ -1,7 +1,6 @@
-def func()
-    return 0;
-end
-
 def main()
-    func();
+    a = 50;
+    b = 60;
+    c = a * b / 2;
+    puts(a + b * c);
 end
