@@ -7,13 +7,6 @@
 		invokespecial Main/<init>()V
 		return
 		.end method
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		iload 0
-		iload 1
-		iload 2
-		imul
-		iadd
-		invokevirtual java/io/PrintStream/println(I)V
 .method public <init>()V
 		.limit stack 128
 		.limit locals 128
@@ -29,5 +22,12 @@
 		ldc 2
 		idiv
 		istore 2
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		iload 0
+		iload 1
+		iload 2
+		imul
+		iadd
+		invokevirtual java/io/PrintStream/println(I)V
 		return
 		.end method

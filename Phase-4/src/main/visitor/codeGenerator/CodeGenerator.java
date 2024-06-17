@@ -474,8 +474,7 @@ public class CodeGenerator extends Visitor<String> {
         else if (type instanceof StringType) {
             commands += "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n";
         }
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(ReturnStatement returnStatement){
