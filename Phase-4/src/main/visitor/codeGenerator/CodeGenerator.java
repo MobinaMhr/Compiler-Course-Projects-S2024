@@ -99,9 +99,7 @@ public class CodeGenerator extends Visitor<String> {
                     file.delete();
             directory.mkdir();
         }
-        catch(SecurityException e){
-            // ignore
-        }
+        catch(SecurityException ignored){}
         copyFile(jasminPath, this.outputPath + "jasmin.jar");
         copyFile(listClassPath, this.outputPath + "List.j");
         copyFile(fptrClassPath, this.outputPath + "Fptr.j");
@@ -125,9 +123,7 @@ public class CodeGenerator extends Visitor<String> {
                 writingFileStream.write(buffer, 0, readLength);
             readingFileStream.close();
             writingFileStream.close();
-        } catch (IOException e){
-            // ignore
-        }
+        } catch (IOException ignored){}
     }
     private void addCommand(String command){
         try {
@@ -231,6 +227,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(AccessExpression accessExpression){
         String commands = "";
+
         if (accessExpression.isFunctionCall()) {
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
             Type type = functionName.accept(typeChecker);
@@ -281,7 +278,7 @@ public class CodeGenerator extends Visitor<String> {
                 commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
             }
         }
-//        addCommand(commands);
+
         return commands;
     }
     @Override
@@ -428,12 +425,11 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(IfStatement ifStatement){
-        //TODO
+        String commands = "";
+
         String thenL = getFreshLabel();
         String elseL = getFreshLabel();
         String exitL = getFreshLabel();
-
-        String commands = "";
 
         for (Expression condition : ifStatement.getConditions()){
             commands += condition.accept(this);
@@ -446,45 +442,40 @@ public class CodeGenerator extends Visitor<String> {
         }
         commands += "goto " + exitL + "\n";
         commands += elseL + ": \n";
-        // What happens if it is empty? probably bug is here
+        // What happens if it is empty? probably bug is here but i think java will handle this. just test
 //        if (!ifStatement.getElseBody().isEmpty())
         for (var stmt : ifStatement.getElseBody()) {
             commands += stmt.accept(this);
         }
         commands += exitL + ":\n";
-        addCommand(commands);
-        return null;
+
+        return commands;
     }
     @Override
     public String visit(PutStatement putStatement){
-        //TODO
         String commands = "";
-        commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
 
+        commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
         Expression putExpr = putStatement.getExpression();
         commands += putExpr.accept(this);
 
         Type type = putStatement.getExpression().accept(typeChecker);
-        if (type instanceof IntType) {
+        if (type instanceof IntType)
             commands += "invokevirtual java/io/PrintStream/println(I)V\n";
-        }
-        else if (type instanceof BoolType) {
+        else if (type instanceof BoolType)
             commands += "invokevirtual java/io/PrintStream/println(Z)V\n";
-        }
-        else if (type instanceof StringType) {
+        else if (type instanceof StringType)
             commands += "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n";
-        }
+
         return commands;
     }
     @Override
     public String visit(ReturnStatement returnStatement){
-        //TODO
         String commands = "";
 
         Expression retExpr = returnStatement.getReturnExp();
         if (retExpr == null) {
             commands += "return\n";
-//            addCommand(commands);
             return commands;
         }
 
@@ -497,7 +488,6 @@ public class CodeGenerator extends Visitor<String> {
             else commands += "areturn\n";
         }
 
-//        addCommand(commands);
         return commands;
     }
     @Override
@@ -581,8 +571,8 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(UnaryExpression unaryExpression){
-        //TODO
         String commands = "";
+
         Type operandType = unaryExpression.getExpression().accept(typeChecker);
         commands += unaryExpression.getExpression().accept(this);
         UnaryOperator operator = unaryExpression.getOperator();
@@ -602,11 +592,11 @@ public class CodeGenerator extends Visitor<String> {
             }
             default -> {}
         }
+
         return commands;
     }
     @Override
     public String visit(Identifier identifier){
-        //TODO
         String commands = "";
 
         Type type = identifier.accept(typeChecker);
@@ -625,7 +615,6 @@ public class CodeGenerator extends Visitor<String> {
             commands += slotOf(identifier.getName()) + "\n";
         }
 
-//        addCommand(commands);
         return commands;
     }
     @Override
@@ -654,14 +643,13 @@ public class CodeGenerator extends Visitor<String> {
 //        endPoints.removeLast();
 //        startPoints.removeLast();
 
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(BreakStatement breakStatement){
         String commands = "";
 
-        if (breakStatement.getConditions().isEmpty()) return null;
+        if (breakStatement.getConditions().isEmpty()) return "";
         for (var expr : breakStatement.getConditions()) {
 //            commands += "goto " + endPoints.getLast() + "\n";
             commands += expr.accept(this);
@@ -673,7 +661,7 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(NextStatement nextStatement){
         String commands = "";
 
-        if (nextStatement.getConditions().isEmpty()) return null;
+        if (nextStatement.getConditions().isEmpty()) return "";
         for (var expr : nextStatement.getConditions()) {
 //            commands += "goto " + startPoints.getLast() + "\n";
             commands += expr.accept(this);
@@ -693,40 +681,40 @@ public class CodeGenerator extends Visitor<String> {
         else
             commands += "invokevirtual java/lang/String/length()I\n";
 
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(ChopStatement chopStatement){
         String commands = "";
+
         commands += "getstatic java/lang/System/out Ljava/io/ChopStatement;\n";
-        // Get the chop expression and generate bytecode for it
         Expression chopExpr = chopStatement.getChopExpression();
         commands += chopExpr.accept(this);
-        commands += "dup\n";// Dup the string reference for later use
-        commands += "invokevirtual java/lang/String/length()I\n";// Get the length of the string
+        commands += "dup\n";
+        commands += "invokevirtual java/lang/String/length()I\n";
         commands += "iconst_1\n";// Subtract 1 from the length
         commands += "isub\n";
 
 //        commands.add("ldc 0"); NOORI did this instead of two lines bellow
-        commands += "swap\n";// Swap the top of the stack to prepare for substring call
-        commands += "iconst_0\n";// Load 0 onto the stack (starting index for substring)
+        commands += "swap\n";
+        commands += "iconst_0\n";
 
-        commands += "swap\n";// Swap the top two elements to match the order for substring call
-        commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";// Call the substring method
+        commands += "swap\n";
+        commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";
 
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(FunctionPointer functionPointer){
-        FptrType fptr = (FptrType) functionPointer.accept(typeChecker);
         String commands = "";
+
+        FptrType fptr = (FptrType) functionPointer.accept(typeChecker);
         commands += "new Fptr\n";
         commands += "dup\n";
         commands += "aload_0\n";
         commands += "ldc " + "\"" + fptr.getFunctionName() + "\"\n";
         commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+
         return commands;
     }
     @Override
@@ -753,8 +741,7 @@ public class CodeGenerator extends Visitor<String> {
         }
         commands += "aload " + slotOf("array_") + "\n";
 
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(IntValue intValue){
