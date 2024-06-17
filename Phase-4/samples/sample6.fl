@@ -1,0 +1,6 @@
+def main()
+    a = 50;
+    b = 60;
+    c = (b >= a);
+#    puts(c);
+end

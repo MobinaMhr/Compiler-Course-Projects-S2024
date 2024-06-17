@@ -1,0 +1,23 @@
+def foo(a)
+#    i = 0;
+#    loop do
+#        if (i >= len(a))
+#            break;
+#        end
+#        j = 0;
+#        loop do
+#            if (j >= a[i])
+#                break;
+#            end
+#            puts(a[i]);
+#            j += 1;
+#        end
+#        i = i + 1;
+#    end
+end
+
+def main()
+    a = [2, 3, 2, 4];
+    foo();
+    # output should be 2 2 3 3 3 2 2 4 4 4 4
+end

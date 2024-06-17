@@ -1,0 +1,13 @@
+def foo(a)
+    if (a)
+        puts("true\n");
+    else
+        puts("false\n");
+    end
+end
+
+def main()
+    a = true;
+    foo(a);
+    foo(!a);
+end
