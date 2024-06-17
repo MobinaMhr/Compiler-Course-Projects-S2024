@@ -164,23 +164,22 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(FunctionDeclaration functionDeclaration){
+        // TODO headers, body and return with corresponding type
         slots.clear();
 
         String commands = "";
-        String args = ""; // TODO and add to the slots
-        String returnType = ""; // TODO
+        String args = "";
+        for (var arg : functionDeclaration.getArgs())
+            args += arg.accept(this);
+        String returnType = "";
+        for (var stmt : functionDeclaration.getBody()) {
+            if (stmt instanceof ReturnStatement returnStatement)
+                returnType += returnStatement.accept(this);
+        }
         commands += ".method public " + functionDeclaration.getFunctionName().getName();
         commands += args + returnType + "\n";
-        for (var arg : functionDeclaration.getArgs()) {
-            //
-        }
-        for (var stmt : functionDeclaration.getBody()) {
-            if (stmt instanceof ReturnStatement returnStatement) {
-
-            }
+        for (var stmt : functionDeclaration.getBody())
             commands += stmt.accept(this);
-        }
-        // TODO headers, body and return with corresponding type
 
         addCommand(commands);
         return null;
@@ -203,11 +202,15 @@ public class CodeGenerator extends Visitor<String> {
         addCommand(commands);
         return null;
     }
+    @Override
     public String visit(AccessExpression accessExpression){
-        String commands = "";
+        accessExpression.getDimentionalAccess();
+        accessExpression.getAccessedExpression();
         if (accessExpression.isFunctionCall()) {
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
-            String args = ""; // TODO
+            String args = "";
+            for (var arg : accessExpression.getArguments())
+                args += arg.accept(this);
             String returnType = ""; // TODO
             return "invokestatic Main/" + functionName.getName() + args + returnType + "\n";
         }
@@ -500,7 +503,11 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(ListValue listValue){
         //TODO
-        return null;
+        String commands = "";
+        for (var arrElement : listValue.getElements()) {
+            //
+        }
+        return commands;
     }
     @Override
     public String visit(IntValue intValue){
