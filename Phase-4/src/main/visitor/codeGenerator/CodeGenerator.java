@@ -75,6 +75,17 @@ public class CodeGenerator extends Visitor<String> {
         }
         return type;
     }
+    public String getClass(Type element){
+        String className = "";
+        switch (element){
+            case StringType stringType -> className += "java/lang/String";
+            case IntType intType -> className += "java/lang/Integer";
+            case BoolType boolType -> className += "java/lang/Boolean";
+            case null -> className += "java/lang/Object";
+            default -> {}
+        }
+        return className;
+    }
     private void prepareOutputFolder(){
         String jasminPath = "utilities/jarFiles/jasmin.jar";
         String listClassPath = "utilities/codeGenerationUtilityClasses/List.j";
@@ -168,18 +179,26 @@ public class CodeGenerator extends Visitor<String> {
         slots.clear();
 
         String commands = "";
-        String args = "";
-        for (var arg : functionDeclaration.getArgs())
+        String args = "(";
+        for (var arg : functionDeclaration.getArgs()) {
             args += arg.accept(this);
-        String returnType = "";
-        for (var stmt : functionDeclaration.getBody()) {
-            if (stmt instanceof ReturnStatement returnStatement)
-                returnType += returnStatement.accept(this);
+            slotOf(arg.getName().getName());
         }
+        args += ")";
+        String returnType = "";
+        returnType += getType(functionDeclaration.accept(typeChecker));
         commands += ".method public " + functionDeclaration.getFunctionName().getName();
         commands += args + returnType + "\n";
-        for (var stmt : functionDeclaration.getBody())
+
+        commands += ".limit stack 128\n";
+        commands += ".limit locals 128\n";
+
+        for (var stmt : functionDeclaration.getBody()) {
             commands += stmt.accept(this);
+            // also return
+        }
+
+        commands += ".end method\n";
 
         addCommand(commands);
         return null;
@@ -204,50 +223,198 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(AccessExpression accessExpression){
-        accessExpression.getDimentionalAccess();
-        accessExpression.getAccessedExpression();
+        String commands = "";
         if (accessExpression.isFunctionCall()) {
             Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
+            Type type = functionName.accept(typeChecker);
+
+            if (type instanceof FptrType fptrType) {
+                commands += "aload " + slotOf(fptrType.getFunctionName()) + "\n";
+            } else {
+                commands += "new Fptr\n";
+                commands += "dup\n";
+                commands += "aload_0\n"; //TODO may change
+                commands += "ldc " + "\"" + functionName.getName() + "\"" + "\n";
+                commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+            }
+            commands += "new java/util/ArrayList\n";
+            commands += "dup\n";
+            commands += "invokespecial java/util/ArrayList/<init>()V\n";
+            commands += "astore " + slotOf(functionName.getName() + "args") + "\n"; //TODO nemed
+
             String args = "";
-            for (var arg : accessExpression.getArguments())
+            for (var arg : accessExpression.getArguments()) {
+                args += "aload " + slotOf(functionName.getName() + "args") + "\n";
                 args += arg.accept(this);
+                args += "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z\n";
+                args += "pop\n";
+            }
+            commands += args;
             String returnType = ""; // TODO
-            return "invokestatic Main/" + functionName.getName() + args + returnType + "\n";
+
+            commands += "aload " + slotOf(functionName.getName() + "args") + "\n";
+            commands += "invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;\n";
+            commands += "pop\n";
+//            return "invokestatic Main/" + functionName.getName() + args + returnType + "\n";
         }
         else {
-            // TODO
+            commands += accessExpression.getAccessedExpression().accept(this);
+
+            for (Expression expr : accessExpression.getDimentionalAccess()) {
+                commands += expr.accept(this);
+            }
+
+            Type type = accessExpression.getAccessedExpression().accept(typeChecker);
+            ListType typeClass = (ListType) type;
+            commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+            commands += "checkcast " + getClass(type);
+            if (typeClass.getType() instanceof IntType)
+                commands += "invokevirtual java/lang/Integer/intValue()I\n";
+            else if (typeClass.getType() instanceof BoolType){
+                commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
+            }
         }
-        //TODO
+        addCommand(commands);
         return null;
     }
     @Override
     public String visit(AssignStatement assignStatement){
         //TODO indexing you asked sour
         String commands = "";
-//        assignStatement.getAssignOperator();
 
+        Type type = assignStatement.getAssignExpression().accept(typeChecker);
         Identifier assignedId = assignStatement.getAssignedId(); // anId
         int slot = slotOf(assignStatement.getAssignedId().getName());
 
         if (assignStatement.isAccessList()) { // anId[3] += "";
-            commands += "aload " + slot + "\n";
-            commands += assignedId.accept(this);
+            commands += assignStatement.getAssignedId().accept(this);
+            commands += assignStatement.getAccessListExpression().accept(this);
 
-            Expression accessListExpr = assignStatement.getAccessListExpression(); // [3]
-            commands += accessListExpr.accept(this);
+            switch (assignStatement.getAssignOperator()){
+                case AssignOperator.ASSIGN -> {
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    if (type instanceof IntType)
+                        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    else if (type instanceof BoolType){
+                        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+                    }
+                    commands += "checkcast " + getClass(null) + "\n";
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case AssignOperator.PLUS_ASSIGN -> {
+                    commands += assignStatement.getAssignedId().accept(this);
+                    commands += assignStatement.getAccessListExpression().accept(this);
+                    commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+                    commands += "checkcast " + getClass(new IntType()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    commands += "iadd\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "checkcast " + getClass(null) + "\n";
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case AssignOperator.MINUS_ASSIGN -> {
+                    commands += assignStatement.getAssignedId().accept(this);
+                    commands += assignStatement.getAccessListExpression().accept(this);
+                    commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+                    commands += "checkcast " + getClass(new IntType()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    commands += "ineg\n";
+                    commands += "iadd\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "checkcast " + getClass(null) + "\n";
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case AssignOperator.DIVIDE_ASSIGN -> {
+                    commands += assignStatement.getAssignedId().accept(this);
+                    commands += assignStatement.getAccessListExpression().accept(this);
+                    commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+                    commands += "checkcast " + getClass(new IntType()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    commands += "idiv\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "checkcast " + getClass(null);
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case AssignOperator.MULT_ASSIGN -> {
+                    commands += assignStatement.getAssignedId().accept(this);
+                    commands += assignStatement.getAccessListExpression().accept(this);
+                    commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+                    commands += "checkcast " + getClass(new IntType()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    commands += "imul\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "checkcast " + getClass(null);
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case AssignOperator.MOD_ASSIGN -> {
+                    commands += assignStatement.getAssignedId().accept(this);
+                    commands += assignStatement.getAccessListExpression().accept(this);
+                    commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
+                    commands += "checkcast " + getClass(new IntType()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += assignStatement.getAssignExpression().accept(this);
+                    commands += "irem\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "checkcast " + getClass(null);
+                    commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
+                }
+                case null, default -> {}
+            }
+//            commands += "aload " + slot + "\n";
+//            commands += assignedId.accept(this);
+//            Expression accessListExpr = assignStatement.getAccessListExpression(); // [3]
+//            commands += accessListExpr.accept(this);
         }
         else { // anId += "";
-            commands += assignedId.accept(this);
-            commands += "istore " + slot + "\n";
+            commands += assignStatement.getAssignExpression().accept(this);
+            switch (assignStatement.getAssignOperator()){
+                case AssignOperator.ASSIGN -> {
+                    commands += (type instanceof IntType) ? "istore " : "astore ";
+                    commands += slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case AssignOperator.PLUS_ASSIGN -> {
+                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "iadd\n";
+                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case AssignOperator.MINUS_ASSIGN -> {
+                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "ineg\n";
+                    commands += "iadd\n";
+                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case AssignOperator.DIVIDE_ASSIGN -> {
+                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "idiv\n";
+                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case AssignOperator.MULT_ASSIGN -> {
+                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "imul\n";
+                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case AssignOperator.MOD_ASSIGN -> {
+                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "irem\n";
+                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                }
+                case null, default -> {}
+            }
+//            commands += assignedId.accept(this);
+//            commands += "istore " + slot + "\n";
         }
 
-        Type assignedIdType = assignedId.accept(typeChecker);
-        if (assignedIdType instanceof IntType) commands += "iastore\n";
-        else if (assignedIdType instanceof BoolType) commands += "iastore\n";
-        else commands += "aastore\n";
-
-        Expression assignExpr = assignStatement.getAssignExpression(); // ""
-        commands += assignExpr.accept(this);
+//        Type assignedIdType = assignedId.accept(typeChecker);
+//        if (assignedIdType instanceof IntType) commands += "iastore\n";
+//        else if (assignedIdType instanceof BoolType) commands += "iastore\n";
+//        else commands += "aastore\n";
+//
+//        Expression assignExpr = assignStatement.getAssignExpression(); // ""
+//        commands += assignExpr.accept(this);
 
         addCommand(commands);
         return null;
@@ -260,6 +427,11 @@ public class CodeGenerator extends Visitor<String> {
         String exitL = getFreshLabel();
 
         String commands = "";
+
+        for (Expression condition : ifStatement.getConditions()){
+            commands += condition.accept(this);
+        }
+
         commands += "ifeq " + elseL + "\n";
         commands += thenL + ":\n";
         for (var stmt : ifStatement.getThenBody()) {
@@ -268,10 +440,11 @@ public class CodeGenerator extends Visitor<String> {
         commands += "goto " + exitL + "\n";
         commands += elseL + ": \n";
         // What happens if it is empty? probably bug is here
+//        if (!ifStatement.getElseBody().isEmpty())
         for (var stmt : ifStatement.getElseBody()) {
             commands += stmt.accept(this);
         }
-
+        commands += exitL + ":\n";
         addCommand(commands);
         return null;
     }
@@ -280,8 +453,20 @@ public class CodeGenerator extends Visitor<String> {
         //TODO
         String commands = "";
         commands += "getstatic java/lang/System/out Ljava/io/PrintStream;\n";
+
         Expression putExpr = putStatement.getExpression();
         commands += putExpr.accept(this);
+
+        Type type = putStatement.getExpression().accept(typeChecker);
+        if (type instanceof IntType) {
+            commands += "invokevirtual java/io/PrintStream/println(I)V\n";
+        }
+        else if (type instanceof BoolType) {
+            commands += "invokevirtual java/io/PrintStream/println(Z)V\n";
+        }
+        else if (type instanceof StringType) {
+            commands += "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n";
+        }
         addCommand(commands);
         return null;
     }
@@ -289,12 +474,23 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(ReturnStatement returnStatement){
         //TODO
         String commands = "";
+
         Expression retExpr = returnStatement.getReturnExp();
+        if (retExpr == null) {
+            commands += "return\n";
+            addCommand(commands);
+            return null;
+        }
+
         Type retType = retExpr.accept(typeChecker);
-        if (retType instanceof VoidType) commands += "return\n";
-        else if (retType instanceof IntType) commands += "ireturn\n";
-        else if (retType instanceof BoolType) commands += "ireturn\n";
-        else commands += "areturn\n";
+        if (retType instanceof NoType) commands += "return\n"; // VoidType
+        else {
+            commands += retExpr.accept(this);
+            if (retType instanceof IntType) commands += "ireturn\n";
+            else if (retType instanceof BoolType) commands += "ireturn\n";
+            else commands += "areturn\n";
+        }
+
         addCommand(commands);
         return null;
     }
@@ -304,17 +500,17 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(BinaryExpression binaryExpression){
-        //TODO
         String commands = "";
+
         Type operandType = binaryExpression.getFirstOperand().accept(typeChecker);
         commands += binaryExpression.getFirstOperand().accept(this);
         commands += binaryExpression.getSecondOperand().accept(this);
         BinaryOperator operator = binaryExpression.getOperator();
 
+        String L1 = getFreshLabel();
+        String exitL = getFreshLabel();
         switch (binaryExpression.getOperator()) {
             case EQUAL -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += (operandType instanceof IntType ||
                             operandType instanceof BoolType)
                         ? "if_icmpeq " : "if_acmpeq ";
@@ -326,8 +522,6 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case NOT_EQUAL -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += (operandType instanceof IntType ||
                         operandType instanceof BoolType)
                         ? "if_icmpne " : "if_acmpne ";
@@ -339,8 +533,6 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case GREATER_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += "if_icmpgt " + L1 + "\n";
                 commands += "ldc 0\n";
                 commands += "goto " + exitL + "\n";
@@ -349,8 +541,6 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case LESS_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += "if_icmplt " + L1 + "\n";
                 commands += "ldc 0\n";
                 commands += "goto " + exitL + "\n";
@@ -359,8 +549,6 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case LESS_EQUAL_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += "if_icmple " + L1 + "\n";
                 commands += "ldc 0\n";
                 commands += "goto " + exitL + "\n";
@@ -369,8 +557,6 @@ public class CodeGenerator extends Visitor<String> {
                 commands += exitL + ":\n";
             }
             case GREATER_EQUAL_THAN -> {
-                String L1 = getFreshLabel();
-                String exitL = getFreshLabel();
                 commands += "if_icmpge " + L1 + "\n";
                 commands += "ldc 0\n";
                 commands += "goto " + exitL + "\n";
@@ -384,8 +570,8 @@ public class CodeGenerator extends Visitor<String> {
             case DIVIDE -> commands += "idiv\n";
             default -> {}
         }
-        addCommand(commands);
-        return null;//what does addCommands do?
+
+        return commands;
     }
     @Override
     public String visit(UnaryExpression unaryExpression){
@@ -410,82 +596,119 @@ public class CodeGenerator extends Visitor<String> {
             }
             default -> {}
         }
-        addCommand(commands);
-        return null;
+        return commands;
     }
     @Override
     public String visit(Identifier identifier){
         //TODO
         String commands = "";
+
         Type type = identifier.accept(typeChecker);
-        String typeSign = (type instanceof IntType) ? "i"
-                : (type instanceof FloatType) ? "f" : "a";
-        commands += typeSign + "load" + slotOf(identifier.getName()) + "\n";
+        if (type instanceof IntType) {
+            commands += "iload";
+            commands += slotOf(identifier.getName()) + "\n";
+        }
+        else if (type instanceof FptrType fptr) {
+            commands += "new Fptr\n";
+            commands += "dup\n";
+            commands += "aload_0\n";
+            commands += "ldc " + "\"" + fptr.getFunctionName() + "\"\n";
+            commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+        }else {
+            commands += "aload";
+            commands += slotOf(identifier.getName()) + "\n";
+        }
+
         addCommand(commands);
         return null;
     }
     @Override
     public String visit(LoopDoStatement loopDoStatement){
-        //TODO
         String commands = "";
+
         String startL = getFreshLabel();
         String exitL = getFreshLabel();
         commands += startL + ":\n";
 
+//        endPoints.add(exitL);
+//        startPoints.add(startL);
         for (var stmt : loopDoStatement.getLoopBodyStmts()) {
             commands += stmt.accept(this);
-            if (stmt instanceof BreakStatement) {
+            if (stmt instanceof BreakStatement breakStatement) {
                 commands += "ifeq " + exitL + "\n";
+                commands += breakStatement.accept(this);
             }
-            if (stmt instanceof NextStatement) {
+            if (stmt instanceof NextStatement nextStatement) {
                 commands += "ifeq " + startL + "\n";
+                commands += nextStatement.accept(this);
             }
         }
         commands += "goto " + startL + "\n";
         commands += exitL + ":\n";
+//        endPoints.removeLast();
+//        startPoints.removeLast();
 
         addCommand(commands);
         return null;
     }
     @Override
     public String visit(BreakStatement breakStatement){
-        //TODO
         String commands = "";
+
         if (breakStatement.getConditions().isEmpty()) return null;
         for (var expr : breakStatement.getConditions()) {
+//            commands += "goto " + endPoints.getLast() + "\n";
             commands += expr.accept(this);
         }
-//        return null;
+
         return commands;
     }
     @Override
     public String visit(NextStatement nextStatement){
-        //TODO
         String commands = "";
+
         if (nextStatement.getConditions().isEmpty()) return null;
         for (var expr : nextStatement.getConditions()) {
+//            commands += "goto " + startPoints.getLast() + "\n";
             commands += expr.accept(this);
         }
-//        return null;
+
         return commands;
     }
     @Override
     public String visit(LenStatement lenStatement){
-        //TODO
         String commands = "";
+
         commands += "getstatic java/lang/System/out Ljava/io/LenStatement;\n";
         Expression lenExpr = lenStatement.getExpression();
         commands += lenExpr.accept(this);
+        if(lenStatement.getExpression().accept(typeChecker) instanceof ListType)
+            commands += "invokevirtual java/util/ArrayList/size()I\n";
+        else
+            commands += "invokevirtual java/lang/String/length()I\n";
+
         addCommand(commands);
         return null;
     }
     @Override
     public String visit(ChopStatement chopStatement){
-        //TODO
         String commands = "";
         commands += "getstatic java/lang/System/out Ljava/io/ChopStatement;\n";
+        // Get the chop expression and generate bytecode for it
         Expression chopExpr = chopStatement.getChopExpression();
         commands += chopExpr.accept(this);
+        commands += "dup\n";// Dup the string reference for later use
+        commands += "invokevirtual java/lang/String/length()I\n";// Get the length of the string
+        commands += "iconst_1\n";// Subtract 1 from the length
+        commands += "isub\n";
+
+//        commands.add("ldc 0"); NOORI did this instead of two lines bellow
+        commands += "swap\n";// Swap the top of the stack to prepare for substring call
+        commands += "iconst_0\n";// Load 0 onto the stack (starting index for substring)
+
+        commands += "swap\n";// Swap the top two elements to match the order for substring call
+        commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";// Call the substring method
+
         addCommand(commands);
         return null;
     }
@@ -502,25 +725,45 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(ListValue listValue){
-        //TODO
         String commands = "";
-        for (var arrElement : listValue.getElements()) {
-            //
+
+        commands += "new java/util/ArrayList\n";
+        commands += "dup\n";
+        commands += "invokespecial java/util/ArrayList/<init>()V\n";
+        commands += "astore " + slotOf("array_") + "\n";
+
+        for (Expression expression : listValue.getElements()) {
+            commands += "aload " + slotOf("array_") + "\n";
+            commands += expression.accept(this);
+
+            Type type = expression.accept(typeChecker);
+            if (type instanceof IntType)
+                commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+            else if (type instanceof BoolType)
+                commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+
+            commands += "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z\n";
+            commands += "pop\n";
         }
-        return commands;
+        commands += "aload " + slotOf("array_") + "\n";
+
+        addCommand(commands);
+        return null;
     }
     @Override
     public String visit(IntValue intValue){
         String commands = "";
-        commands += "ldc " + intValue.getIntVal() + "\n";
-        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";
+        commands += "ldc " + intValue.getIntVal() + "\n";// TODO maybe bipush
+        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";//TODO maybe remove
         return commands;
     }
     @Override
     public String visit(BoolValue boolValue){
         String commands = "";
-        commands += "ldc " + boolValue.getBool() + "\n";
-        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";
+        commands += "ldc ";
+        commands += (boolValue.getBool()) ? 1 : 0;
+        commands += "\n";
+        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";//TODO maybe remove
         return commands;
     }
     @Override
