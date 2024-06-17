@@ -9,5 +9,14 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jarFiles" level="project" />
+    <orderEntry type="module-library">
+      <library name="JsTypeDef-Std-Lib" type="Objective-J Library">
+        <CLASSES />
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$APPLICATION_PLUGINS_DIR$/Objective-J/lib/Objective-J-2021.08.21.jar!/definitions/jstypedef" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>

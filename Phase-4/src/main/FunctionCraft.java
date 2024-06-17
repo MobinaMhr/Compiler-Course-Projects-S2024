@@ -10,9 +10,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import parsers.FunctionCraftLexer;
 import parsers.FunctionCraftParser;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Comparator;
 import java.io.*;
 
@@ -44,7 +41,15 @@ public class FunctionCraft {
         try {
             System.out.println("---------------------------Compilation Successful---------------------------");
             File dir = new File("./codeGenOutput");
-            Process process = Runtime.getRuntime().exec("java -jar jasmin.jar *.j", null, dir);
+            // // print currunt directory : 
+            // System.out.println("Current Directory : " + dir.getAbsolutePath());
+            // // print whats in directory
+            // System.out.println("Files in this Directory : ");
+            // for (File file : dir.listFiles()) {
+            //     System.out.println(file.getName());
+            // } 
+            Process process = Runtime.getRuntime().exec("java -jar jasmin.jar List.j Fptr.j Main.j", null, dir);
+            printResults(process.getErrorStream());
             process = Runtime.getRuntime().exec("java Main", null, dir);
             printResults(process.getInputStream());
             printResults(process.getErrorStream());
