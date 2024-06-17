@@ -1,5 +1,7 @@
+def func()
+    return 0;
+end
 
 def main()
-    a = 100;
-    #func();
+    func();
 end

@@ -194,7 +194,10 @@ public class CodeGenerator extends Visitor<String> {
         commands += ".limit locals 128\n";
 
         for (var stmt : functionDeclaration.getBody()) {
-            commands += stmt.accept(this);
+            String command = stmt.accept(this);
+            if (command != null) {
+                commands += command;
+            }
             // also return
         }
 
@@ -278,8 +281,8 @@ public class CodeGenerator extends Visitor<String> {
                 commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
             }
         }
-        addCommand(commands);
-        return null;
+//        addCommand(commands);
+        return commands;
     }
     @Override
     public String visit(AssignStatement assignStatement){
@@ -482,8 +485,8 @@ public class CodeGenerator extends Visitor<String> {
         Expression retExpr = returnStatement.getReturnExp();
         if (retExpr == null) {
             commands += "return\n";
-            addCommand(commands);
-            return null;
+//            addCommand(commands);
+            return commands;
         }
 
         Type retType = retExpr.accept(typeChecker);
@@ -495,8 +498,8 @@ public class CodeGenerator extends Visitor<String> {
             else commands += "areturn\n";
         }
 
-        addCommand(commands);
-        return null;
+//        addCommand(commands);
+        return commands;
     }
     @Override
     public String visit(ExpressionStatement expressionStatement){
