@@ -31,6 +31,7 @@ import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 import main.visitor.type.TypeChecker;
 
+import java.awt.desktop.SystemEventListener;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Set;
@@ -175,7 +176,6 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(FunctionDeclaration functionDeclaration){
-        // TODO headers, body and return with corresponding type
         slots.clear();
 
         String commands = "";
@@ -213,8 +213,12 @@ public class CodeGenerator extends Visitor<String> {
         commands += ".limit locals 128\n";
         commands += "aload_0\n";
         commands += "invokespecial java/lang/Object/<init>()V\n";
-        for (var statement : mainDeclaration.getBody())
-            commands += statement.accept(this);
+        for (var statement : mainDeclaration.getBody()) {
+            String command = statement.accept(this);
+            if (command != null) {
+                commands += command;
+            }
+        }
         commands += "return\n";
         commands += ".end method\n";
 
@@ -416,8 +420,8 @@ public class CodeGenerator extends Visitor<String> {
 //        Expression assignExpr = assignStatement.getAssignExpression(); // ""
 //        commands += assignExpr.accept(this);
 
-        addCommand(commands);
-        return null;
+//        addCommand(commands);
+        return commands;
     }
     @Override
     public String visit(IfStatement ifStatement){
@@ -754,7 +758,7 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(IntValue intValue){
         String commands = "";
         commands += "ldc " + intValue.getIntVal() + "\n";// TODO maybe bipush
-        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";//TODO maybe remove
+//        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";//TODO maybe remove
         return commands;
     }
     @Override
@@ -763,7 +767,7 @@ public class CodeGenerator extends Visitor<String> {
         commands += "ldc ";
         commands += (boolValue.getBool()) ? 1 : 0;
         commands += "\n";
-        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";//TODO maybe remove
+//        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";//TODO maybe remove
         return commands;
     }
     @Override
