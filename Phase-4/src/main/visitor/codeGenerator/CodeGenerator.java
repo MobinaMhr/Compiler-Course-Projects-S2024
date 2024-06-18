@@ -417,9 +417,9 @@ public class CodeGenerator extends Visitor<String> {
                     commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.MINUS_ASSIGN -> {
+                    commands += "ineg\n";
                     commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                     commands += "invokevirtual java/lang/Integer/intValue()I\n";
-                    commands += "ineg\n";
                     commands += "iadd\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
                     commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
@@ -641,8 +641,9 @@ public class CodeGenerator extends Visitor<String> {
 
         Type type = identifier.accept(typeChecker);
         if (type instanceof IntType) {
-            commands += "iload ";
+            commands += "aload ";
             commands += slotOf(identifier.getName()) + "\n";
+            commands += "invokevirtual java/lang/Integer/intValue()I\n";
         }
         else if (type instanceof BoolType) {
             commands += "aload ";

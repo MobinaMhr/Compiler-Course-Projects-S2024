@@ -1,5 +1,7 @@
 def main()
     a = 50;
     b = 60;
-    puts(b);
+    c = 60 - 50;
+    c -= 1;
+    puts(c);
 end
