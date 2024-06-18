@@ -71,11 +71,22 @@ public class CodeGenerator extends Visitor<String> {
             case FptrType fptrType -> type += "LFptr;";
             case ListType listType -> type += "LList;";
             case BoolType boolType -> type += "Ljava/lang/Boolean;";
-            case null, default -> {
-            }
+            case null, default -> type += "V";
         }
         return type;
     }
+//    public String getTypeReturn(Type element){
+//        String type = "";
+//        switch (element){
+//            case StringType stringType -> type += "Ljava/lang/String;";
+//            case IntType intType -> type += "I";
+//            case FptrType fptrType -> type += "LFptr;";
+//            case ListType listType -> type += "LList;";
+//            case BoolType boolType -> type += "Z";
+//            case null, default -> type += "V";
+//        }
+//        return type;
+//    }
     public String getClass(Type element){
         String className = "";
         switch (element){
@@ -173,16 +184,20 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(FunctionDeclaration functionDeclaration){
         slots.clear();
+        slotOf(functionDeclaration.getFunctionName().getName());
 
         String commands = "";
         String args = "(";
         for (var arg : functionDeclaration.getArgs()) {
-            args += arg.accept(this);
             slotOf(arg.getName().getName());
+        }
+        for (var argType : curFunction.getArgumentTypes()) {
+            args += getType(argType);
         }
         args += ")";
         String returnType = "";
-        returnType += getType(functionDeclaration.accept(typeChecker));
+        //returnType += getTypeReturn(curFunction.getReturnType());
+        returnType += getType(curFunction.getReturnType());
         commands += ".method public " + functionDeclaration.getFunctionName().getName();
         commands += args + returnType + "\n";
 
@@ -194,9 +209,10 @@ public class CodeGenerator extends Visitor<String> {
             if (command != null) {
                 commands += command;
             }
-            // also return
         }
-
+        if (curFunction.getReturnType() == null) {
+            commands += "return\n";
+        }
         commands += ".end method\n";
 
         addCommand(commands);
@@ -205,6 +221,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(MainDeclaration mainDeclaration){
         slots.clear();
+        slotOf("main");
 
         String commands = "";
         commands += ".method public <init>()V\n";
@@ -250,6 +267,12 @@ public class CodeGenerator extends Visitor<String> {
             for (var arg : accessExpression.getArguments()) {
                 args += "aload " + slotOf(functionName.getName() + "args") + "\n";
                 args += arg.accept(this);
+                Type argType = arg.accept(typeChecker);
+                if (argType instanceof BoolType) {
+                    args += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+                } else if (argType instanceof IntType) {
+                    args += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                }
                 args += "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z\n";
                 args += "pop\n";
             }
@@ -377,34 +400,50 @@ public class CodeGenerator extends Visitor<String> {
             commands += assignStatement.getAssignExpression().accept(this);
             switch (assignStatement.getAssignOperator()){
                 case AssignOperator.ASSIGN -> {
-                    commands += (type instanceof IntType) ? "istore " : "astore ";
+                    //commands += (type instanceof IntType || type instanceof BoolType) ? "istore " : "astore ";
+                    if (type instanceof BoolType) {
+                        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+                    } else if (type instanceof IntType) {
+                        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    }
+                    commands += "astore ";
                     commands += slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.PLUS_ASSIGN -> {
-                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
                     commands += "iadd\n";
-                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.MINUS_ASSIGN -> {
-                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
                     commands += "ineg\n";
                     commands += "iadd\n";
-                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.DIVIDE_ASSIGN -> {
-                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
                     commands += "idiv\n";
-                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.MULT_ASSIGN -> {
-                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
                     commands += "imul\n";
-                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case AssignOperator.MOD_ASSIGN -> {
-                    commands += "iload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokevirtual java/lang/Integer/intValue()I\n";
                     commands += "irem\n";
-                    commands += "istore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                 }
                 case null, default -> {}
             }
@@ -427,7 +466,6 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(IfStatement ifStatement){
         String commands = "";
 
-        String thenL = getFreshLabel();
         String elseL = getFreshLabel();
         String exitL = getFreshLabel();
 
@@ -436,7 +474,6 @@ public class CodeGenerator extends Visitor<String> {
         }
 
         commands += "ifeq " + elseL + "\n";
-        commands += thenL + ":\n";
         for (var stmt : ifStatement.getThenBody()) {
             commands += stmt.accept(this);
         }
@@ -483,9 +520,12 @@ public class CodeGenerator extends Visitor<String> {
         if (retType instanceof NoType) commands += "return\n"; // VoidType
         else {
             commands += retExpr.accept(this);
-            if (retType instanceof IntType) commands += "ireturn\n";
-            else if (retType instanceof BoolType) commands += "ireturn\n";
-            else commands += "areturn\n";
+            if (retType instanceof BoolType) {
+                commands += "invokestatic java/lang/Boolean/valueOf(I)Ljava/lang/Boolean;\n";
+            } else if (retType instanceof IntType) {
+                commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+            }
+            commands += "areturn\n";
         }
 
         return commands;
@@ -603,6 +643,11 @@ public class CodeGenerator extends Visitor<String> {
         if (type instanceof IntType) {
             commands += "iload ";
             commands += slotOf(identifier.getName()) + "\n";
+        }
+        else if (type instanceof BoolType) {
+            commands += "aload ";
+            commands += slotOf(identifier.getName()) + "\n";
+            commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
         }
         else if (type instanceof FptrType fptr) {
             commands += "new Fptr\n";
@@ -747,7 +792,7 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(IntValue intValue){
         String commands = "";
         commands += "ldc " + intValue.getIntVal() + "\n";// TODO maybe bipush
-//        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer\n";//TODO maybe remove
+//        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";//TODO maybe remove
         return commands;
     }
     @Override
@@ -756,7 +801,7 @@ public class CodeGenerator extends Visitor<String> {
         commands += "ldc ";
         commands += (boolValue.getBool()) ? 1 : 0;
         commands += "\n";
-//        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean\n";//TODO maybe remove
+//        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";//TODO maybe remove
         return commands;
     }
     @Override

@@ -1,6 +1,8 @@
 def main()
-    a = true;
-    b = false;
-    c = (!(!(a))) && ((b) || (a));
-#    puts((!(!(a))) && ((b) || (a)));
+    a = "true";
+    b = "false";
+    puts(a);
+    puts(b);
+    #c = ((!(!(a))) && ((b) || (a)));
+    puts((!(!(a))) && ((b) || (a)));
 end

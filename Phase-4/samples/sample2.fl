@@ -2,5 +2,5 @@ def main()
     a = 50;
     b = 60;
     c = a * b / 2;
-    puts(a + b * c);
+    puts(b * c);
 end

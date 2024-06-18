@@ -1,9 +1,10 @@
 def foo(a)
     if (a)
-        puts("true\n");
+        puts("true");
     else
-        puts("false\n");
+        puts("false");
     end
+    return 0;
 end
 
 def main()
