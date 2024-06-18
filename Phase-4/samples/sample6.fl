@@ -8,7 +8,7 @@ def main()
         if (i >= len(a))
             break;
         end
-        puts(a[i])
-        i += 1;
+        puts(a[i]);
+        ++i;
     end
 end

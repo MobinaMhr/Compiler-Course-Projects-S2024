@@ -3,4 +3,22 @@ def main()
     a[1] = 10;
     puts("cur value a[1] : ");
     puts(a[1]);
+    puts("PLUS 1 :");
+    a[1] += 1;
+    puts(a[1]);
+    a[1] -= 1;
+    puts("MINUS 1 :");
+    puts(a[1]);
+    puts("DIVIDE by 5 :");
+    a[1] /= 5;
+    puts(a[1]);
+    puts("MULTIPLY by 12 :");
+    a[1] *= 12;
+    puts(a[1]);
+    puts("MOD 5 :");
+    a[1] %= 5;
+    puts(a[1]);
+    puts("INC a[1]");
+    puts(++a[1]);
+    puts(a[1]);
 end

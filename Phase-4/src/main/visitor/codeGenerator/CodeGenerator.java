@@ -31,8 +31,10 @@ import main.symbolTable.item.VarItem;
 import main.visitor.Visitor;
 import main.visitor.type.TypeChecker;
 
+import java.awt.*;
 import java.awt.desktop.SystemEventListener;
 import java.io.*;
+import java.util.Stack;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -44,6 +46,10 @@ public class CodeGenerator extends Visitor<String> {
     private FunctionItem curFunction;
     private final HashMap<String, Integer> slots = new HashMap<>();
     private int curLabel = 0;
+    private Stack<String> loopDoStartStack = new Stack<>();
+    private Stack<String> loopDoExitStack = new Stack<>();
+    private String curLoopStartL;
+    private String curLoopExitL;
 
     public CodeGenerator(TypeChecker typeChecker){
         this.typeChecker = typeChecker;
@@ -184,7 +190,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(FunctionDeclaration functionDeclaration){
         slots.clear();
-        slotOf(functionDeclaration.getFunctionName().getName());
+        slotOf("__Main__");
 
         String commands = "";
         String args = "(";
@@ -221,7 +227,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(MainDeclaration mainDeclaration){
         slots.clear();
-        slotOf("main");
+        slotOf("__Main__");
 
         String commands = "";
         commands += ".method public <init>()V\n";
@@ -294,7 +300,7 @@ public class CodeGenerator extends Visitor<String> {
             Type type = accessExpression.getAccessedExpression().accept(typeChecker);
             ListType typeClass = (ListType) type;
             commands += "invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;\n";
-            commands += "checkcast " + getClass(type);
+            commands += "checkcast " + getClass(typeClass.getType()) + "\n";
             if (typeClass.getType() instanceof IntType)
                 commands += "invokevirtual java/lang/Integer/intValue()I\n";
             else if (typeClass.getType() instanceof BoolType){
@@ -306,7 +312,6 @@ public class CodeGenerator extends Visitor<String> {
     }
     @Override
     public String visit(AssignStatement assignStatement){
-        //TODO indexing you asked sour
         String commands = "";
 
         Type type = assignStatement.getAssignExpression().accept(typeChecker);
@@ -362,7 +367,7 @@ public class CodeGenerator extends Visitor<String> {
                     commands += assignStatement.getAssignExpression().accept(this);
                     commands += "idiv\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
-                    commands += "checkcast " + getClass(null);
+                    commands += "checkcast " + getClass(null) + "\n";
                     commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
                 }
                 case AssignOperator.MULT_ASSIGN -> {
@@ -374,7 +379,7 @@ public class CodeGenerator extends Visitor<String> {
                     commands += assignStatement.getAssignExpression().accept(this);
                     commands += "imul\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
-                    commands += "checkcast " + getClass(null);
+                    commands += "checkcast " + getClass(null) + "\n";
                     commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
                 }
                 case AssignOperator.MOD_ASSIGN -> {
@@ -386,7 +391,7 @@ public class CodeGenerator extends Visitor<String> {
                     commands += assignStatement.getAssignExpression().accept(this);
                     commands += "irem\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
-                    commands += "checkcast " + getClass(null);
+                    commands += "checkcast " + getClass(null) + "\n";
                     commands += "invokevirtual java/util/ArrayList/set(ILjava/lang/Object;)Ljava/lang/Object;\n";
                 }
                 case null, default -> {}
@@ -467,27 +472,38 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(IfStatement ifStatement){
         String commands = "";
+        if (!ifStatement.getElseBody().isEmpty()) {
+            String elseL = getFreshLabel();
+            String exitL = getFreshLabel();
 
-        String elseL = getFreshLabel();
-        String exitL = getFreshLabel();
+            for (Expression condition : ifStatement.getConditions()) {
+                commands += condition.accept(this);
+            }
 
-        for (Expression condition : ifStatement.getConditions()){
-            commands += condition.accept(this);
-        }
-
-        commands += "ifeq " + elseL + "\n";
-        for (var stmt : ifStatement.getThenBody()) {
-            commands += stmt.accept(this);
-        }
-        commands += "goto " + exitL + "\n";
-        commands += elseL + ": \n";
-        // What happens if it is empty? probably bug is here but i think java will handle this. just test
+            commands += "ifeq " + elseL + "\n";
+            for (var stmt : ifStatement.getThenBody()) {
+                commands += stmt.accept(this);
+            }
+            commands += "goto " + exitL + "\n";
+            commands += elseL + ": \n";
+            // What happens if it is empty? probably bug is here but i think java will handle this. just test
 //        if (!ifStatement.getElseBody().isEmpty())
-        for (var stmt : ifStatement.getElseBody()) {
-            commands += stmt.accept(this);
+            for (var stmt : ifStatement.getElseBody()) {
+                commands += stmt.accept(this);
+            }
+            commands += exitL + ":\n";
         }
-        commands += exitL + ":\n";
-
+        else {
+            String exitL = getFreshLabel();
+            for (Expression condition : ifStatement.getConditions()) {
+                commands += condition.accept(this);
+            }
+            commands += "ifeq " + exitL + "\n";
+            for (var stmt : ifStatement.getThenBody()) {
+                commands += stmt.accept(this);
+            }
+            commands += exitL + ":\n";
+        }
         return commands;
     }
     @Override
@@ -675,12 +691,23 @@ public class CodeGenerator extends Visitor<String> {
 
         return commands;
     }
+    public void pushLoopLabels(String startL, String exitL) {
+        loopDoStartStack.push(curLoopStartL);
+        curLoopStartL = startL;
+        loopDoExitStack.push(curLoopExitL);
+        curLoopExitL = exitL;
+    }
+    public void popLoopLabels() {
+        curLoopStartL = loopDoStartStack.pop();
+        curLoopExitL = loopDoExitStack.pop();
+    }
     @Override
     public String visit(LoopDoStatement loopDoStatement){
         String commands = "";
 
         String startL = getFreshLabel();
         String exitL = getFreshLabel();
+        pushLoopLabels(startL, exitL);
         commands += startL + ":\n";
 
 //        endPoints.add(exitL);
@@ -730,15 +757,13 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(LenStatement lenStatement){
         String commands = "";
-
-        commands += "getstatic java/lang/System/out Ljava/io/LenStatement;\n";
-        Expression lenExpr = lenStatement.getExpression();
-        commands += lenExpr.accept(this);
-        if(lenStatement.getExpression().accept(typeChecker) instanceof ListType)
+        commands += lenStatement.getExpression().accept(this);
+        if (lenStatement.getExpression().accept(typeChecker) instanceof ListType){
             commands += "invokevirtual java/util/ArrayList/size()I\n";
-        else
+        }
+        else{
             commands += "invokevirtual java/lang/String/length()I\n";
-
+        }
         return commands;
     }
     @Override

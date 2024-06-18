@@ -12,83 +12,79 @@
 		.limit locals 128
 		aload_0
 		invokespecial java/lang/Object/<init>()V
-		ldc 50
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 1
-		ldc 61
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		new java/util/ArrayList
+		dup
+		invokespecial java/util/ArrayList/<init>()V
 		astore 2
 		aload 2
+		ldc 3
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		ldc 10
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		ldc 2
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		ldc 7
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		ldc 100034
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z
+		pop
+		aload 2
+		astore 1
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		ldc "list length : "
+		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		aload 1
+		invokevirtual java/util/ArrayList/size()I
+		invokevirtual java/io/PrintStream/println(I)V
+		ldc 0
+		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
+		astore 3
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		ldc "list a :"
+		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+		Label_0:
+		aload 3
 		invokevirtual java/lang/Integer/intValue()I
 		aload 1
-		invokevirtual java/lang/Integer/intValue()I
-		isub
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "Hello World!\n"
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "cur value c : "
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual java/io/PrintStream/println(I)V
+		invokevirtual java/util/ArrayList/size()I
+		if_icmpge Label_3
+		ldc 0
+		goto Label_4
+		Label_3:
 		ldc 1
-		ineg
+		Label_4:
+		ifeq Label_2
+		Label_2:
+		getstatic java/lang/System/out Ljava/io/PrintStream;
+		aload 1
 		aload 3
 		invokevirtual java/lang/Integer/intValue()I
+		invokevirtual java/util/ArrayList/get(I)Ljava/lang/Object;
+		checkcast java/lang/Integer
+		invokevirtual java/lang/Integer/intValue()I
+		invokevirtual java/io/PrintStream/println(I)V
+		aload 3
+		invokevirtual java/lang/Integer/intValue()I
+		ldc 1
 		iadd
+		dup
 		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
 		astore 3
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "MINUS 1 :"
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual java/io/PrintStream/println(I)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "DIVIDE by 2 :"
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		ldc 2
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		swap
-		idiv
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual java/io/PrintStream/println(I)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "MULTIPLY by 3 :"
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		ldc 3
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		imul
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual java/io/PrintStream/println(I)V
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		ldc "MOD 4 :"
-		invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
-		ldc 4
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		swap
-		irem
-		invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;
-		astore 3
-		getstatic java/lang/System/out Ljava/io/PrintStream;
-		aload 3
-		invokevirtual java/lang/Integer/intValue()I
-		invokevirtual java/io/PrintStream/println(I)V
+		goto Label_0
+		Label_1:
 		return
 		.end method
