@@ -627,10 +627,20 @@ public class CodeGenerator extends Visitor<String> {
             case INC -> {
                 commands += "ldc 1\n";
                 commands += "iadd\n";
+                if (unaryExpression.getExpression() instanceof Identifier identifier) {
+                    commands += "dup\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(identifier.getName()) + "\n";
+                }
             }
             case DEC -> {
                 commands += "ldc -1\n";
                 commands += "iadd\n";
+                if (unaryExpression.getExpression() instanceof Identifier identifier) {
+                    commands += "dup\n";
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "astore " + slotOf(identifier.getName()) + "\n";
+                }
             }
             default -> {}
         }

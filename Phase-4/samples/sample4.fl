@@ -1,14 +1,20 @@
-def foo(a)
-    if (a)
-        puts("true");
-    else
-        puts("false");
-    end
-    return 0;
-end
-
 def main()
-    a = true;
-    foo(a);
-    foo(!a);
+    a = 50;
+    b = 61;
+    c = b - a;
+    puts("Hello World!\n");
+    puts("cur value c : ");
+    puts(c);
+    c -= 1;
+    puts("MINUS 1 :");
+    puts(c);
+    puts("DIVIDE by 2 :");
+    c /= 2;
+    puts(c);
+    puts("MULTIPLY by 3 :");
+    c *= 3;
+    puts(c);
+    puts("MOD 4 :");
+    c %= 4;
+    puts(c);
 end

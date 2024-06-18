@@ -1,8 +1,14 @@
+def foo(a)
+    if (a)
+        puts("true");
+    else
+        puts("false");
+    end
+    return 0;
+end
+
 def main()
-    a = "true";
-    b = "false";
-    puts(a);
-    puts(b);
-    c = 10 / 2;
-    puts(c);
+    a = true;
+    foo(a);
+    foo(!a);
 end

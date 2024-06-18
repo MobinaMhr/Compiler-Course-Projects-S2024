@@ -1,20 +1,14 @@
 def main()
-    a = 50;
-    b = 61;
-    c = b - a;
-    puts("Hello World!\n");
-    puts("cur value c : ");
-    puts(c);
-    c -= 1;
-    puts("MINUS 1 :");
-    puts(c);
-    puts("DIVIDE by 2 :");
-    c /= 2;
-    puts(c);
-    puts("MULTIPLY by 3 :");
-    c *= 3;
-    puts(c);
-    puts("MOD 4 :");
-    c %= 4;
-    puts(c);
+    a = [3, 10, 2, 7, 100034];
+    puts("list length : ");
+    puts(len(a));
+    i = 0;
+    puts("list a :");
+    loop do
+        if (i >= len(a))
+            break;
+        end
+        puts(a[i])
+        i += 1;
+    end
 end
