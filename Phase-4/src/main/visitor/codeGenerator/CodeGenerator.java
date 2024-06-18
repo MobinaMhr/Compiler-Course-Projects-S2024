@@ -427,6 +427,7 @@ public class CodeGenerator extends Visitor<String> {
                 case AssignOperator.DIVIDE_ASSIGN -> {
                     commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                     commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += "swap\n";
                     commands += "idiv\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
                     commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
@@ -441,6 +442,7 @@ public class CodeGenerator extends Visitor<String> {
                 case AssignOperator.MOD_ASSIGN -> {
                     commands += "aload " + slotOf(assignStatement.getAssignedId().getName()) + "\n";
                     commands += "invokevirtual java/lang/Integer/intValue()I\n";
+                    commands += "swap\n";
                     commands += "irem\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
                     commands += "astore " + slotOf(assignStatement.getAssignedId().getName()) + "\n";

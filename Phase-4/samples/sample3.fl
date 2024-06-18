@@ -3,6 +3,6 @@ def main()
     b = "false";
     puts(a);
     puts(b);
-    #c = ((!(!(a))) && ((b) || (a)));
-    puts((!(!(a))) && ((b) || (a)));
+    c = 10 / 2;
+    puts(c);
 end
