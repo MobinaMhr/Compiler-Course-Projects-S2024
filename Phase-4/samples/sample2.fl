@@ -3,6 +3,6 @@ def main()
     b = 60;
     c = a * b / 2;
     puts(a + b * c + 1);
-    puts(++c);
+    --c;
     puts(c);
 end

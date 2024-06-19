@@ -18,6 +18,6 @@ end
 
 def main()
     a = [2, 3, 2, 4];
-    foo();
+    foo(a);
     # output should be 2 2 3 3 3 2 2 4 4 4 4
 end

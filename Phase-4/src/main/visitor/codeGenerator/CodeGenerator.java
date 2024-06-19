@@ -75,24 +75,12 @@ public class CodeGenerator extends Visitor<String> {
             case StringType stringType -> type += "Ljava/lang/String;";
             case IntType intType -> type += "Ljava/lang/Integer;";
             case FptrType fptrType -> type += "LFptr;";
-            case ListType listType -> type += "LList;";
+            case ListType listType -> type += "Ljava/util/ArrayList;";
             case BoolType boolType -> type += "Ljava/lang/Boolean;";
             case null, default -> type += "V";
         }
         return type;
     }
-//    public String getTypeReturn(Type element){
-//        String type = "";
-//        switch (element){
-//            case StringType stringType -> type += "Ljava/lang/String;";
-//            case IntType intType -> type += "I";
-//            case FptrType fptrType -> type += "LFptr;";
-//            case ListType listType -> type += "LList;";
-//            case BoolType boolType -> type += "Z";
-//            case null, default -> type += "V";
-//        }
-//        return type;
-//    }
     public String getClass(Type element){
         String className = "";
         switch (element){
@@ -191,18 +179,31 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(FunctionDeclaration functionDeclaration){
         slots.clear();
         slotOf("__Main__");
+        SymbolTable.push(new SymbolTable());
 
         String commands = "";
         String args = "(";
+        int i = 0;
         for (var arg : functionDeclaration.getArgs()) {
-            slotOf(arg.getName().getName());
-        }
-        for (var argType : curFunction.getArgumentTypes()) {
+            Type argType = curFunction.getArgumentTypes().get(i);
             args += getType(argType);
+            slotOf(arg.getName().getName());
+            VarItem newVarItem = new VarItem(arg.getName());
+            newVarItem.setType(argType);
+            i++;
+            try {
+                SymbolTable.top.put(newVarItem);
+            }catch (ItemAlreadyExists ignored){
+                VarItem item = null;
+                try {
+                    item = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY + newVarItem.getName());
+                } catch (ItemNotFound ignored1) {}
+                assert item != null;
+                item.setType(this.curFunction.getArgumentTypes().get(i));
+            }
         }
         args += ")";
         String returnType = "";
-        //returnType += getTypeReturn(curFunction.getReturnType());
         returnType += getType(curFunction.getReturnType());
         commands += ".method public " + functionDeclaration.getFunctionName().getName();
         commands += args + returnType + "\n";
@@ -210,18 +211,23 @@ public class CodeGenerator extends Visitor<String> {
         commands += ".limit stack 128\n";
         commands += ".limit locals 128\n";
 
+        boolean hasReturn = false;
         for (var stmt : functionDeclaration.getBody()) {
             String command = stmt.accept(this);
             if (command != null) {
                 commands += command;
             }
+            if (stmt instanceof ReturnStatement){
+                hasReturn = true;
+            }
         }
-        if (curFunction.getReturnType() == null) {
+        if (!hasReturn) {
             commands += "return\n";
         }
         commands += ".end method\n";
 
         addCommand(commands);
+        SymbolTable.pop();
         return null;
     }
     @Override
@@ -252,43 +258,57 @@ public class CodeGenerator extends Visitor<String> {
         String commands = "";
 
         if (accessExpression.isFunctionCall()) {
-            Identifier functionName = (Identifier)accessExpression.getAccessedExpression();
-            Type type = functionName.accept(typeChecker);
-
-            if (type instanceof FptrType fptrType) {
-                commands += "aload " + slotOf(fptrType.getFunctionName()) + "\n";
+            Identifier functionIdentifier = (Identifier) accessExpression.getAccessedExpression();
+            String funcName = "";
+            Type funcType = functionIdentifier.accept(typeChecker);
+            FunctionItem functionItem = null;
+            if (funcType instanceof FptrType fptr){
+                funcName += fptr.getFunctionName();
             } else {
-                commands += "new Fptr\n";
-                commands += "dup\n";
-                commands += "aload_0\n"; //TODO may change
-                commands += "ldc " + "\"" + functionName.getName() + "\"" + "\n";
-                commands += "invokespecial Fptr/<init>(Ljava/lang/Object;Ljava/lang/String;)V\n";
+                funcName += functionIdentifier.getName();
             }
-            commands += "new java/util/ArrayList\n";
-            commands += "dup\n";
-            commands += "invokespecial java/util/ArrayList/<init>()V\n";
-            commands += "astore " + slotOf(functionName.getName() + "args") + "\n"; //TODO nemed
 
-            String args = "";
-            for (var arg : accessExpression.getArguments()) {
-                args += "aload " + slotOf(functionName.getName() + "args") + "\n";
-                args += arg.accept(this);
+            try {
+                functionItem = (FunctionItem) SymbolTable.root.getItem(FunctionItem.START_KEY + funcName);
+            } catch(ItemNotFound ignored) {}
+
+            commands += "aload 0\n";
+            int argCount = 0;
+            String args = "(";
+            for (Expression arg : accessExpression.getArguments()){
                 Type argType = arg.accept(typeChecker);
+                args += getType(argType);
+                commands += arg.accept(this);
                 if (argType instanceof BoolType) {
-                    args += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
-                } else if (argType instanceof IntType) {
-                    args += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                    commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
                 }
-                args += "invokevirtual java/util/ArrayList/add(Ljava/lang/Object;)Z\n";
-                args += "pop\n";
+                else if (argType instanceof IntType) {
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                }
+                argCount++;
             }
-            commands += args;
-            String returnType = ""; // TODO
+            for (int i = argCount; i < functionItem.getArgumentTypes().size(); i++){
+                Type argType = functionItem.getArgumentTypes().get(i);
+                args += getType(argType);
+                commands += functionItem.getFunctionDeclaration().getArgs().get(i).getDefaultVal().accept(this);
+                if (argType instanceof BoolType) {
+                    commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
+                }
+                else if (argType instanceof IntType) {
+                    commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
+                }
+            }
+            args += ")";
 
-            commands += "aload " + slotOf(functionName.getName() + "args") + "\n";
-            commands += "invokevirtual Fptr/invoke(Ljava/util/ArrayList;)Ljava/lang/Object;\n";
-            commands += "pop\n";
-//            return "invokestatic Main/" + functionName.getName() + args + returnType + "\n";
+            Type returnType = functionItem.getReturnType();
+            commands += "invokevirtual Main/" + funcName + args + getType(returnType) + "\n";
+            if (returnType instanceof BoolType) {
+                commands += "invokevirtual java/lang/Boolean/booleanValue()Z\n";
+            }
+            else if (returnType instanceof IntType) {
+                commands += "invokevirtual java/lang/Integer/intValue()I\n";
+            }
+            return commands;
         }
         else {
             commands += accessExpression.getAccessedExpression().accept(this);
@@ -315,10 +335,10 @@ public class CodeGenerator extends Visitor<String> {
         String commands = "";
 
         Type type = assignStatement.getAssignExpression().accept(typeChecker);
-        Identifier assignedId = assignStatement.getAssignedId(); // anId
+        Identifier assignedId = assignStatement.getAssignedId();
         int slot = slotOf(assignStatement.getAssignedId().getName());
 
-        if (assignStatement.isAccessList()) { // anId[3] += "";
+        if (assignStatement.isAccessList()) {
             commands += assignStatement.getAssignedId().accept(this);
             commands += assignStatement.getAccessListExpression().accept(this);
 
@@ -396,16 +416,23 @@ public class CodeGenerator extends Visitor<String> {
                 }
                 case null, default -> {}
             }
-//            commands += "aload " + slot + "\n";
-//            commands += assignedId.accept(this);
-//            Expression accessListExpr = assignStatement.getAccessListExpression(); // [3]
-//            commands += accessListExpr.accept(this);
         }
-        else { // anId += "";
+        else {
             commands += assignStatement.getAssignExpression().accept(this);
             switch (assignStatement.getAssignOperator()){
                 case AssignOperator.ASSIGN -> {
-                    //commands += (type instanceof IntType || type instanceof BoolType) ? "istore " : "astore ";
+                    VarItem newVarItem = new VarItem(assignStatement.getAssignedId());
+                    newVarItem.setType(type);
+                    try {
+                        SymbolTable.top.put(newVarItem);
+                    }catch (ItemAlreadyExists ignored){
+                        VarItem item = null;
+                        try {
+                            item = (VarItem) SymbolTable.top.getItem(VarItem.START_KEY + newVarItem.getName());
+                        } catch (ItemNotFound ignored1) {}
+                        assert item != null;
+                        item.setType(type);
+                    }
                     if (type instanceof BoolType) {
                         commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";
                     } else if (type instanceof IntType) {
@@ -454,56 +481,37 @@ public class CodeGenerator extends Visitor<String> {
                 }
                 case null, default -> {}
             }
-//            commands += assignedId.accept(this);
-//            commands += "istore " + slot + "\n";
         }
 
-//        Type assignedIdType = assignedId.accept(typeChecker);
-//        if (assignedIdType instanceof IntType) commands += "iastore\n";
-//        else if (assignedIdType instanceof BoolType) commands += "iastore\n";
-//        else commands += "aastore\n";
-//
-//        Expression assignExpr = assignStatement.getAssignExpression(); // ""
-//        commands += assignExpr.accept(this);
-
-//        addCommand(commands);
         return commands;
     }
     @Override
     public String visit(IfStatement ifStatement){
-        String commands = "";
+        String commands ="";
+        for (Expression condition : ifStatement.getConditions()){
+            commands += condition.accept(this);
+        }
+        String thenLabel = getFreshLabel();
+        String elseLabel = getFreshLabel();
+        String exitLabel = getFreshLabel();
+
+        commands += "ifeq" + " " + elseLabel + "\n";
+        commands += thenLabel + ":\n";
+
+        SymbolTable.push(SymbolTable.top.copy());
+        for (Statement statement : ifStatement.getThenBody())
+            commands += statement.accept(this);
+        SymbolTable.pop();
+        commands += "goto " + exitLabel + "\n";
+        commands += elseLabel + ":\n";
         if (!ifStatement.getElseBody().isEmpty()) {
-            String elseL = getFreshLabel();
-            String exitL = getFreshLabel();
-
-            for (Expression condition : ifStatement.getConditions()) {
-                commands += condition.accept(this);
-            }
-
-            commands += "ifeq " + elseL + "\n";
-            for (var stmt : ifStatement.getThenBody()) {
-                commands += stmt.accept(this);
-            }
-            commands += "goto " + exitL + "\n";
-            commands += elseL + ": \n";
-            // What happens if it is empty? probably bug is here but i think java will handle this. just test
-//        if (!ifStatement.getElseBody().isEmpty())
-            for (var stmt : ifStatement.getElseBody()) {
-                commands += stmt.accept(this);
-            }
-            commands += exitL + ":\n";
+            SymbolTable.push(SymbolTable.top.copy());
+            for (Statement statement : ifStatement.getElseBody())
+                commands += statement.accept(this);
+            SymbolTable.pop();
         }
-        else {
-            String exitL = getFreshLabel();
-            for (Expression condition : ifStatement.getConditions()) {
-                commands += condition.accept(this);
-            }
-            commands += "ifeq " + exitL + "\n";
-            for (var stmt : ifStatement.getThenBody()) {
-                commands += stmt.accept(this);
-            }
-            commands += exitL + ":\n";
-        }
+
+        commands += exitLabel + ":\n";
         return commands;
     }
     @Override
@@ -535,7 +543,7 @@ public class CodeGenerator extends Visitor<String> {
         }
 
         Type retType = retExpr.accept(typeChecker);
-        if (retType instanceof NoType) commands += "return\n"; // VoidType
+        if (retType instanceof NoType) commands += "return\n";
         else {
             commands += retExpr.accept(this);
             if (retType instanceof BoolType) {
@@ -556,75 +564,57 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(BinaryExpression binaryExpression){
         String commands = "";
 
-        Type operandType = binaryExpression.getFirstOperand().accept(typeChecker);
         commands += binaryExpression.getFirstOperand().accept(this);
         commands += binaryExpression.getSecondOperand().accept(this);
-        BinaryOperator operator = binaryExpression.getOperator();
+        Type firstOperandType = binaryExpression.getFirstOperand().accept(typeChecker);
 
-        String L1 = getFreshLabel();
-        String exitL = getFreshLabel();
-        switch (binaryExpression.getOperator()) {
-            case EQUAL -> {
-                commands += (operandType instanceof IntType ||
-                            operandType instanceof BoolType)
-                        ? "if_icmpeq " : "if_acmpeq ";
-                commands += L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
+        String enterLabel;
+        String exitLabel;
+        if (binaryExpression.getOperator() != BinaryOperator.PLUS && binaryExpression.getOperator() != BinaryOperator.MINUS
+                && binaryExpression.getOperator() != BinaryOperator.MULT && binaryExpression.getOperator() != BinaryOperator.DIVIDE )
+        {
+            enterLabel = getFreshLabel();
+            exitLabel = getFreshLabel();
+
+            switch (binaryExpression.getOperator()) {
+                case BinaryOperator.EQUAL -> {
+                    if (firstOperandType instanceof IntType || firstOperandType instanceof BoolType) {
+                        commands += "if_icmpeq " + enterLabel + "\n";
+                    }
+                    else {
+                        commands += "if_acmpeq " + enterLabel + "\n";
+                    }
+                }
+                case BinaryOperator.NOT_EQUAL -> {
+                    if (firstOperandType instanceof IntType || firstOperandType instanceof BoolType) {
+                        commands += "if_icmpne " + enterLabel + "\n";
+                    }
+                    else {
+                        commands += "if_acmpne " + enterLabel + "\n";
+                    }
+                }
+                case BinaryOperator.GREATER_THAN -> commands += "if_icmpgt " + enterLabel + "\n";
+                case BinaryOperator.LESS_THAN -> commands += "if_icmplt " + enterLabel + "\n";
+                case BinaryOperator.GREATER_EQUAL_THAN -> commands += "if_icmpge " + enterLabel + "\n";
+                case BinaryOperator.LESS_EQUAL_THAN -> commands += "if_icmple " + enterLabel + "\n";
+                default -> {}
             }
-            case NOT_EQUAL -> {
-                commands += (operandType instanceof IntType ||
-                        operandType instanceof BoolType)
-                        ? "if_icmpne " : "if_acmpne ";
-                commands += L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
-            }
-            case GREATER_THAN -> {
-                commands += "if_icmpgt " + L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
-            }
-            case LESS_THAN -> {
-                commands += "if_icmplt " + L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
-            }
-            case LESS_EQUAL_THAN -> {
-                commands += "if_icmple " + L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
-            }
-            case GREATER_EQUAL_THAN -> {
-                commands += "if_icmpge " + L1 + "\n";
-                commands += "ldc 0\n";
-                commands += "goto " + exitL + "\n";
-                commands += L1 +  ":\n";
-                commands += "ldc 1\n";
-                commands += exitL + ":\n";
-            }
-            case PLUS -> commands += "iadd\n";
-            case MINUS -> commands += "isub\n";
-            case MULT -> commands += "imul\n";
-            case DIVIDE -> commands += "idiv\n";
-            default -> {}
+
+            commands += "ldc 0\n";
+            commands += "goto " + exitLabel + "\n";
+            commands += enterLabel + ":\n";
+            commands += "ldc 1\n";
+            commands += exitLabel + ":\n";
         }
-
+        else {
+            switch (binaryExpression.getOperator()) {
+                case BinaryOperator.PLUS -> commands += "iadd\n";
+                case BinaryOperator.MINUS -> commands += "isub\n";
+                case BinaryOperator.MULT -> commands += "imul\n";
+                case BinaryOperator.DIVIDE -> commands += "idiv\n";
+                default -> {}
+            }
+        }
         return commands;
     }
     @Override
@@ -636,7 +626,7 @@ public class CodeGenerator extends Visitor<String> {
         UnaryOperator operator = unaryExpression.getOperator();
         switch (operator) {
             case NOT -> {
-                commands += "ldc 1\n"; // if BIT_NOT, ldc -1
+                commands += "ldc 1\n";
                 commands += "ixor\n";
             }
             case MINUS -> commands += "ineg\n";
@@ -644,7 +634,7 @@ public class CodeGenerator extends Visitor<String> {
                 commands += "ldc 1\n";
                 commands += "iadd\n";
                 if (unaryExpression.getExpression() instanceof Identifier identifier) {
-                    commands += "dup\n";
+//                    commands += "dup\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
                     commands += "astore " + slotOf(identifier.getName()) + "\n";
                 }
@@ -653,7 +643,7 @@ public class CodeGenerator extends Visitor<String> {
                 commands += "ldc -1\n";
                 commands += "iadd\n";
                 if (unaryExpression.getExpression() instanceof Identifier identifier) {
-                    commands += "dup\n";
+//                    commands += "dup\n";
                     commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";
                     commands += "astore " + slotOf(identifier.getName()) + "\n";
                 }
@@ -710,23 +700,14 @@ public class CodeGenerator extends Visitor<String> {
         pushLoopLabels(startL, exitL);
         commands += startL + ":\n";
 
-//        endPoints.add(exitL);
-//        startPoints.add(startL);
-        for (var stmt : loopDoStatement.getLoopBodyStmts()) {
-            commands += stmt.accept(this);
-            if (stmt instanceof BreakStatement breakStatement) {
-                commands += "ifeq " + exitL + "\n";
-                commands += breakStatement.accept(this);
-            }
-            if (stmt instanceof NextStatement nextStatement) {
-                commands += "ifeq " + startL + "\n";
-                commands += nextStatement.accept(this);
-            }
+        SymbolTable.push(SymbolTable.top.copy());
+        for (Statement statement : loopDoStatement.getLoopBodyStmts()){
+            commands += statement.accept(this);
         }
+        SymbolTable.pop();
         commands += "goto " + startL + "\n";
         commands += exitL + ":\n";
-//        endPoints.removeLast();
-//        startPoints.removeLast();
+        this.popLoopLabels();
 
         return commands;
     }
@@ -734,24 +715,14 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(BreakStatement breakStatement){
         String commands = "";
 
-        if (breakStatement.getConditions().isEmpty()) return "";
-        for (var expr : breakStatement.getConditions()) {
-//            commands += "goto " + endPoints.getLast() + "\n";
-            commands += expr.accept(this);
-        }
-
+        commands += "goto " + curLoopExitL + "\n";
         return commands;
     }
     @Override
     public String visit(NextStatement nextStatement){
         String commands = "";
 
-        if (nextStatement.getConditions().isEmpty()) return "";
-        for (var expr : nextStatement.getConditions()) {
-//            commands += "goto " + startPoints.getLast() + "\n";
-            commands += expr.accept(this);
-        }
-
+        commands += "goto " + curLoopStartL + "\n";
         return commands;
     }
     @Override
@@ -770,18 +741,12 @@ public class CodeGenerator extends Visitor<String> {
     public String visit(ChopStatement chopStatement){
         String commands = "";
 
-        commands += "getstatic java/lang/System/out Ljava/io/ChopStatement;\n";
-        Expression chopExpr = chopStatement.getChopExpression();
-        commands += chopExpr.accept(this);
+        commands += chopStatement.getChopExpression().accept(this);
         commands += "dup\n";
         commands += "invokevirtual java/lang/String/length()I\n";
-        commands += "iconst_1\n";// Subtract 1 from the length
-        commands += "isub\n";
-
-//        commands.add("ldc 0"); NOORI did this instead of two lines bellow
-        commands += "swap\n";
-        commands += "iconst_0\n";
-
+        commands += "ldc -1\n";
+        commands += "iadd\n";
+        commands += "ldc 0\n";
         commands += "swap\n";
         commands += "invokevirtual java/lang/String/substring(II)Ljava/lang/String;\n";
 
@@ -829,8 +794,7 @@ public class CodeGenerator extends Visitor<String> {
     @Override
     public String visit(IntValue intValue){
         String commands = "";
-        commands += "ldc " + intValue.getIntVal() + "\n";// TODO maybe bipush
-//        commands += "invokestatic java/lang/Integer/valueOf(I)Ljava/lang/Integer;\n";//TODO maybe remove
+        commands += "ldc " + intValue.getIntVal() + "\n";
         return commands;
     }
     @Override
@@ -839,7 +803,6 @@ public class CodeGenerator extends Visitor<String> {
         commands += "ldc ";
         commands += (boolValue.getBool()) ? 1 : 0;
         commands += "\n";
-//        commands += "invokestatic java/lang/Boolean/valueOf(Z)Ljava/lang/Boolean;\n";//TODO maybe remove
         return commands;
     }
     @Override
