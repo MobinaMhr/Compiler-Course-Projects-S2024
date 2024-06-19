@@ -1,0 +1,7 @@
+def foo(x)
+    return 2 * x;
+end
+
+def main()
+    puts(foo(3));
+end
