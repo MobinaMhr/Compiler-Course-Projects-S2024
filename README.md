@@ -56,6 +56,7 @@ Variable and function names should contain only small words (a...z), capital wor
 Variable and function names should not start with numbers.
 Keywords should not be used as variable and function names.
 All keywords in FunctionCraft are listed as follows: 
+
 | def | end | main | return |
 | if | else | elseif | ture |
 | false | chop | chomp | push | 
