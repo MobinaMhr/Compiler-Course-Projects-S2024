@@ -113,6 +113,7 @@ There could be default values set to function parameters. Giving value to argume
 ### Operators
 - **Computational Operators**
   Just numbers can be used as operands. These operators are listed as follows(A = 100, B = 10) : 
+
 | Sample | Description | Participation | Operand |
 |----------|----------|----------|----------|
 | A + B = 110 | Addition | Left | + |
@@ -125,6 +126,7 @@ There could be default values set to function parameters. Giving value to argume
 
 - **Comparative Operators**
  These operators compare two values with each other, and the result of this comparison is a boolean type. The operands of `<`, `>`, `<=`, `>=` should be `int` or `float` type. These operators are listed as follows : 
+
 | Sample | Description | Participation | Operand |
 |----------|----------|----------|----------|
 | A < B = false | Less Than | Left | <= or < |
