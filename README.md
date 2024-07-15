@@ -58,6 +58,7 @@ Keywords should not be used as variable and function names.
 All keywords in FunctionCraft are listed as follows: 
 
 | def | end | main | return |
+|----------|----------|----------|----------|
 | if | else | elseif | ture |
 | false | chop | chomp | push | 
 | puts | method | len | pattern |
