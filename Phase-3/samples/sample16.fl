@@ -3,4 +3,9 @@ def return_string_func()
 end
 def main()
     return_string_func() << 1;
+    loop do
+        a = 10;
+        c = "str";
+        a = c + a;
+    end
 end
