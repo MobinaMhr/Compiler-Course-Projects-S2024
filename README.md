@@ -60,13 +60,9 @@ All keywords in FunctionCraft are listed as follows:
 | def | end | main | return |
 |----------|----------|----------|----------|
 | if | else | elseif | ture |
-|----------|----------|----------|----------|
 | false | chop | chomp | push | 
-|----------|----------|----------|----------|
 | puts | method | len | pattern |
-|----------|----------|----------|----------|
 | match | next | break | loop |
-|----------|----------|----------|----------|
 | do | for | in | |
 
 ### Function Declaration
@@ -154,8 +150,47 @@ There could be default values set to function parameters. Giving value to argume
 ### Default Functions
 
 ### Loops
+In this programming language, the `do loop` structure is defined. It does not have any conditions, and its scope ends with the `end` keyword.
+```
+ loop do
+ puts("start");
+ ...
+ puts("end");
+ end
+```
+- another defined loop structure is `for ... in ...` whose scope ends with the `end` keyword. It is used for `list` and `range` structures. An example of `range` syntax : `(start .. end)`
+The `start` and `end` are integer numbers (`int`). The low bound is inclusive, and the high bound is exclusive. 
+- `break`, `break if`, `next`, and `next if` structures can appear in `loop do` and `for`.
+- The program returns from the current loop by using the `break if` structure if the condition is satisfied and by using the `break` structure with no conditions.
+The program executes the next iteration of the loop by using the `next if` structure if the condition is satisfied and by using the `next` structure without condition ons.
+```
+ list = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+ for num in list
+ end
+
+ start = 0;
+ finish = 9;
+ for num in (start..finish)
+ next if (num / 2 == 1);
+ puts(num);
+ end
+```
 
 ### Pattern Matching Structure
+- Similar to the `Switch case` structure, it gets one or more inputs and, based on them, returns one output.
+- There should be a conditional statement after each `|` character. After the `=` character, one value appears. If the condition is satisfied, the value is returned.
+- There should be an indentation (one `tab` character or four `space` characters) before each condition.
+```
+    pattern fib(n)
+        | (n == 0) = 1
+        | (n == 1) = 1
+        | (n > 2) = fib(n-1) + fib(n-2)
+    ;
+    def main
+        fib_5 = fib.match(5);
+    end
+```
+- to call a declared pattern, we use `fib_5 = fib.match(5);` syntax.
 
 - ## [Phase-1](https://github.com/MobinaMhr/Compiler-Course-Projects-S2024/tree/main/Phase-1). Lexical and Syntax Analysis
 
