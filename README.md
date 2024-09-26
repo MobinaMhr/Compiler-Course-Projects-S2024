@@ -142,12 +142,73 @@ There could be default values set to function parameters. Giving value to argume
 - **Precedence of Operators**
 
 ### Function Pointer
+Function pointers are defined using the `method` keyword. Here is an example of a function pointer definition:
+```
+def f(x)
+    return x + 1;
+end
+
+def main()
+    f_ptr = method(:f);
+    a = f_ptr(5);
+    puts(a);
+end
+```
 
 ### Conditional Statements
 
 ### Scoping Rules
 
 ### Default Functions
+
+#### puts
+The `puts` function is used to print the value of a variable. Here is an example of using the `puts` function:
+```
+def main()
+    a = 5;
+    puts(a);
+end
+```
+
+#### push
+The `push` function is used to append an element to a list or string. Here is an example of using the `push` function:
+```
+def main()
+    a = [1,2,3];
+    push(a, 4);
+    puts(a);
+end
+```
+
+#### len
+The `len` function is used to get the length of a list or a string. Here is an example of using the `len` function:
+```
+def main()
+    a = [1,2,3];
+    b = len(a);
+    puts(b);
+end
+```
+
+#### chop
+The `chop` function is used to remove the last element of a string. Here is an example of using the `chop` function:
+```
+def main()
+    a = "Hello";
+    chop(a);
+    puts(a);
+end
+```
+
+#### chomp
+The `chomp` function is used to remove the newline characters from the string. Here is an example of using the `chomp` function:
+```
+def main()
+    a = "Hello\n";
+    chomp(a);
+    puts(a);
+end
+```
 
 ### Loops
 In this programming language, the `do loop` structure is defined. It does not have any conditions, and its scope ends with the `end` keyword.
