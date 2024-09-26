@@ -155,9 +155,9 @@ def main()
 end
 ```
 
-### Conditional Statements
+<!-- ### Conditional Statements
 
-### Scoping Rules
+### Scoping Rules -->
 
 ### Default Functions
 
